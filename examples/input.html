@@ -1,0 +1,61 @@
+<html>
+<head>
+<script src="../lib/mousetrap.js"></script>
+<script src="../lib/mousetrap-global-bind.js"></script>
+<script src="../gamepad.js"></script>
+<script src="../inputmapper.js"></script>
+<script>
+'use strict';
+
+var ctx;
+var tester;
+
+var Tester = function() {
+    this.positions = [0, 0];
+    this.goingDown = [false, false];
+    this.input = new InputMapper(this, 2);
+    this.input.addListener(Gamepads.BUTTONS.A, ['down', 's'], this.downPressed, this.downReleased);
+};
+
+Tester.prototype.downPressed = function(playerNumber) {
+    this.goingDown[playerNumber] = true;
+};
+
+Tester.prototype.downReleased = function(playerNumber) {
+    this.goingDown[playerNumber] = false;
+};
+
+Tester.prototype.update = function() {
+    this.input.update();
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    for (var i = 0; i < this.positions.length; ++i) {
+        // Use getKeyInstruction to prompt for player input:
+        var instruction = 'Press ' + this.input.getKeyInstruction(this.downPressed, i);
+
+        var x = (i + 1) / (this.positions.length + 1) * ctx.canvas.width;
+        this.positions[i] += this.goingDown[i] ? 1.0 : 0.1;
+        if (this.positions[i] > ctx.canvas.height) {
+            this.positions[i] = 0;
+        }
+        ctx.fillRect(x, 0, 10, this.positions[i]);
+        ctx.fillText(instruction, x, this.positions[i] + 20);
+    }
+};
+
+var frame = function() {
+    tester.update();
+    requestAnimationFrame(frame);
+};
+
+var start = function() {
+    tester = new Tester();
+    var canvas = document.createElement('canvas');
+    ctx = canvas.getContext('2d');
+    document.body.appendChild(canvas);
+    frame();
+};
+</script>
+</head>
+<body onload="start()">
+</body>
+</html>
