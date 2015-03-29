@@ -2,6 +2,14 @@
  * Copyright Olli Etuaho 2012-2014.
  */
 
+// This file contains following utilities:
+// cssUtil: Utilities for working with CSS
+// colorUtil: Utilities for working with RGB colors represented as arrays of numbers, including blending
+// Vec2: A class for storing a two-dimensional vector.
+// AffineTransform: A scale/translate transform.
+// Rect: A class for storing a two-dimensional rectangle.
+// canvasUtil: Utilities for drawing to a 2D canvas.
+
 'use strict';
 
 var cssUtil = {
