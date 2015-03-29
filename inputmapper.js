@@ -117,11 +117,19 @@ InputMapper.prototype.addListener = function(gamepadButton, keyboardButtons, dow
     };
     this.gamepads.addButtonChangeListener(gamepadButton, gamepadDownCallback, gamepadUpCallback);
 
+    var gamepadInstruction;
+    
+    if (gamepadButton < 100) {
+        gamepadInstruction = Gamepads.BUTTON_INSTRUCTION[gamepadButton];
+    } else {
+        gamepadInstruction = Gamepads.BUTTON_INSTRUCTION[gamepadButton - 100];
+    }
+    
     if (downCallback !== undefined) {
-        this.callbacks.push({key: Gamepads.BUTTON_INSTRUCTION[gamepadButton], callback: downCallback, controllerType: InputMapper.GAMEPAD});
+        this.callbacks.push({key: gamepadInstruction, callback: downCallback, controllerType: InputMapper.GAMEPAD});
     }
     if (upCallback !== undefined) {
-        this.callbacks.push({key: Gamepads.BUTTON_INSTRUCTION[gamepadButton], callback: upCallback, controllerType: InputMapper.GAMEPAD});
+        this.callbacks.push({key: gamepadInstruction, callback: upCallback, controllerType: InputMapper.GAMEPAD});
     }
 
     var that = this;
