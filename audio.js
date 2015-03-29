@@ -4,28 +4,24 @@
  * An object representing one audio sample.
  * @param {string} filename Name of the audio file without a file extension. Assumes that the audio file is located
  * in Audio.audioPath.
- * @param {boolean=} isLooping Whether the sample should loop when played. Defaults to false.
  * @param {Array.<string>} fileExtensions Array of extensions. Defaults to ogg and mp3, which should be enough for
  * cross-browser compatibility.
  * @constructor
  */
-var Audio = function(filename, isLooping, fileExtensions) {
-    if (isLooping === undefined) {
-        isLooping = false;
-    }
+var Audio = function(filename, fileExtensions) {
     if (fileExtensions === undefined) {
         fileExtensions = ['ogg', 'mp3'];
     }
     this.loaded = false;
     this.playWhenLoaded = false;
     this.audio = document.createElement('audio');
-    this.audio.loop = isLooping;
     this.filenames = [];
     for (var i = 0; i < fileExtensions.length; ++i) {
         this.filenames.push(filename + '.' + fileExtensions[i]);
     }
     this.addSourcesTo(this.audio);
     this.clones = [];
+    this.ensureOneClone();
 };
 
 /**
@@ -46,29 +42,28 @@ Audio.prototype.addSourcesTo = function(audioElement) {
 };
 
 /**
- * Play a clone of this sample. Will not affect other clones, and playback can not be stopped.
+ * Play a clone of this sample. Will not affect other clones. Playback will not loop and playback can not be stopped.
  */
-Audio.prototype.playClone = function () {
+Audio.prototype.play = function () {
     if (this.audio.readyState < 4) {
         return;
     }
-    for (var i = 0; i < this.clones.length; ++i) {
-        if (this.clones[i].ended) {
-            this.clones[i].currentTime = 0;
-            this.clones[i].play();
-            return;
-        }
-    }
-    var clone = document.createElement('audio');
-    this.addSourcesTo(clone);
-    this.clones.push(clone);
+    var clone = this.ensureOneClone();
     clone.play();
+    this.ensureOneClone(); // Make another clone ready ahead of time.
 };
 
 /**
  * Play this sample when it is ready. Use only if only one copy of this sample is going to play simultaneously.
+ * Playback can be stopped by calling stop().
+ * @param {boolean=} loop Whether the sample should loop when played. Defaults to false.
  */
-Audio.prototype.play = function () {
+Audio.prototype.playSingular = function (loop) {
+    if (loop === undefined) {
+        this.audio.loop = false;
+    } else {
+        this.audio.loop = loop;
+    }
     if (this.audio.readyState === 4) {
         this.audio.play();
     } else {
@@ -85,4 +80,22 @@ Audio.prototype.play = function () {
 Audio.prototype.stop = function () {
     this.audio.pause();
     this.audio.currentTime = 0;
+};
+
+/**
+ * Ensure that there is one clone available for playback and return it.
+ * @protected
+ * @return {HTMLAudioElement} Clone that is ready for playback.
+ */
+Audio.prototype.ensureOneClone = function() {
+    for (var i = 0; i < this.clones.length; ++i) {
+        if (this.clones[i].ended) {
+            this.clones[i].currentTime = 0;
+            return this.clones[i];
+        }
+    }
+    var clone = document.createElement('audio');
+    this.addSourcesTo(clone);
+    this.clones.push(clone);
+    return clone;
 };
