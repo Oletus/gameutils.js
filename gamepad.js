@@ -42,6 +42,9 @@ Gamepads.prototype.update = function() {
     } else if (navigator.webkitGetGamepads) {
         gamepads = navigator.webkitGetGamepads();
     }
+    if (gamepads === undefined) {
+        return;
+    }
 
     for (var i = 0; i < gamepads.length; ++i) {
         if (gamepads[i] !== undefined && gamepads[i] !== null) {
