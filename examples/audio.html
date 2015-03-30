@@ -1,0 +1,37 @@
+<html>
+<head>
+<script src="../audio.js"></script>
+<script>
+'use strict';
+
+Audio.audioPath = 'assets/audio/';
+
+var bgm = new Audio('whichwayisup');
+var sample = new Audio('get');
+
+var playSample = function() {
+    sample.play();
+};
+
+var stopMusic = function() {
+    bgm.stop();
+};
+
+var startMusic = function() {
+    bgm.playSingular(true);
+};
+
+var start = function() {
+    bgm.playSingular(true);
+};
+
+</script>
+</head>
+<body onload="start()">
+<p>This example illustrates how to use audio.js, a very simple way to import audio assets and play them.</p>
+<p>Compatibility: Chrome, Firefox, IE</p>
+<input type="button" onclick="playSample()" value="Play sample once" />
+<input type="button" onclick="stopMusic()" value="Stop music" />
+<input type="button" onclick="startMusic()" value="Restart music" />
+</body>
+</html>
