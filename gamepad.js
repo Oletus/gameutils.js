@@ -65,7 +65,7 @@ Gamepads.prototype.update = function() {
                 if (l.buttonNumber > 100) {
                     buttonNumber -= 100;
                 }
-                if (pad.buttons[buttonNumber].hasOwnProperty('value')) {
+                if ('value' in pad.buttons[buttonNumber]) {
                     value = pad.buttons[buttonNumber].value;
                 } else {
                     value = pad.buttons[buttonNumber];
