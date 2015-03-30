@@ -5,12 +5,12 @@
  * @param {string} filename Name of the audio file without a file extension. Assumes that the audio file is located
  * in Audio.audioPath.
  * @param {Array.<string>} fileExtensions Array of extensions. Defaults to ogg and mp3, which should be enough for
- * cross-browser compatibility.
+ * cross-browser compatibility. The default file extensions are configurable through Audio.defaultExtensions.
  * @constructor
  */
 var Audio = function(filename, fileExtensions) {
     if (fileExtensions === undefined) {
-        fileExtensions = ['ogg', 'mp3'];
+        fileExtensions = Audio.defaultExtensions;
     }
     this.loaded = false;
     this.playWhenLoaded = false;
@@ -28,6 +28,12 @@ var Audio = function(filename, fileExtensions) {
  * Path for audio files. Set this before creating any Audio objects.
  */
 Audio.audioPath = 'assets/sounds/';
+
+/**
+ * Default file extensions. Set this before creating any Audio objects. Ogg and mp3 are enough for cross-browser
+ * compatibility.
+ */
+Audio.defaultExtensions = ['ogg', 'mp3'];
 
 /**
  * @param {HTMLAudioElement} audioElement Element to add audio sources to.
