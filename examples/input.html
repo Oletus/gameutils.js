@@ -11,7 +11,7 @@ var ctx;
 var tester;
 
 var Tester = function() {
-    this.positions = [0, 0];
+    this.playerPositions = [0, 0];
     this.goingDown = [false, false];
     this.input = new InputMapper(this, 2);
     this.input.addListener(Gamepads.BUTTONS.A, ['down', 's'], this.downPressed, this.downReleased);
@@ -28,17 +28,17 @@ Tester.prototype.downReleased = function(playerNumber) {
 Tester.prototype.update = function() {
     this.input.update();
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    for (var i = 0; i < this.positions.length; ++i) {
+    for (var playerNumber = 0; playerNumber < this.playerPositions.length; ++playerNumber) {
         // Use getKeyInstruction to prompt for player input:
-        var instruction = 'Press ' + this.input.getKeyInstruction(this.downPressed, i);
+        var instruction = 'Press ' + this.input.getKeyInstruction(this.downPressed, playerNumber);
 
-        var x = (i + 1) / (this.positions.length + 1) * ctx.canvas.width;
-        this.positions[i] += this.goingDown[i] ? 1.0 : 0.1;
-        if (this.positions[i] > ctx.canvas.height) {
-            this.positions[i] = 0;
+        var x = (playerNumber + 1) / (this.playerPositions.length + 1) * ctx.canvas.width;
+        this.playerPositions[playerNumber] += this.goingDown[playerNumber] ? 1.0 : 0.1;
+        if (this.playerPositions[playerNumber] > ctx.canvas.height) {
+            this.playerPositions[playerNumber] = 0;
         }
-        ctx.fillRect(x, 0, 10, this.positions[i]);
-        ctx.fillText(instruction, x, this.positions[i] + 20);
+        ctx.fillRect(x, 0, 10, this.playerPositions[playerNumber]);
+        ctx.fillText(instruction, x, this.playerPositions[playerNumber] + 20);
     }
 };
 
