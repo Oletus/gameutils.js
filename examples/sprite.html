@@ -1,0 +1,60 @@
+<html>
+<head>
+<title>Gameutils.js sprite example</title>
+<script src="../sprite.js"></script>
+<script>
+'use strict';
+
+var ctx;
+var tester;
+
+Sprite.gfxPath = 'assets/gfx/';
+
+var Tester = function() {
+    this.time = 0;
+    this.carrotSprite = new Sprite('carrot.png');
+    this.blackCarrot = undefined;
+};
+
+Tester.prototype.update = function() {
+    this.time += 1 / 60; // Assume 60 fps... bad example :P
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    
+    var width = ctx.canvas.width;
+    var height = ctx.canvas.height;
+    // No need to wait for async loading... just start drawing!
+    this.carrotSprite.draw(ctx, 50, 100 + Math.sin(this.time * 3) * 10);
+    this.carrotSprite.drawRotated(ctx, width * 0.4, height * 0.5, this.time);
+    this.carrotSprite.drawRotated(ctx, width * 0.6, height * 0.5, this.time,
+                                  Math.sin(this.time));
+    this.carrotSprite.drawRotatedNonUniform(ctx, width * 0.8, height * 0.5, 0,
+                                            Math.sin(this.time), Math.cos(this.time));
+    if (this.blackCarrot !== undefined) {
+        this.blackCarrot.draw(ctx, 50, 150 + Math.sin(this.time * 3) * 3);
+    } else if (this.carrotSprite.loaded) {
+        // For getSolidColoredVersion(), you need to wait for the source sprite to be loaded.
+        this.blackCarrot = this.carrotSprite.getSolidColoredVersion('black');
+    }
+};
+
+var frame = function() {
+    tester.update();
+    requestAnimationFrame(frame);
+};
+
+var start = function() {
+    tester = new Tester();
+    var canvas = document.createElement('canvas');
+    canvas.width = 500;
+    canvas.height = 300;
+    ctx = canvas.getContext('2d');
+    document.body.appendChild(canvas);
+    frame();
+};
+</script>
+</head>
+<body onload="start()">
+<p>This example illustrates how to use the Sprite class of gameutils.js.</p>
+<p>Compatibility: Chrome 41, Firefox 36, IE 11.</p>
+</body>
+</html>
