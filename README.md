@@ -1,4 +1,7 @@
 gameutils.js
 ============
 
-Utility library for 2D JavaScript games
+Utility library for 2D JavaScript games.
+
+Collection of simple, mostly independent helpers to speed up getting started with JS game development.
+Especially well suited for game jams and similar rapid, code-driven prototyping.
