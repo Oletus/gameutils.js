@@ -7,9 +7,11 @@
 var Sprite = function(filename) {
     this.filename = filename;
     this.img = document.createElement('img');
+    Sprite.createdCount++;
     if (typeof this.filename != typeof '') {
         this.img = this.filename;
         this.loaded = true;
+        Sprite.loadedCount++;
         this.width = this.filename.width;
         this.height = this.filename.height;
     } else {
@@ -18,6 +20,7 @@ var Sprite = function(filename) {
         this.loaded = false;
         this.img.onload = function() {
             that.loaded = true;
+            Sprite.loadedCount++;
             that.width = that.img.width;
             that.height = that.img.height;
         };
@@ -28,6 +31,22 @@ var Sprite = function(filename) {
  * Path for graphics files. Set this before creating any Sprite objects.
  */
 Sprite.gfxPath = 'assets/gfx/';
+
+/**
+ * How many Sprite objects have been created.
+ */
+Sprite.createdCount = 0;
+/**
+ * How many Sprite objects have been fully loaded.
+ */
+Sprite.loadedCount = 0;
+
+/**
+ * @return {number} Amount of Sprite objects that have been fully loaded per amount that has been created.
+ */
+Sprite.loadedFraction = function() {
+    return Sprite.loadedCount / Sprite.createdCount;
+};
 
 /**
  * Draw this to the given 2D canvas.
