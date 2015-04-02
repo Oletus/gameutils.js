@@ -3,10 +3,21 @@
  * @constructor
  * @param {string|HTMLImageElement|HTMLCanvasElement} filename File to load or a graphical element that's already
  * loaded.
+ * @param {string=} solidColor Optional CSS color string to turn the Sprite solid colored.
  */
-var Sprite = function(filename) {
+var Sprite = function(filename, /* Optional */ solidColor) {
+    var turnSolidColored = function(sprite, cssColor) {
+        var canvas2 = document.createElement('canvas');
+        canvas2.width = sprite.width;
+        canvas2.height = sprite.height;
+        var ctx2 = canvas2.getContext('2d');
+        ctx2.fillStyle = cssColor;
+        ctx2.fillRect(0, 0, canvas2.width, canvas2.height);
+        ctx2.globalCompositeOperation = 'destination-in';
+        sprite.draw(ctx2, 0, 0);
+        sprite.img = canvas2;
+    };
     this.filename = filename;
-    this.img = document.createElement('img');
     Sprite.createdCount++;
     if (typeof this.filename != typeof '') {
         this.img = this.filename;
@@ -14,7 +25,11 @@ var Sprite = function(filename) {
         Sprite.loadedCount++;
         this.width = this.filename.width;
         this.height = this.filename.height;
+        if (solidColor !== undefined) {
+            turnSolidColored(this, solidColor);
+        }
     } else {
+        this.img = document.createElement('img');
         this.img.src = Sprite.gfxPath + filename;
         var that = this;
         this.loaded = false;
@@ -23,6 +38,9 @@ var Sprite = function(filename) {
             Sprite.loadedCount++;
             that.width = that.img.width;
             that.height = that.img.height;
+            if (solidColor !== undefined) {
+                turnSolidColored(that, solidColor);
+            }
         };
     }
 };
@@ -145,21 +163,4 @@ Sprite.prototype.fillCanvasFitBottom = function(ctx) {
     }
     var scale = Math.max(ctx.canvas.width / this.width, ctx.canvas.height / this.height);
     this.drawRotated(ctx, ctx.canvas.width * 0.5, ctx.canvas.height - scale * this.height * 0.5, 0, scale);
-};
-
-/**
- * Return a solid colored version of the sprite.
- * @param {string} cssColor A color in the CSS format.
- * @return {Sprite} A solid colored version of this sprite.
- */
-Sprite.prototype.getSolidColoredVersion = function(cssColor) {
-    var canvas2 = document.createElement('canvas');
-    canvas2.width = this.width;
-    canvas2.height = this.height;
-    var ctx2 = canvas2.getContext('2d');
-    ctx2.fillStyle = cssColor;
-    ctx2.fillRect(0, 0, canvas2.width, canvas2.height);
-    ctx2.globalCompositeOperation = 'destination-in';
-    this.draw(ctx2, 0, 0);
-    return new Sprite(canvas2);
 };

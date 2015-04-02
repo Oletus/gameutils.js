@@ -13,7 +13,7 @@ Sprite.gfxPath = 'assets/gfx/';
 var Tester = function() {
     this.time = 0;
     this.carrotSprite = new Sprite('carrot.png');
-    this.blackCarrot = undefined;
+    this.blackCarrot = new Sprite('carrot.png', 'black');
 };
 
 Tester.prototype.update = function() {
@@ -24,17 +24,12 @@ Tester.prototype.update = function() {
     var height = ctx.canvas.height;
     // No need to wait for async loading... just start drawing!
     this.carrotSprite.draw(ctx, 50, 100 + Math.sin(this.time * 3) * 10);
+    this.blackCarrot.draw(ctx, 50, 150 + Math.sin(this.time * 3) * 3);
     this.carrotSprite.drawRotated(ctx, width * 0.4, height * 0.5, this.time);
     this.carrotSprite.drawRotated(ctx, width * 0.6, height * 0.5, this.time,
                                   Math.sin(this.time));
     this.carrotSprite.drawRotatedNonUniform(ctx, width * 0.8, height * 0.5, 0,
                                             Math.sin(this.time), Math.cos(this.time));
-    if (this.blackCarrot !== undefined) {
-        this.blackCarrot.draw(ctx, 50, 150 + Math.sin(this.time * 3) * 3);
-    } else if (this.carrotSprite.loaded) {
-        // For getSolidColoredVersion(), you need to wait for the source sprite to be loaded.
-        this.blackCarrot = this.carrotSprite.getSolidColoredVersion('black');
-    }
 };
 
 var frame = function() {
