@@ -12,12 +12,30 @@ var Audio = function(filename, fileExtensions) {
     if (fileExtensions === undefined) {
         fileExtensions = Audio.defaultExtensions;
     }
-    this.loaded = false;
-    this.playWhenLoaded = false;
+    Audio.createdCount++;
+    this.loaded = false; // Used purely for purposes of marking the audio loaded.
     this.audio = document.createElement('audio');
     this.filenames = [];
+    var canDetermineLoaded = false;
     for (var i = 0; i < fileExtensions.length; ++i) {
         this.filenames.push(filename + '.' + fileExtensions[i]);
+        if (fileExtensions[i] === 'ogg' && !canDetermineLoaded) {
+            canDetermineLoaded = this.audio.canPlayType('audio/ogg;codecs="vorbis"') == 'probably';
+        }
+        if (fileExtensions[i] === 'mp3' && !canDetermineLoaded) {
+            canDetermineLoaded = this.audio.canPlayType('audio/mpeg') == 'probably';
+        }
+    }
+    if (canDetermineLoaded) {
+        var that = this;
+        var markLoaded = function() {
+            that.markLoaded();
+        }
+        this.audio.oncanplay = markLoaded;
+        // Can never be sure that the audio will load. Fake loaded after 10 seconds to unblock loading bar.
+        setTimeout(markLoaded, 10000);
+    } else {
+        this.markLoaded();
     }
     this.addSourcesTo(this.audio);
     this.clones = [];
@@ -34,6 +52,23 @@ Audio.audioPath = 'assets/sounds/';
  * compatibility.
  */
 Audio.defaultExtensions = ['ogg', 'mp3'];
+
+
+/**
+ * How many Audio objects have been created.
+ */
+Audio.createdCount = 0;
+/**
+ * How many Audio objects have been fully loaded.
+ */
+Audio.loadedCount = 0;
+
+/**
+ * @return {number} Amount of Audio objects that have been fully loaded per amount that has been created.
+ */
+Audio.loadedFraction = function() {
+    return Audio.loadedCount / Audio.createdCount;
+};
 
 /**
  * @param {HTMLAudioElement} audioElement Element to add audio sources to.
@@ -72,10 +107,12 @@ Audio.prototype.playSingular = function (loop) {
     }
     if (this.audio.readyState === 4) {
         this.audio.play();
+        this.markLoaded();
     } else {
         var that = this.audio;
         this.audio.oncanplay = function() {
             that.play();
+            that.markLoaded();
         };
     }
 };
@@ -104,4 +141,17 @@ Audio.prototype.ensureOneClone = function() {
     this.addSourcesTo(clone);
     this.clones.push(clone);
     return clone;
+};
+
+/**
+ * Mark this audio sample loaded.
+ * @protected
+ */
+Audio.prototype.markLoaded = function() {
+    if (this.loaded) {
+        return;
+    }
+    this.loaded = true;
+    Audio.loadedCount++;
+    this.audio.oncanplay = null;
 };
