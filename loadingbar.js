@@ -19,6 +19,8 @@ var LoadingBar = function(objectsToPoll) {
     this.objectsToPoll = objectsToPoll;
     this.loadedFraction = 0;
     this.allLoaded = false;
+    this.sinceLoaded = 0;
+    this.sinceStarted = 0;
 };
 
 /**
@@ -26,7 +28,9 @@ var LoadingBar = function(objectsToPoll) {
  * @return {boolean} True when fully loaded.
  */
 LoadingBar.prototype.update = function(deltaTime) {
+    this.sinceStarted += deltaTime;
     if (this.allLoaded) {
+        this.sinceLoaded += deltaTime;
         return this.allLoaded;
     }
     this.loadedFraction = 0;
@@ -52,16 +56,19 @@ LoadingBar.prototype.finished = function() {
  * @param {CanvasRenderingContext2D} ctx Context to draw the loading bar to.
  */
 LoadingBar.prototype.render = function(ctx) {
-    ctx.save();
-    ctx.globalAlpha = 1.0;
-    ctx.fillStyle = '#000';
-    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    ctx.translate(ctx.canvas.width * 0.5, ctx.canvas.height * 0.5);
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(-100, -30, 200, 60);
-    ctx.fillStyle = '#000';
-    ctx.fillRect(-95, -25, 190, 50);
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(-90, -20, 180 * this.loadedFraction, 40);
-    ctx.restore();
+    if (this.sinceLoaded < 1.0) {
+        ctx.save();
+        ctx.globalAlpha = Math.min(1.0, (1.0 - this.sinceLoaded) * 1.5);
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        ctx.translate(ctx.canvas.width * 0.5, ctx.canvas.height * 0.5);
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(-100, -25, 200, 50);
+        ctx.fillStyle = '#000';
+        ctx.fillRect(-95, -20, 190, 40);
+        ctx.fillStyle = '#fff';
+        // Fake some loading animation even if loading doesn't really take any time.
+        ctx.fillRect(-90, -15, 180 * Math.min(this.loadedFraction, this.sinceStarted * 4), 30);
+        ctx.restore();
+    }
 };
