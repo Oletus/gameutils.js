@@ -2,6 +2,7 @@
 <head>
 <title>Main loop example</title>
 <script src="../mainloop.js"></script>
+<script src="../loadingbar.js"></script>
 <script>
 'use strict';
 
@@ -15,6 +16,7 @@ var GameExample = function() {
     this.canvas.width = 1000;
     document.body.appendChild(this.canvas);
     this.ballPosition = 0.0;
+    this.timeSinceCreated = 0.0;
 };
 
 /**
@@ -31,15 +33,38 @@ GameExample.prototype.render = function() {
  * @param {number} deltaTime Time that's passed since the last frame in seconds.
  */
 GameExample.prototype.update = function(deltaTime) {
+    this.timeSinceCreated += deltaTime;
+    if (!this.loadingBar.finished()) {
+        // It's good not to update the game state before the loading is finished.
+        return;
+    }
     this.ballPosition += deltaTime * 100.0;
     if (this.ballPosition > this.canvas.width) {
         this.ballPosition = 0.0;
     }
 };
+
+/**
+ * Mock loadedFraction function to demonstrate the LoadingBar class.
+ * In an actual game, you don't need to define this function yourself if you use
+ * the Sprite and/or Audio classes for loading assets.
+ */
+GameExample.prototype.loadedFraction = function() {
+    return this.timeSinceCreated * 0.4;
+};
+
+var start = function() {
+    var game = new GameExample();
+    // Pass the game to LoadingBar since in this example the Game class
+    // implements loadedFraction().
+    game.loadingBar = new LoadingBar([game]);
+    startMainLoop([game, game.loadingBar], {debugMode: true});
+};
 </script>
 </head>
-<body onload="startMainLoop(new GameExample(), {debugMode: true})">
-<p>This example illustrates how to use the startMainLoop function of gameutils.js.</p>
+<body onload="start();">
+<p>This example illustrates how to use the startMainLoop function and loading bar class of gameutils.js.</p>
+<p>The bar on the top shows a log of render/update frames the main loop has processed.</p>
 <p>Compatibility: Chrome 41, Firefox 36, IE 11.</p>
 </body>
 </html>

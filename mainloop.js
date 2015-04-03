@@ -1,10 +1,12 @@
 /**
  * Start a main loop on the provided game with the provided options.
- * @param {Object} game Object with two functions: update() and render().
+ * @param {Array.<Object>} updateables Objects with two functions: update() and render().
  *   update(deltaTime) should update the game state. The deltaTime parameter
  *   is time passed since the last update in seconds.
  *   render() should draw the current game state and optionally return a
- *   CanvasRenderingContext2D for drawing debug information.
+ *   CanvasRenderingContext2D that the following updateables in the array will use.
+ *   Updateables that are processed after the first one receive this rendering context
+ *   as a parameter.
  * @param {Object} options Takes the following keys:
  *
  * updateFPS: number
@@ -15,12 +17,12 @@
  *
  * debugMode: boolean
  *  When debugMode is on, a timeline of frames is drawn on the canvas returned
- *  from game.render().
+ *  from updateables[i].render().
  *  - Green in the log is an update which was rendered to the screen.
  *  - Orange in the log is an update which was not rendered to the screen.
  *  - White in the log is a frame on which the game state was not updated.
  */
-var startMainLoop = function(game, options) {
+var startMainLoop = function(updateables, options) {
     var defaults = {
         updateFPS: 60,
         debugMode: false
@@ -33,6 +35,9 @@ var startMainLoop = function(game, options) {
         if(!options.hasOwnProperty(key)) {
             options[key] = defaults[key];
         }
+    }
+    if (!(updateables instanceof Array)) {
+        updateables = [updateables];
     }
     
     var timePerUpdate = 1000 / options.updateFPS;
@@ -95,14 +100,22 @@ var startMainLoop = function(game, options) {
         }
         while (time > nextFrameTime) {
             nextFrameTime += timePerUpdate;
-            game.update(timePerUpdate * 0.001);
+            for (var i = 0; i < updateables.length; ++i) {
+                updateables[i].update(timePerUpdate * 0.001);
+            }
             updates++;
         }
         if (options.debugMode) {
             frameLog.push({time: callbackTime, updates: updates});
         }
         if (updates > 0) {
-            var ctx = game.render();
+            var ctx = updateables[0].render();
+            for (var i = 1; i < updateables.length; ++i) {
+                var candidateCtx = updateables[i].render(ctx);
+                if (candidateCtx !== undefined) {
+                    ctx = candidateCtx;
+                }
+            }
             if (options.debugMode && (ctx instanceof CanvasRenderingContext2D)) {
                 drawFrameLog(ctx, callbackTime);
                 if (frameLog.length >= 1024) {
