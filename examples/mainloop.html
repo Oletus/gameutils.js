@@ -1,0 +1,43 @@
+<html>
+<head>
+<title>Main loop example</title>
+<script src="../mainloop.js"></script>
+<script>
+'use strict';
+
+/**
+ * Game class.
+ * @constructor
+ */
+var GameExample = function() {
+    this.canvas = document.createElement('canvas');
+    this.ctx = this.canvas.getContext('2d');
+    this.canvas.width = 1000;
+    document.body.appendChild(this.canvas);
+    this.ballPosition = 0.0;
+};
+
+/**
+ * Draw the current game state on the screen.
+ */
+GameExample.prototype.render = function() {
+    this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+    this.ctx.fillRect(this.ballPosition, this.ctx.canvas.height * 0.5 - 5, 10, 10);
+    return this.ctx;
+};
+
+/**
+ * Update the game state.
+ * @param {number} deltaTime Time that's passed since the last frame in seconds.
+ */
+GameExample.prototype.update = function(deltaTime) {
+    this.ballPosition += deltaTime * 100.0;
+    if (this.ballPosition > this.canvas.width) {
+        this.ballPosition = 0.0;
+    }
+};
+</script>
+</head>
+<body onload="startMainLoop(new GameExample(), {debugMode: true})">
+</body>
+</html>
