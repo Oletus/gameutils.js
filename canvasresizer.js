@@ -75,16 +75,9 @@ CanvasResizer.Mode = {
 };
 
 CanvasResizer.prototype.resize = function() {
-    if (this.mode === CanvasResizer.Mode.FIXED_RESOLUTION ||
-        this.mode === CanvasResizer.Mode.FIXED_RESOLUTION_INTERPOLATED) {
-        // Canvas dimensions don't change, so this doesn't clear the canvas.
-        // Execute the resize right away.
-        this._resizeFixedResolution();
-    } else {
-        // Resize only on a render call to avoid flicker from changing canvas
-        // size.
-        this.resizeOnNextRender = true;
-    }
+    // Resize only on a render call to avoid flicker from changing canvas
+    // size.
+    this.resizeOnNextRender = true;
 };
 
 CanvasResizer.prototype.update = function() {
@@ -148,6 +141,17 @@ CanvasResizer.prototype.getCanvas = function() {
 };
 
 /**
+ * @param {number} width New width for the canvas element.
+ * @param {number} height New height for the canvas element.
+ */
+CanvasResizer.prototype.changeCanvasDimensions = function(width, height) {
+    this.width = width;
+    this.height = height;
+    this.canvasWidthToHeight = this.width / this.height;
+    this.resize();
+};
+
+/**
  * Change the resizing mode.
  */
 CanvasResizer.prototype.changeMode = function(mode) {
@@ -182,6 +186,12 @@ CanvasResizer.prototype._getParentProperties = function() {
  * @protected
  */
 CanvasResizer.prototype._resizeFixedResolution = function() {
+    if (this.mode !== CanvasResizer.Mode.FIXED_RESOLUTION &&
+        this.mode !== CanvasResizer.Mode.FIXED_RESOLUTION_INTERPOLATED) {
+        return;
+    }
+    this.canvas.width = this.width;
+    this.canvas.height = this.height;
     var parentProperties = this._getParentProperties();
     var parentWidth = parentProperties.width;
     var parentHeight = parentProperties.height;
