@@ -1,0 +1,47 @@
+<html>
+<head>
+<title>Gameutils.js canvas resizing example</title>
+<script src="../canvasresizer.js"></script>
+<script>
+'use strict';
+
+var ctx;
+var resizer;
+
+var frame = function() {
+    resizer.render();
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.fillStyle = '#000';
+    ctx.fillRect(25, 25, 25, 25);
+    requestAnimationFrame(frame);
+};
+
+var start = function() {
+    var parent = document.getElementById('canvasContainer');
+    resizer = new CanvasResizer({
+        mode: CanvasResizer.Mode.FIXED_RESOLUTION,
+        width: 320,
+        height: 180,
+        parentElement: parent
+    });
+    var canvas = resizer.getCanvas();
+    ctx = canvas.getContext('2d');
+    frame();
+};
+</script>
+</head>
+<body onload="start()">
+<p>This example illustrates how to use the CanvasResizer class of gameutils.js.</p>
+<p>Compatibility: Chrome 41 (full), Firefox 36 (no pixelated rendering), IE 11 (no pixelated rendering).</p>
+<div id="canvasContainer" style="width: 100%; height: 600px; background: #000; border: 3px solid #08d;"></div>
+<input type="button" value="Set mode to FIXED_RESOLUTION"
+    onclick="resizer.changeMode(CanvasResizer.Mode.FIXED_RESOLUTION)"></input>
+<input type="button" value="Set mode to FIXED_RESOLUTION_INTERPOLATED"
+    onclick="resizer.changeMode(CanvasResizer.Mode.FIXED_RESOLUTION_INTERPOLATED)"></input>
+<input type="button" value="Set mode to FIXED_ASPECT_RATIO"
+    onclick="resizer.changeMode(CanvasResizer.Mode.FIXED_ASPECT_RATIO)"></input>
+<input type="button" value="Set mode to DYNAMIC"
+    onclick="resizer.changeMode(CanvasResizer.Mode.DYNAMIC)"></input>
+</body>
+</html>
