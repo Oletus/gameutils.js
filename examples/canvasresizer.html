@@ -37,12 +37,13 @@ var start = function() {
     frame();
 };
 </script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
 </head>
 <body onload="start()">
 <p>This example illustrates how to use the CanvasResizer class of gameutils.js.</p>
-<p>Try clicking or touching on the canvas.</p>
+<p>Try clicking or touching on the canvas, or resizing the browser window.</p>
 <p>Compatibility: Chrome 41 (full), Firefox 36 (no pixelated rendering), IE 11 (no pixelated rendering).</p>
-<div id="canvasContainer" style="width: 100%; height: 600px; background: #000; border: 3px solid #08d;"></div>
+<div id="canvasContainer" style="width: 90%; height: 600px; background: #000; border: 3px solid #08d;"></div>
 <input type="button" value="Set mode to FIXED_RESOLUTION"
     onclick="resizer.changeMode(CanvasResizer.Mode.FIXED_RESOLUTION)"></input>
 <input type="button" value="Set mode to FIXED_RESOLUTION_INTERPOLATED"
