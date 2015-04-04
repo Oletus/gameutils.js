@@ -7,6 +7,8 @@
  *  width: number Width of the coordinate space.
  *  height: number Height of the coordinate space.
  *  parentElement: HTMLElement (defaults to the document body)
+ *  wrapperElement: HTMLElement Optional wrapper element that tightly wraps
+ *      the canvas. Useful for implementing HTML-based UI on top of the canvas.
  */
 var CanvasResizer = function(options) {
     var defaults = {
@@ -14,7 +16,8 @@ var CanvasResizer = function(options) {
         mode: CanvasResizer.Mode.DYNAMIC,
         width: 16,
         height: 9,
-        parentElement: document.body
+        parentElement: document.body,
+        wrapperElement: null
     };
 
     for(var key in defaults) {
@@ -56,9 +59,16 @@ var CanvasResizer = function(options) {
         this.parentElement.style.padding = '0';
     }
     // No need to remove the object from existing parent if it has one
-    this.parentElement.appendChild(this.canvas);
+    if (this.wrapperElement === null) {
+        this.parentElement.appendChild(this.canvas);
+    } else {
+        this.parentElement.appendChild(this.wrapperElement);
+        // Assume that wrapper already wraps the canvas - don't re-append the
+        // canvas to the wrapper since the wrapper might have other children.
+    }
     window.addEventListener('resize', resize, false);
     this.resize();
+    this._scale = 1.0;
 };
 
 CanvasResizer.Mode = {
@@ -127,6 +137,14 @@ CanvasResizer.prototype.render = function() {
             this.canvas.height = parentHeight;
             this.canvas.style.width = parentWidth + 'px';
             this.canvas.style.height = parentHeight + 'px';
+            this.canvas.style.marginTop = '0';
+            this.canvas.style.marginLeft = '0';
+        }
+        if (this.wrapperElement !== null) {
+            this.wrapperElement.style.width = this.canvas.style.width;
+            this.wrapperElement.style.height = this.canvas.style.height;
+            this.wrapperElement.style.marginTop = this.canvas.style.marginTop;
+            this.wrapperElement.style.marginLeft = this.canvas.style.marginLeft;
             this.canvas.style.marginTop = '0';
             this.canvas.style.marginLeft = '0';
         }
@@ -204,6 +222,19 @@ CanvasResizer.prototype.changeMode = function(mode) {
 };
 
 /**
+ * @return {number} the scale at which the canvas coordinate space is drawn.
+ */
+CanvasResizer.prototype.getScale = function() {
+    if (this.mode === CanvasResizer.Mode.FIXED_RESOLUTION ||
+        this.mode === CanvasResizer.Mode.FIXED_RESOLUTION_INTERPOLATED)
+    {
+        return this._scale;
+    } else {
+        return 1.0;
+    }
+};
+
+/**
  * Get properties of the containing element.
  * @return {Object} Object containing keys width, height, and widthToHeight.
  * @protected
@@ -250,7 +281,7 @@ CanvasResizer.prototype._resizeFixedResolution = function() {
             }
         } else {
             var i = 1;
-            while ((i + 1) * this.width < maxWidth && (i + 1) * this.height < maxHeight) {
+            while ((i + 1) * this.width <= maxWidth && (i + 1) * this.height <= maxHeight) {
                 ++i;
             }
             styleWidth = (this.width * i) / window.devicePixelRatio;
@@ -267,6 +298,7 @@ CanvasResizer.prototype._resizeFixedResolution = function() {
     }
     this.canvas.style.width = styleWidth + 'px';
     this.canvas.style.height = styleHeight + 'px';
+    this._scale = styleHeight / this.canvas.height;
     this.canvas.style.marginLeft = Math.round((parentWidth - styleWidth) * 0.5) + 'px';
     this.canvas.style.marginTop = Math.round((parentHeight - styleHeight) * 0.5) + 'px';
 };
