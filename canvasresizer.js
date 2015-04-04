@@ -4,8 +4,8 @@
  * @param {Object} options Object with the following optional keys:
  *  canvas: HTMLCanvasElement (one is created by default)
  *  mode: CanvasResizer.Mode (defaults to filling the window)
- *  width: number
- *  height: number
+ *  width: number Width of the coordinate space.
+ *  height: number Height of the coordinate space.
  *  parentElement: HTMLElement (defaults to the document body)
  */
 var CanvasResizer = function(options) {
@@ -66,24 +66,36 @@ CanvasResizer.Mode = {
     FIXED_RESOLUTION: 0,
     // Fixed amount of pixels, rendered interpolated:
     FIXED_RESOLUTION_INTERPOLATED: 1,
-    // Only available for 2D canvas. Set the canvas transform on render to emulate a fixed coordinate system:
+    // Only available for 2D canvas. Set the canvas transform on render to
+    // emulate a fixed coordinate system:
     // TODO: FIXED_COORDINATE_SYSTEM: 2,
-    // Fix the aspect ratio, but not the coordinate system:
+    // Fix the aspect ratio, but not the exact width/height of the coordinate
+    // space:
     FIXED_ASPECT_RATIO: 3,
-    // Make the canvas fill the containing element completely:
+    // Make the canvas fill the containing element completely, with the
+    // coordinate space being set according to the canvas dimensions:
     DYNAMIC: 4
 };
 
+/**
+ * Resize callback.
+ */
 CanvasResizer.prototype.resize = function() {
     // Resize only on a render call to avoid flicker from changing canvas
     // size.
     this.resizeOnNextRender = true;
 };
 
+/**
+ * Do nothing. This function exists just for mainloop.js compatibility.
+ */
 CanvasResizer.prototype.update = function() {
-    // Do nothing. This function exists just for mainloop compatibility.
 };
 
+/**
+ * Call this function in the beginning of rendering to the canvas to update
+ * the canvas size. Compatible with mainloop.js.
+ */
 CanvasResizer.prototype.render = function() {
     if (this.resizeOnNextRender) {
         var parentProperties = this._getParentProperties();
@@ -141,6 +153,9 @@ CanvasResizer.prototype.getCanvas = function() {
 };
 
 /**
+ * Set the dimensions of the canvas coordinate space. Note that this has no
+ * effect when the mode is DYNAMIC. If the mode is FIXED_ASPECT_RATIO, the
+ * aspect ratio is set based on the width and height.
  * @param {number} width New width for the canvas element.
  * @param {number} height New height for the canvas element.
  */
@@ -153,13 +168,12 @@ CanvasResizer.prototype.changeCanvasDimensions = function(width, height) {
 
 /**
  * Change the resizing mode.
+ * @param {CanvasResizer.Mode} mode New mode to use.
  */
 CanvasResizer.prototype.changeMode = function(mode) {
     this.mode = mode;
     if (this.mode === CanvasResizer.Mode.FIXED_RESOLUTION) {
         this.canvas.style.imageRendering = 'pixelated';
-        this.canvas.width = this.width;
-        this.canvas.height = this.height;
     } else {
         this.canvas.style.imageRendering = 'auto';
     }
@@ -167,6 +181,8 @@ CanvasResizer.prototype.changeMode = function(mode) {
 };
 
 /**
+ * Get properties of the containing element.
+ * @return {Object} Object containing keys width, height, and widthToHeight.
  * @protected
  */
 CanvasResizer.prototype._getParentProperties = function() {
