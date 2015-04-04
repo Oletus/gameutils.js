@@ -137,11 +137,34 @@ CanvasResizer.prototype.render = function() {
  * Get a canvas coordinate space position from a given event.
  * The coordinate space is relative to the width and height properties on
  * this object.
+ * @param {MouseEvent|PointerEvent|TouchEvent} Event to get the position from.
+ * In case of a touch event, the position is retrieved from the first touch
+ * point.
  * @return {Object} Object with x and y keys for horizontal and vertical
  * positions in the canvas coordinate space.
  */
 CanvasResizer.prototype.getCanvasPosition = function(event) {
-    // TODO
+    var rect = this.canvas.getBoundingClientRect();
+    var x, y;
+    if (event.touches !== undefined && event.touches.length > 0) {
+        x = event.touches[0].clientX;
+        y = event.touches[0].clientY;
+    } else {
+        x = event.clientX;
+        y = event.clientY;
+    }
+    // +0.5 to position the coordinates to the pixel center.
+    var xRel = x - rect.left + 0.5;
+    var yRel = y - rect.top + 0.5;
+    if (rect.width != this.canvas.width) {
+        xRel *= this.canvas.width / rect.width;
+        yRel *= this.canvas.height / rect.height;
+    }
+    if ('Vec2' in window) {
+        return new Vec2(xRel, yRel);
+    } else {
+        return {x: xRel, y: yRel};
+    }
 };
 
 /**

@@ -7,14 +7,19 @@
 
 var ctx;
 var resizer;
+var pos = {x: 37.5, y: 37.5};
 
 var frame = function() {
     resizer.render();
     ctx.fillStyle = '#fff';
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     ctx.fillStyle = '#000';
-    ctx.fillRect(25, 25, 25, 25);
+    ctx.fillRect(Math.round(pos.x - 12.5), Math.round(pos.y - 12.5), 25, 25);
     requestAnimationFrame(frame);
+};
+
+var eventListener = function(event) {
+    pos = resizer.getCanvasPosition(event);
 };
 
 var start = function() {
@@ -27,12 +32,15 @@ var start = function() {
     });
     var canvas = resizer.getCanvas();
     ctx = canvas.getContext('2d');
+    canvas.addEventListener('click', eventListener);
+    canvas.addEventListener('touchmove', eventListener);
     frame();
 };
 </script>
 </head>
 <body onload="start()">
 <p>This example illustrates how to use the CanvasResizer class of gameutils.js.</p>
+<p>Try clicking or touching on the canvas.</p>
 <p>Compatibility: Chrome 41 (full), Firefox 36 (no pixelated rendering), IE 11 (no pixelated rendering).</p>
 <div id="canvasContainer" style="width: 100%; height: 600px; background: #000; border: 3px solid #08d;"></div>
 <input type="button" value="Set mode to FIXED_RESOLUTION"
