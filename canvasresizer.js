@@ -253,8 +253,8 @@ CanvasResizer.prototype._resizeFixedResolution = function() {
             while ((i + 1) * this.width < maxWidth && (i + 1) * this.height < maxHeight) {
                 ++i;
             }
-            styleWidth = (this.width * i);
-            styleHeight = (this.height * i);
+            styleWidth = (this.width * i) / window.devicePixelRatio;
+            styleHeight = (this.height * i) / window.devicePixelRatio;
         }
     } else if (this.mode === CanvasResizer.Mode.FIXED_RESOLUTION_INTERPOLATED) {
         if (parentWidthToHeight > this.canvasWidthToHeight) {
