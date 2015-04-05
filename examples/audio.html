@@ -1,6 +1,7 @@
 <html>
 <head>
-<title>Gameutils.js audio example</title>
+<title>Gameutils.js: Using the Audio class</title>
+<link rel="stylesheet" type="text/css" href="assets/default.css">
 <script src="../audio.js"></script>
 <script>
 'use strict';
@@ -22,14 +23,10 @@ var startMusic = function() {
     bgm.playSingular(true);
 };
 
-var start = function() {
-    bgm.playSingular(true);
-};
-
 </script>
 </head>
-<body onload="start()">
-<p>This example illustrates how to use audio.js, a very simple way to import audio assets and play them.</p>
+<body onload="startMusic()">
+<h2>Using the Audio class</h2>
 <p>Compatibility: Chrome, Firefox, IE</p>
 <input type="button" onclick="playSample()" value="Play sample once" />
 <input type="button" onclick="stopMusic()" value="Stop music" />

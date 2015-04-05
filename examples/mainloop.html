@@ -1,6 +1,7 @@
 <html>
 <head>
-<title>Main loop example</title>
+<title>Gameutils.js: Using the startMainLoop function and LoadingBar class</title>
+<link rel="stylesheet" type="text/css" href="assets/default.css">
 <script src="../mainloop.js"></script>
 <script src="../loadingbar.js"></script>
 <script>
@@ -63,8 +64,13 @@ var start = function() {
 </script>
 </head>
 <body onload="start();">
-<p>This example illustrates how to use the startMainLoop function and loading bar class of gameutils.js.</p>
+<h2>Using the startMainLoop function and LoadingBar class</h2>
 <p>The bar on the top shows a log of render/update frames the main loop has processed.</p>
+<ul>
+<li>Green in the log is an update which was rendered to the screen.</li>
+<li>Orange in the log is an update which was not rendered to the screen.</li>
+<li>White in the log is a frame on which the game state was not updated.</li>
+</ul>
 <p>Compatibility: Chrome 41, Firefox 36, IE 11.</p>
 </body>
 </html>

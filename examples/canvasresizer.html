@@ -1,6 +1,7 @@
 <html>
 <head>
-<title>Gameutils.js canvas resizing example</title>
+<title>Gameutils.js: Using the CanvasResizer class to manage canvas size</title>
+<link rel="stylesheet" type="text/css" href="assets/default.css">
 <script src="../canvasresizer.js"></script>
 <script>
 'use strict';
@@ -40,10 +41,21 @@ var start = function() {
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
 </head>
 <body onload="start()">
-<p>This example illustrates how to use the CanvasResizer class of gameutils.js.</p>
+<h2>Using the CanvasResizer class to manage canvas size</h2>
+<p>With the CanvasResizer, you can set the canvas size several ways:</p>
+<ul>
+<li>FIXED_RESOLUTION: Forces an integer scaling ratio like 2:1 or 3:1, perfect for pixel art based graphics.
+Unfortunately pixel-perfect rendering of this mode is currently only possible in Chrome.</li>
+<li>FIXED_RESOLUTION_INTERPOLATED: Fix the resolution of the canvas, but fill the screen by scaling it. This may result
+in blurred graphics, but can be helpful in rapid prototyping.</li>
+<li>FIXED_ASPECT_RATIO: Fill the screen with the canvas, but preserving aspect ratio.</li>
+<li>DYNAMIC: Simply fill the screen with the canvas.</li>
+</ul>
+<p>With all of the modes, you can map touch and mouse events to the canvas coordinate space with a simple function call.</p>
 <p>Try clicking or touching on the canvas, or resizing the browser window.</p>
 <p>Compatibility: Chrome 41 (full), Firefox 36 (no pixelated rendering), IE 11 (no pixelated rendering).</p>
 <div id="canvasContainer" style="width: 90%; height: 600px; background: #000; border: 3px solid #08d;"></div>
+<p>
 <input type="button" value="Set mode to FIXED_RESOLUTION"
     onclick="resizer.changeMode(CanvasResizer.Mode.FIXED_RESOLUTION)"></input>
 <input type="button" value="Set mode to FIXED_RESOLUTION_INTERPOLATED"
@@ -52,5 +64,6 @@ var start = function() {
     onclick="resizer.changeMode(CanvasResizer.Mode.FIXED_ASPECT_RATIO)"></input>
 <input type="button" value="Set mode to DYNAMIC"
     onclick="resizer.changeMode(CanvasResizer.Mode.DYNAMIC)"></input>
+</p>
 </body>
 </html>
