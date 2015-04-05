@@ -16,7 +16,7 @@ var Tester = function() {
     this.playerPositions = [0, 0];
     this.goingDown = [false, false];
     this.input = new InputMapper(this, 2);
-    this.input.addListener(Gamepads.BUTTONS.A, ['down', 's'], this.downPressed, this.downReleased);
+    this.input.addListener(Gamepad.BUTTONS.A, ['down', 's'], this.downPressed, this.downReleased);
 };
 
 Tester.prototype.downPressed = function(playerNumber) {

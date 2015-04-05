@@ -4,13 +4,13 @@
  * Mapper that automatically maps keyboard / gamepad input to different player numbers.
  * This can be used to implement keyboard / gamepad controls for a single player or a local
  * multiplayer game that allows players on the keyboard to play against players on gamepads.
- * Requires gamepad.js, Mousetrap and MouseTrap-global-bind to be included.
+ * Requires gamepad.js, mousetrap.js and mousetrap-global-bind.js to be included.
  * @param {Object} callbackObj Object on which the callback functions will be called.
  * @param {number} maxPlayers Maximum number of players. If there are more active controllers
  * than this, then two controllers may be mapped to the same player.
  */
 var InputMapper = function(callbackObj, maxPlayers) {
-    this.gamepads = new Gamepads(this);
+    this.gamepads = new Gamepad(this);
     this.callbackObj = callbackObj;
     this.maxPlayers = maxPlayers;
     this.resetPlayerMap();
@@ -97,7 +97,7 @@ InputMapper.prototype.getPlayerIndex = function(controllerType, controllerIndex)
 };
 
 /**
- * @param {number} gamepadButton A button from Gamepads.BUTTONS
+ * @param {number} gamepadButton A button from Gamepad.BUTTONS
  * @param {Array} keyboardBindings List of bindings for different players, for example ['up', 'w']
  * @param {function} downCallback Callback when the button is pressed down, that takes a player number as a parameter.
  * @param {function} upCallback Callback when the button is released, that takes a player number as a parameter.
@@ -120,9 +120,9 @@ InputMapper.prototype.addListener = function(gamepadButton, keyboardButtons, dow
     var gamepadInstruction;
     
     if (gamepadButton < 100) {
-        gamepadInstruction = Gamepads.BUTTON_INSTRUCTION[gamepadButton];
+        gamepadInstruction = Gamepad.BUTTON_INSTRUCTION[gamepadButton];
     } else {
-        gamepadInstruction = Gamepads.BUTTON_INSTRUCTION[gamepadButton - 100];
+        gamepadInstruction = Gamepad.BUTTON_INSTRUCTION[gamepadButton - 100];
     }
     
     if (downCallback !== undefined) {

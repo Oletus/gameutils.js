@@ -1,13 +1,13 @@
 'use strict';
 
-var Gamepads = function(callbackObj) {
+var Gamepad = function(callbackObj) {
     this.downListeners = [];
     this.indexToPlayer = {};
     this.players = [];
     this.callbackObj = callbackObj;
 };
 
-Gamepads.prototype.gamepadForPlayer = function(gamepads, playerNumber) {
+Gamepad.prototype.gamepadForPlayer = function(gamepads, playerNumber) {
     for (var i = 0; i < gamepads.length; ++i) {
         if (gamepads[i] !== undefined && gamepads[i] !== null && gamepads[i].index === this.players[playerNumber]) {
             return gamepads[i];
@@ -19,7 +19,7 @@ Gamepads.prototype.gamepadForPlayer = function(gamepads, playerNumber) {
 /**
  * @protected
  */
-Gamepads.prototype._markDownAndCallback = function(l, p, value) {
+Gamepad.prototype._markDownAndCallback = function(l, p, value) {
     if (value > 0.5) {
         if (!l.isDown[p]) {
             l.isDown[p] = true;
@@ -37,7 +37,7 @@ Gamepads.prototype._markDownAndCallback = function(l, p, value) {
     }
 };
 
-Gamepads.prototype.update = function() {
+Gamepad.prototype.update = function() {
     var gamepads;
     if (navigator.getGamepads) {
         gamepads = navigator.getGamepads();
@@ -73,10 +73,10 @@ Gamepads.prototype.update = function() {
                     value = pad.buttons[buttonNumber];
                 }
                 if (l.buttonNumber > 100) {
-                    var axis = (l.buttonNumber <= Gamepads.BUTTONS.DOWN_OR_ANALOG_DOWN) ? 1 : 0;
+                    var axis = (l.buttonNumber <= Gamepad.BUTTONS.DOWN_OR_ANALOG_DOWN) ? 1 : 0;
                     var axisValue = pad.axes[axis];
                     // positive values are down/right, negative up/left
-                    if (l.buttonNumber % 2 === Gamepads.BUTTONS.UP_OR_ANALOG_UP % 2) {
+                    if (l.buttonNumber % 2 === Gamepad.BUTTONS.UP_OR_ANALOG_UP % 2) {
                         axisValue = -axisValue;
                     }
                     this._markDownAndCallback(l, p, Math.max(value, axisValue));
@@ -88,11 +88,11 @@ Gamepads.prototype.update = function() {
     }
 };
 
-Gamepads.prototype.addButtonChangeListener = function(buttonNumber, callbackDown, callbackUp) {
+Gamepad.prototype.addButtonChangeListener = function(buttonNumber, callbackDown, callbackUp) {
     this.downListeners.push({buttonNumber: buttonNumber, callback: callbackDown, callbackUp: callbackUp, isDown: [false, false, false, false]});
 };
 
-Gamepads.BUTTONS = {
+Gamepad.BUTTONS = {
   A: 0, // Face (main) buttons
   B: 1,
   X: 2,
@@ -115,7 +115,7 @@ Gamepads.BUTTONS = {
   RIGHT_OR_ANALOG_RIGHT: 115
 };
 
-Gamepads.BUTTON_INSTRUCTION = [
+Gamepad.BUTTON_INSTRUCTION = [
     'A',
     'B',
     'X',
