@@ -92,6 +92,9 @@ Gamepad.prototype.addButtonChangeListener = function(buttonNumber, callbackDown,
     this.downListeners.push({buttonNumber: buttonNumber, callback: callbackDown, callbackUp: callbackUp, isDown: [false, false, false, false]});
 };
 
+/**
+ * Face button names according to the common XBox 360 gamepad.
+ */
 Gamepad.BUTTONS = {
   A: 0, // Face (main) buttons
   B: 1,
@@ -115,6 +118,9 @@ Gamepad.BUTTONS = {
   RIGHT_OR_ANALOG_RIGHT: 115
 };
 
+/**
+ * Face button names according to the common XBox 360 gamepad.
+ */
 Gamepad.BUTTON_INSTRUCTION = [
     'A',
     'B',
