@@ -1,3 +1,5 @@
+'use strict';
+
 var Gamepads = function(callbackObj) {
     this.downListeners = [];
     this.indexToPlayer = {};
@@ -17,7 +19,7 @@ Gamepads.prototype.gamepadForPlayer = function(gamepads, playerNumber) {
 /**
  * @protected
  */
-Gamepads.prototype.markDownAndCallback = function(l, p, value) {
+Gamepads.prototype._markDownAndCallback = function(l, p, value) {
     if (value > 0.5) {
         if (!l.isDown[p]) {
             l.isDown[p] = true;
@@ -77,9 +79,9 @@ Gamepads.prototype.update = function() {
                     if (l.buttonNumber % 2 === Gamepads.BUTTONS.UP_OR_ANALOG_UP % 2) {
                         axisValue = -axisValue;
                     }
-                    this.markDownAndCallback(l, p, Math.max(value, axisValue));
+                    this._markDownAndCallback(l, p, Math.max(value, axisValue));
                 } else {
-                    this.markDownAndCallback(l, p, value);
+                    this._markDownAndCallback(l, p, value);
                 }
             }
         }

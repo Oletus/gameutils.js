@@ -1,6 +1,8 @@
+'use strict';
+
 /**
  * A class to help keeping canvas size suitable for the window or parent
- * element resolution.
+ * element size and screen resolution.
  * @param {Object} options Object with the following optional keys:
  *  canvas: HTMLCanvasElement (one is created by default)
  *  mode: CanvasResizer.Mode (defaults to filling the window)
@@ -9,6 +11,8 @@
  *  parentElement: HTMLElement (defaults to the document body)
  *  wrapperElement: HTMLElement Optional wrapper element that tightly wraps
  *      the canvas. Useful for implementing HTML-based UI on top of the canvas.
+ *      The wrapper element should already be the parent of the canvas when it
+ *      is passed in.
  */
 var CanvasResizer = function(options) {
     var defaults = {
@@ -103,7 +107,7 @@ CanvasResizer.prototype.update = function() {
 };
 
 /**
- * Call this function in the beginning of rendering to the canvas to update
+ * Call this function in the beginning of rendering a frame to update
  * the canvas size. Compatible with mainloop.js.
  */
 CanvasResizer.prototype.render = function() {
@@ -152,9 +156,8 @@ CanvasResizer.prototype.render = function() {
 };
 
 /**
- * Get a canvas coordinate space position from a given event.
- * The coordinate space is relative to the width and height properties on
- * this object.
+ * Get a canvas coordinate space position from a given event. The coordinate
+ * space is relative to the width and height properties of the canvas.
  * @param {MouseEvent|PointerEvent|TouchEvent} Event to get the position from.
  * In case of a touch event, the position is retrieved from the first touch
  * point.
@@ -253,6 +256,7 @@ CanvasResizer.prototype._getParentProperties = function() {
 };
 
 /**
+ * Resize the canvas in one of the fixed resolution modes.
  * @protected
  */
 CanvasResizer.prototype._resizeFixedResolution = function() {

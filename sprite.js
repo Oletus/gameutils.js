@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * A sprite that can be drawn on a 2D canvas.
  * @constructor

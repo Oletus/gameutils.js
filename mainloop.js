@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * Start a main loop on the provided game with the provided options.
  * @param {Array.<Object>} updateables Objects with two functions: update() and render().

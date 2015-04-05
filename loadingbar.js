@@ -52,7 +52,8 @@ LoadingBar.prototype.finished = function() {
     return this.allLoaded;
 };
 
-/** 
+/**
+ * Draw the loading bar.
  * @param {CanvasRenderingContext2D} ctx Context to draw the loading bar to.
  */
 LoadingBar.prototype.render = function(ctx) {

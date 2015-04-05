@@ -172,7 +172,7 @@ InputMapper.prototype.addListener = function(gamepadButton, keyboardButtons, dow
  * @param {Object} cbInfo Information on the callback, with keys controllerType and kbIndex in case of a keyboard.
  * @return {boolean} True if the given callback uses the given type of a controller.
  */
-InputMapper.usesController = function(controller, cbInfo) {
+InputMapper._usesController = function(controller, cbInfo) {
     if (cbInfo.controllerType === controller.controllerType) {
         if (cbInfo.controllerType === InputMapper.KEYBOARD && controller.controllerIndex !== cbInfo.kbIndex) {
             // Each keyboard "controller" has different key bindings.
@@ -188,7 +188,7 @@ InputMapper.usesController = function(controller, cbInfo) {
  * @param {Array.<InputMapper.Controller>} player Array of controllers to check.
  * @return {InputMapper.Controller} The most recently used controller.
  */
-InputMapper.prototype.getLastUsedController = function(player) {
+InputMapper.prototype._getLastUsedController = function(player) {
     var controller;
     var lastUsed = 0;
     for (var j = 0; j < player.length; ++j) {
@@ -211,7 +211,7 @@ InputMapper.prototype.getKeyInstruction = function(callback, playerIndex) {
     var controller;
     if (playerIndex !== undefined) {
         if (this.players[playerIndex].length > 0) {
-            controller = this.getLastUsedController(this.players[playerIndex]);
+            controller = this._getLastUsedController(this.players[playerIndex]);
         } else {
             // Gamepad instructions by default
             controller = new InputMapper.Controller(InputMapper.GAMEPAD, 0);
@@ -226,7 +226,7 @@ InputMapper.prototype.getKeyInstruction = function(callback, playerIndex) {
                 // Determine all keys mapped to that callback from different controllers.
                 for (var j = 0; j < this.players.length; ++j) {
                     for (var k = 0; k < this.players[j].length; ++k) {
-                        if (InputMapper.usesController(this.players[j][k], cbInfo)) {
+                        if (InputMapper._usesController(this.players[j][k], cbInfo)) {
                             var hasInstruction = false;
                             var instruction = cbInfo.key.toUpperCase();
                             for (var l = 0; l < returnStr.length; ++l) {
@@ -241,7 +241,7 @@ InputMapper.prototype.getKeyInstruction = function(callback, playerIndex) {
                     }
                 }
             } else {
-                if (InputMapper.usesController(controller, cbInfo)) {
+                if (InputMapper._usesController(controller, cbInfo)) {
                     return cbInfo.key.toUpperCase();
                 }
             }
