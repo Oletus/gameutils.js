@@ -1,0 +1,22 @@
+body.mainpage {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: sans-serif;
+}
+
+h1 {
+    margin: 0;
+    padding: 20px;
+    padding-top: 100px;
+    background: #ebf1f6; /* Old browsers */
+    background: linear-gradient(to bottom, #ebf1f6 0%,#edd3aa 25%,#e8a788 60%,#e8a788 100%); /* W3C */
+}
+
+#content {
+    padding: 20px;
+    background: #fff;
+    width: 600px;
+}
