@@ -99,8 +99,8 @@ InputMapper.prototype.getPlayerIndex = function(controllerType, controllerIndex)
 /**
  * @param {number} gamepadButton A button from Gamepad.BUTTONS
  * @param {Array} keyboardBindings List of bindings for different players, for example ['up', 'w']
- * @param {function} downCallback Callback when the button is pressed down, that takes a player number as a parameter.
- * @param {function} upCallback Callback when the button is released, that takes a player number as a parameter.
+ * @param {function=} downCallback Callback when the button is pressed down, that takes a player number as a parameter.
+ * @param {function=} upCallback Callback when the button is released, that takes a player number as a parameter.
  */
 InputMapper.prototype.addListener = function(gamepadButton, keyboardButtons, downCallback, upCallback) {
     var gamepadDownCallback = function(gamepadNumber) {
