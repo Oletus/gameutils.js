@@ -152,6 +152,7 @@ CanvasResizer.prototype.render = function() {
             this.canvas.style.marginTop = '0';
             this.canvas.style.marginLeft = '0';
         }
+        this.resizeOnNextRender = false;
     }
 };
 
@@ -216,11 +217,7 @@ CanvasResizer.prototype.changeCanvasDimensions = function(width, height) {
  */
 CanvasResizer.prototype.changeMode = function(mode) {
     this.mode = mode;
-    if (this.mode === CanvasResizer.Mode.FIXED_RESOLUTION) {
-        this.canvas.style.imageRendering = 'pixelated';
-    } else {
-        this.canvas.style.imageRendering = 'auto';
-    }
+    this.canvas.style.imageRendering = 'auto';
     this.resize();
 };
 
@@ -290,6 +287,11 @@ CanvasResizer.prototype._resizeFixedResolution = function() {
             }
             styleWidth = (this.width * i) / window.devicePixelRatio;
             styleHeight = (this.height * i) / window.devicePixelRatio;
+        }
+        if (styleWidth * window.devicePixelRatio > 0.9999) {
+            this.canvas.style.imageRendering = 'pixelated';
+        } else {
+            this.canvas.style.imageRendering = 'auto';
         }
     } else if (this.mode === CanvasResizer.Mode.FIXED_RESOLUTION_INTERPOLATED) {
         if (parentWidthToHeight > this.canvasWidthToHeight) {
