@@ -41,10 +41,18 @@ var startMainLoop = function(updateables, options) {
     if (!(updateables instanceof Array)) {
         updateables = [updateables];
     }
-    
+
+    var now = function() {
+        if ('performance' in window && 'now' in performance) {
+            return performance.now();
+        } else {
+            return Date.now();
+        }
+    };
+
     var timePerUpdate = 1000 / options.updateFPS;
 
-    var nextFrameTime = new Date().getTime() - timePerUpdate * 0.5;
+    var nextFrameTime = now() - timePerUpdate * 0.5;
 
     var frameLog = [];
 
@@ -89,7 +97,7 @@ var startMainLoop = function(updateables, options) {
 
     var frame = function() {
         // Process a single requestAnimationFrame callback
-        var time = new Date().getTime();
+        var time = now();
         var callbackTime = time;
         var updated = false;
         var updates = 0;
