@@ -280,6 +280,7 @@ CanvasResizer.prototype._resizeFixedResolution = function() {
                 styleWidth = parentWidth;
                 styleHeight = Math.floor(styleWidth / this.canvasWidthToHeight);
             }
+            this.canvas.style.imageRendering = 'auto';
         } else {
             var i = 1;
             while ((i + 1) * this.width <= maxWidth && (i + 1) * this.height <= maxHeight) {
@@ -287,11 +288,7 @@ CanvasResizer.prototype._resizeFixedResolution = function() {
             }
             styleWidth = (this.width * i) / window.devicePixelRatio;
             styleHeight = (this.height * i) / window.devicePixelRatio;
-        }
-        if (styleWidth * window.devicePixelRatio > 0.9999) {
             this.canvas.style.imageRendering = 'pixelated';
-        } else {
-            this.canvas.style.imageRendering = 'auto';
         }
     } else if (this.mode === CanvasResizer.Mode.FIXED_RESOLUTION_INTERPOLATED) {
         if (parentWidthToHeight > this.canvasWidthToHeight) {
