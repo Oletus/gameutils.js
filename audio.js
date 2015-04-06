@@ -132,7 +132,7 @@ Audio.prototype.stop = function () {
  */
 Audio.prototype.ensureOneClone = function() {
     for (var i = 0; i < this.clones.length; ++i) {
-        if (this.clones[i].ended) {
+        if (this.clones[i].ended || (this.clones[i].readyState == 4 && this.clones[i].paused)) {
             this.clones[i].currentTime = 0;
             return this.clones[i];
         }
