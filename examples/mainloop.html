@@ -4,6 +4,9 @@
 <link rel="stylesheet" type="text/css" href="assets/default.css">
 <script src="../mainloop.js"></script>
 <script src="../loadingbar.js"></script>
+<!-- Including mousetrap is optional and is only used for debug mode key bindings in mainloop.js -->
+<script src="../lib/mousetrap.js"></script>
+<script src="../lib/mousetrap-global-bind.js"></script>
 <script>
 'use strict';
 
@@ -71,6 +74,7 @@ var start = function() {
 <li>Orange lines are updates which were not rendered to the screen.</li>
 <li>White lines are frames on which the game state was not updated.</li>
 </ul>
+<p>Press f to fast-forward time in the debug mode.</p>
 <p>Compatibility: Chrome 41, Firefox 36, IE 11.</p>
 </body>
 </html>

@@ -18,11 +18,13 @@
  *  Every update is not necessarily displayed on the screen.
  *
  * debugMode: boolean
- *  When debugMode is on, a timeline of frames is drawn on the canvas returned
+ *  When debug mode is on, a timeline of frames is drawn on the canvas returned
  *  from updateables[i].render().
  *  - Green in the log is an update which was rendered to the screen.
  *  - Orange in the log is an update which was not rendered to the screen.
  *  - White in the log is a frame on which the game state was not updated.
+ *  If Mousetrap is imported, you may also hold T to speed up the game
+ *  execution while in debug mode.
  *
  * onRefocus: function
  *  Function that should be called when the window becomes visible after it
@@ -111,6 +113,18 @@ var startMainLoop = function(updateables, options) {
     
     document.addEventListener('visibilitychange', visibilityChange);
 
+    var fastForward = false;
+    if (options.debugMode && 'Mousetrap' in window && 'bindGlobal' in Mousetrap) {
+        var speedUp = function() {
+            fastForward = true;
+        };
+        var slowDown = function() {
+            fastForward = false;
+        };
+        Mousetrap.bindGlobal('f', speedUp, 'keydown');
+        Mousetrap.bindGlobal('f', slowDown, 'keyup');
+    }
+
     var frame = function() {
         // Process a single requestAnimationFrame callback
         if (!visible) {
@@ -132,7 +146,11 @@ var startMainLoop = function(updateables, options) {
             nextFrameTime = time - 500;
         }
         while (time > nextFrameTime) {
-            nextFrameTime += timePerUpdate;
+            if (fastForward) {
+                nextFrameTime += timePerUpdate / 5;
+            } else {
+                nextFrameTime += timePerUpdate;
+            }
             for (var i = 0; i < updateables.length; ++i) {
                 updateables[i].update(timePerUpdate * 0.001);
             }
