@@ -102,7 +102,7 @@ var startMainLoop = function(updateables, options) {
     
     var visible = true;
     var visibilityChange = function() {
-        visible = document.visibilityState == document.PAGE_VISIBLE;
+        visible = document.visibilityState == document.PAGE_VISIBLE || (document.hidden === false);
         nextFrameTime = -1;
         if (visible && options.onRefocus != null) {
             options.onRefocus();
@@ -113,6 +113,10 @@ var startMainLoop = function(updateables, options) {
 
     var frame = function() {
         // Process a single requestAnimationFrame callback
+        if (!visible) {
+            requestAnimationFrame(frame);
+            return;
+        }
         var time = now();
         var callbackTime = time;
         var updated = false;
