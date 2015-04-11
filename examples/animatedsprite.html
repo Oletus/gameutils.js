@@ -1,0 +1,76 @@
+<html>
+<head>
+<title>Gameutils.js: Using the AnimatedSprite class</title>
+<link rel="stylesheet" type="text/css" href="assets/default.css">
+<script src="../sprite.js"></script>
+<script src="../animatedsprite.js"></script>
+<script>
+'use strict';
+
+var ctx;
+var tester;
+
+Sprite.gfxPath = 'assets/gfx/';
+AnimatedSprite.frameConstructor = Sprite;
+
+var Tester = function() {
+    this.time = 0;
+    this.carrotSprite = new AnimatedSprite({
+        'idle': [{src: 'carrot.png', duration: 1000}],
+        'animated': [{src: 'carrot.png', duration: 5 / 60 * 1000},
+                     {src: 'carrotflex1.png', duration: 5 / 60 * 1000},
+                     {src: 'carrot.png', duration: 5 / 60 * 1000},
+                     {src: 'carrotflex2.png', duration: 5 / 60 * 1000},]
+    });
+    this.carrotInstance = new AnimatedSpriteInstance(this.carrotSprite);
+    this.animated = false;
+    this.toggleAnimation();
+};
+
+Tester.prototype.update = function() {
+    var deltaTime = 1 / 60; // Assume 60 fps... bad example :P
+    this.time += deltaTime;
+    
+    this.carrotInstance.update(deltaTime);
+    
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    
+    var width = ctx.canvas.width;
+    var height = ctx.canvas.height;
+    // No need to wait for async loading... just start drawing!
+    // The sprite instance inherits its draw functions from the sprite class.
+    this.carrotInstance.draw(ctx, 50, 120 + Math.sin(this.time * 3) * 10);
+    this.carrotInstance.drawRotated(ctx, width * 0.6, height * 0.5, this.time);
+};
+
+Tester.prototype.toggleAnimation = function() {
+    this.animated = !this.animated;
+    if (this.animated) {
+        this.carrotInstance.setAnimation('animated');
+    } else {
+        this.carrotInstance.setAnimation('idle');
+    }
+};
+
+var frame = function() {
+    tester.update();
+    requestAnimationFrame(frame);
+};
+
+var start = function() {
+    tester = new Tester();
+    var canvas = document.createElement('canvas');
+    canvas.width = 400;
+    canvas.height = 300;
+    ctx = canvas.getContext('2d');
+    document.body.appendChild(canvas);
+    frame();
+};
+</script>
+</head>
+<body onload="start()">
+<h2>Using the AnimatedSprite/AnimatedSpriteInstance classes</h2>
+<p>Compatibility: Chrome 41, Firefox 36, IE 11.</p>
+<input type="button" value="Toggle animation" onclick="tester.toggleAnimation()"></input>
+</body>
+</html>
