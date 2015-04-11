@@ -16,11 +16,15 @@ AnimatedSprite.frameConstructor = Sprite;
 var Tester = function() {
     this.time = 0;
     this.carrotSprite = new AnimatedSprite({
-        'idle': [{src: 'carrot.png', duration: 1000}],
-        'animated': [{src: 'carrot.png', duration: 5 / 60 * 1000},
-                     {src: 'carrotflex1.png', duration: 5 / 60 * 1000},
-                     {src: 'carrot.png', duration: 5 / 60 * 1000},
-                     {src: 'carrotflex2.png', duration: 5 / 60 * 1000},]
+        'idle': [{src: 'carrot.png', duration: 0}],
+        'animated': [{src: 'carrot.png'},
+                     {src: 'carrotflex1.png'},
+                     {src: 'carrot.png'},
+                     {src: 'carrotflex2.png'},]
+    },
+    {
+        durationMultiplier: 1000 / 60,
+        defaultDuration: 5
     });
     this.carrotInstance = new AnimatedSpriteInstance(this.carrotSprite);
     this.animated = false;
@@ -71,6 +75,6 @@ var start = function() {
 <body onload="start()">
 <h2>Using the AnimatedSprite/AnimatedSpriteInstance classes</h2>
 <p>Compatibility: Chrome 41, Firefox 36, IE 11.</p>
-<input type="button" value="Toggle animation" onclick="tester.toggleAnimation()"></input>
+<p><input type="button" value="Toggle animation" onclick="tester.toggleAnimation()"></input></p>
 </body>
 </html>

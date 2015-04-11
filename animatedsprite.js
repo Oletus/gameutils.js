@@ -5,17 +5,31 @@
  * @param {Object} animationData Data for animation frames. Keys are animation ids. 
  * Values are arrays containing objects specifying frames.
  * Each frame has two mandatory keys: 'src' for frame source and 'duration' for a duration in milliseconds.
+ * Duration can be set to 0 to have the frame run into infinity.
  * Example:
  * {
- *  idle: [{src: 'idle.png', duration: 50}],
+ *  idle: [{src: 'idle.png', duration: 0}],
  *  walk: [{src: 'walk1.png', duration: 50}, {src: 'walk2.png', duration: 50}]
  * }
- * @param {function=} frameConstructor Constructor for single frames that takes the
- * frame source as a parameter. Defaults to AnimatedSprite.frameConstructor.
+ * @param {Object} options Object with the following optional keys:
+ *  frameConstructor: function Constructor for single frames that takes the
+ *      frame source as a parameter. Defaults to AnimatedSprite.frameConstructor.
+ *  durationMultiplier: number Multiplier for specified frame durations. Useful if you
+ *      want to have frame times relative to fixed FPS, for example. Defaults to 1.
+ *  defaultDuration: number Default duration for a single frame. Defaults to 1.
  */
-var AnimatedSprite = function(animationData, frameConstructor) {
-    if (frameConstructor === undefined) {
-        frameConstructor = AnimatedSprite.frameConstructor;
+var AnimatedSprite = function(animationData, options) {
+    var defaults = {
+        frameConstructor: AnimatedSprite.frameConstructor,
+        durationMultiplier: 1,
+        defaultDuration: 1
+    };
+    for(var key in defaults) {
+        if (!options.hasOwnProperty(key)) {
+            this[key] = defaults[key];
+        } else {
+            this[key] = options[key];
+        }
     }
     // Construct animations by generating animation frames based on the sources.
     this.animations = {};
@@ -25,8 +39,14 @@ var AnimatedSprite = function(animationData, frameConstructor) {
             var animation = [];
             var singleAnimationData = animationData[key];
             for (var i = 0; i < singleAnimationData.length; ++i) {
-                var frame = AnimatedSprite._getFrame(singleAnimationData[i].src, frameConstructor);
-                animation.push({frame: frame, duration: singleAnimationData[i].duration});
+                var frame = AnimatedSprite._getFrame(singleAnimationData[i].src, this.frameConstructor);
+                var duration = this.defaultDuration;
+                if (singleAnimationData[i].duration !== undefined)
+                {
+                    duration = singleAnimationData[i].duration
+                }
+                duration *= this.durationMultiplier;
+                animation.push({frame: frame, duration: duration});
             }
             this.animations[key] = animation;
             if (this.defaultAnimation === undefined) {
@@ -104,15 +124,17 @@ AnimatedSpriteInstance.prototype.setAnimation = function(animationKey) {
 };
 
 AnimatedSpriteInstance.prototype.update = function(deltaTime) {
-    this.framePos += deltaTime * 1000;
     var currentAnimation = this.animatedSprite.animations[this.animationKey];
-    while (this.framePos > currentAnimation[this.frame].duration) {
-        this.framePos -= currentAnimation[this.frame].duration;
-        ++this.frame;
-        if (this.frame >= currentAnimation.length) {
-            this.frame = 0;
-            if (this.finishedAnimationCallback !== undefined) {
-                this.finishedAnimationCallback(this.animationKey);
+    if (currentAnimation[this.frame].duration > 0) {
+        this.framePos += deltaTime * 1000;
+        while (this.framePos > currentAnimation[this.frame].duration) {
+            this.framePos -= currentAnimation[this.frame].duration;
+            ++this.frame;
+            if (this.frame >= currentAnimation.length) {
+                this.frame = 0;
+                if (this.finishedAnimationCallback !== undefined) {
+                    this.finishedAnimationCallback(this.animationKey);
+                }
             }
         }
     }
