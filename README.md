@@ -3,12 +3,13 @@ gameutils.js
 
 ## A Head Start on JavaScript Game Development
 
-Gameutils.js is a collection of simple, modular helpers aimed at handling the tedious tasks of JavaScript game
-development, enabling you to focus on the game content.
+Gameutils.js is a collection of helpers aimed at handling the tedious tasks of JavaScript game development.
+It is not a framework, but rather a library of simple utilities that can be used independently of each other.
 
-It is for people who like to mostly work with code rather than GUI-based tools, but aims to make this as simple as possible.
+It is for people who like to work with code close to the platform level, but aims to make this as simple as possible.
 
-It is especially well suited for game jams and similar events.
+It is especially well suited for game jams and similar events, with a focus on flexibility that enables the exploration
+of new ideas.
 
 It targets browsers that support modern APIs, and has been tested on Chrome, Firefox and Internet Explorer 11.
 
