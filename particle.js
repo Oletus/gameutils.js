@@ -15,8 +15,8 @@ var ParticleEngine = function(options) {
     this.particles = [];
 };
 
-ParticleEngine.prototype.addParticle = function(options) {
-    this.particles.push(new Particle(options));
+ParticleEngine.prototype.addParticle = function(particle) {
+    this.particles.push(particle);
 };
 
 ParticleEngine.prototype.update = function(deltaTime) {
@@ -41,6 +41,60 @@ ParticleEngine.prototype.draw = function(ctx) {
     if (ctx instanceof CanvasRenderingContext2D) {
         ctx.restore();
     }
+};
+
+/**
+ * A class that can generate particles based on a distribution of angles/velocities.
+ * @param {Object} options Options to use on this ParticleEmitter.
+ */
+var ParticleEmitter = function(options) {
+    var defaults = {
+        x: 0,
+        y: 0,
+        direction: 0, // degrees from positive x axis
+        directionSpread: 360, // degrees
+        minVelocity: 0,
+        maxVelocity: 0,
+        minLifetime: 1, // seconds
+        maxLifetime: 3, // seconds
+        sizeFunc: Particle.fadeOutLinear,
+        opacityFunc: Particle.fastAppearSlowDisappear,
+        appearance: Particle.Appearance.CIRCLE,
+        color: '#f0f'
+    };
+    this.options = {};
+    for(var key in defaults) {
+        if (options.hasOwnProperty(key)) {
+            this.options[key] = options[key];
+        } else {
+            this.options[key] = defaults[key];
+        }
+    }
+};
+
+/**
+ * Spawn a single particle using this emitter.
+ * @param {Object} options Options to override ones set on this ParticleEmitter.
+ * @return {Particle} The created particle.
+ */
+ParticleEmitter.prototype.emitParticle = function(options) {
+    var spawnOptions = {};
+    for(var key in this.options) {
+        if (options.hasOwnProperty(key)) {
+            spawnOptions[key] = options[key];
+        } else {
+            spawnOptions[key] = this.options[key];
+        }
+    }
+    var direction = (spawnOptions.direction + (Math.random() - 0.5) * spawnOptions.directionSpread) * (Math.PI / 180);
+    var absoluteVelocity = spawnOptions.minVelocity +
+        Math.random() * (spawnOptions.maxVelocity - spawnOptions.minVelocity);
+    spawnOptions.velX = Math.cos(direction) * absoluteVelocity;
+    spawnOptions.velY = Math.sin(direction) * absoluteVelocity;
+    spawnOptions.seed = Math.floor(Math.random() * 65536);
+    spawnOptions.lifetime = spawnOptions.minLifetime +
+        Math.random() * (spawnOptions.maxLifetime - spawnOptions.minLifetime);
+    return new Particle(spawnOptions);
 };
 
 /**

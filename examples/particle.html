@@ -11,7 +11,8 @@ var tester;
 
 var Tester = function() {
     this.time = 0;
-    this.particles = new ParticleEngine({});
+    this.particles = new ParticleEngine({gravityY: 100});
+    this.emitter = new ParticleEmitter({minVelocity: 10, maxVelocity: 80, color: '#7fa'});
 };
 
 Tester.prototype.update = function() {
@@ -20,16 +21,14 @@ Tester.prototype.update = function() {
     
     this.particles.update(deltaTime);
     
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     
     var width = ctx.canvas.width;
     var height = ctx.canvas.height;
-    var angle = Math.random() * Math.PI * 2;
-    var velX = Math.cos(angle) * 20;
-    var velY = Math.sin(angle) * 20;
     var posX = Math.sin(this.time * 2.9) * width * 0.4;
     var posY = Math.cos(this.time * 1.9) * height * 0.4;
-    this.particles.addParticle({x: width * 0.5 + posX, y: height * 0.5 + posY, velX: velX, velY: velY});
+    this.particles.addParticle(this.emitter.emitParticle({x: width * 0.5 + posX, y: height * 0.5 + posY}));
     
     this.particles.draw(ctx);
 };
@@ -42,8 +41,8 @@ var frame = function() {
 var start = function() {
     tester = new Tester();
     var canvas = document.createElement('canvas');
-    canvas.width = 400;
-    canvas.height = 300;
+    canvas.width = 600;
+    canvas.height = 600;
     ctx = canvas.getContext('2d');
     document.body.appendChild(canvas);
     frame();
