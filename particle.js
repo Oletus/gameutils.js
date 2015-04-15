@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * A particle engine to run particle effects.
+ * @param {Object} options Options for the particle engine.
+ */
 var ParticleEngine = function(options) {
     var defaults = {
         gravityX: 0,
@@ -15,10 +19,18 @@ var ParticleEngine = function(options) {
     this.particles = [];
 };
 
+/**
+ * Add a particle to update and draw with this engine.
+ * @param {Particle} particle Particle to add.
+ */
 ParticleEngine.prototype.addParticle = function(particle) {
     this.particles.push(particle);
 };
 
+/**
+ * Update the particle effects.
+ * @param {number} deltaTime Time since the last update in seconds.
+ */
 ParticleEngine.prototype.update = function(deltaTime) {
     var i = 0;
     while (i < this.particles.length) {
@@ -31,6 +43,11 @@ ParticleEngine.prototype.update = function(deltaTime) {
     }
 };
 
+/**
+ * Draw the particle effects.
+ * @param {CanvasRenderingContext2D|Object} ctx A context to draw the particles to. In case you have a custom
+ * appearance function, 
+ */
 ParticleEngine.prototype.draw = function(ctx) {
     if (ctx instanceof CanvasRenderingContext2D) {
         ctx.save();
@@ -45,6 +62,8 @@ ParticleEngine.prototype.draw = function(ctx) {
 
 /**
  * A class that can generate particles based on a distribution of angles/velocities.
+ * The class only has parameters for generating particles - you need to call emitParticle
+ * when you actually want to create a particle based on the parameters.
  * @param {Object} options Options to use on this ParticleEmitter.
  */
 var ParticleEmitter = function(options) {

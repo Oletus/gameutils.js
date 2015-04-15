@@ -18,18 +18,22 @@ var Tester = function() {
 Tester.prototype.update = function() {
     var deltaTime = 1 / 60; // Assume 60 fps... bad example :P
     this.time += deltaTime;
-    
+
+    // Update:
+
     this.particles.update(deltaTime);
-    
-    ctx.fillStyle = 'black';
-    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    
     var width = ctx.canvas.width;
     var height = ctx.canvas.height;
-    var posX = Math.sin(this.time * 2.9) * width * 0.4;
-    var posY = Math.cos(this.time * 1.9) * height * 0.4;
-    this.particles.addParticle(this.emitter.emitParticle({x: width * 0.5 + posX, y: height * 0.5 + posY}));
-    
+    var posX = width * 0.5 + Math.sin(this.time * 2.9) * width * 0.4;
+    var posY = height * 0.5 + Math.cos(this.time * 1.9) * height * 0.4;
+    for (var i = 0; i < 5; ++i) {
+        this.particles.addParticle(this.emitter.emitParticle({x: posX, y: posY}));
+    }
+
+    // Draw:
+
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     this.particles.draw(ctx);
 };
 
