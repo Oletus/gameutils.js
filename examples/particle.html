@@ -12,7 +12,7 @@ var tester;
 var Tester = function() {
     this.time = 0;
     this.particles = new ParticleEngine({gravityY: 100});
-    this.emitter = new ParticleEmitter({minVelocity: 10, maxVelocity: 80, color: '#7fa'});
+    this.emitter = new ParticleEmitter({minVelocity: 10, maxVelocity: 80, color: '#7fa', positionSpread: 10});
 };
 
 Tester.prototype.update = function() {

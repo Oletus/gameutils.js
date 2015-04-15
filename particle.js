@@ -51,6 +51,7 @@ var ParticleEmitter = function(options) {
     var defaults = {
         x: 0,
         y: 0,
+        positionSpread: 0, // maximum spread radially from the center
         direction: 0, // degrees from positive x axis
         directionSpread: 360, // degrees
         minVelocity: 0,
@@ -94,6 +95,12 @@ ParticleEmitter.prototype.emitParticle = function(options) {
     spawnOptions.seed = Math.floor(Math.random() * 65536);
     spawnOptions.lifetime = spawnOptions.minLifetime +
         Math.random() * (spawnOptions.maxLifetime - spawnOptions.minLifetime);
+    if (spawnOptions.positionSpread > 0) {
+        var spreadDistance = Math.random() * spawnOptions.positionSpread;
+        var spreadAngle = Math.random() * (Math.PI * 2.0);
+        spawnOptions.x += Math.cos(spreadAngle) * spreadDistance;
+        spawnOptions.y += Math.sin(spreadAngle) * spreadDistance;
+    }
     return new Particle(spawnOptions);
 };
 
