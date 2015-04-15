@@ -77,6 +77,7 @@ var ParticleEmitter = function(options) {
         maxVelocity: 0,
         minLifetime: 1, // seconds
         maxLifetime: 3, // seconds
+        size: 5,
         sizeFunc: Particle.fadeOutLinear,
         opacityFunc: Particle.fastAppearSlowDisappear,
         appearance: Particle.Appearance.CIRCLE,
@@ -155,6 +156,33 @@ var Particle = function(options) {
 
 Particle.Appearance = {
     CIRCLE: 0
+};
+
+/**
+ * To use with the Sprite class from gameutils.js
+ */
+Particle.spriteAppearance = function(sprite, sizeMultiplier) {
+    return function(ctx, x, y, size, opacity) {
+        ctx.globalAlpha = opacity;
+        sprite.drawRotated(ctx, x, y, 0, size * sizeMultiplier);
+    };
+};
+
+/**
+ * Prerendered circle using the Sprite class from gameutils.js.
+ * May be faster than drawing a circle as a path.
+ */
+Particle.prerenderedCircleAppearance = function(color, resolution) {
+    var helperCanvas = document.createElement('canvas');
+    helperCanvas.width = resolution;
+    helperCanvas.height = resolution;
+    var helperCtx = helperCanvas.getContext('2d');
+    helperCtx.fillStyle = color;
+    helperCtx.beginPath();
+    helperCtx.arc(resolution * 0.5, resolution * 0.5, resolution * 0.5, 0, Math.PI * 2);
+    helperCtx.fill();
+    var sprite = new Sprite(helperCanvas);
+    return Particle.spriteAppearance(sprite, 1.0 / resolution);
 };
 
 Particle.fastAppearSlowDisappear = function(t, seed) {

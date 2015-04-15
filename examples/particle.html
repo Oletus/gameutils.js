@@ -2,6 +2,7 @@
 <head>
 <title>Gameutils.js: Using the ParticleEngine</title>
 <link rel="stylesheet" type="text/css" href="assets/default.css">
+<script src="../sprite.js"></script><!-- required for Particle.prerenderedCircleAppearance -->
 <script src="../particle.js"></script>
 <script>
 'use strict';
@@ -12,7 +13,12 @@ var tester;
 var Tester = function() {
     this.time = 0;
     this.particles = new ParticleEngine({gravityY: 100});
-    this.emitter = new ParticleEmitter({minVelocity: 10, maxVelocity: 80, color: '#7fa', positionSpread: 10});
+    this.emitter = new ParticleEmitter({
+        minVelocity: 10,
+        maxVelocity: 80,
+        positionSpread: 10,
+        appearance: Particle.prerenderedCircleAppearance('#4fd', 8)
+    });
 };
 
 Tester.prototype.update = function() {
