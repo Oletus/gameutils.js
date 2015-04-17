@@ -16,6 +16,7 @@ var Audio = function(filename, fileExtensions) {
     this.loaded = false; // Used purely for purposes of marking the audio loaded.
     this.audio = document.createElement('audio');
     this.filenames = [];
+    this.playWhenReady = null; // Event listener to start playing when audio is ready.
     var canDetermineLoaded = false;
     for (var i = 0; i < fileExtensions.length; ++i) {
         this.filenames.push(filename + '.' + fileExtensions[i]);
@@ -29,13 +30,13 @@ var Audio = function(filename, fileExtensions) {
     if (canDetermineLoaded) {
         var that = this;
         var markLoaded = function() {
-            that.markLoaded();
+            that._markLoaded();
         }
-        this.audio.oncanplay = markLoaded;
+        this.audio.addEventListener('canplay', markLoaded);
         // Can never be sure that the audio will load. Fake loaded after 10 seconds to unblock loading bar.
         setTimeout(markLoaded, 10000);
     } else {
-        this.markLoaded();
+        this._markLoaded();
     }
     this.addSourcesTo(this.audio);
     this.clones = [];
@@ -106,14 +107,19 @@ Audio.prototype.playSingular = function (loop) {
         this.audio.loop = loop;
     }
     if (this.audio.readyState === 4) {
+        if (this.playWhenReady !== null) {
+            this.audio.removeEventListener('canplay', this.playWhenReady);
+            this.playWhenReady = null;
+        }
         this.audio.play();
-        this.markLoaded();
-    } else {
-        var audio = this.audio;
-        this.audio.oncanplay = function() {
-            audio.play();
-            audio.markLoaded();
-        };
+        this._markLoaded();
+    } else if (this.playWhenReady === null) {
+        var that = this;
+        this.playWhenReady = function() {
+            that.audio.play();
+            that._markLoaded();
+        }
+        this.audio.addEventListener('canplay', this.playWhenReady);
     }
 };
 
@@ -121,12 +127,9 @@ Audio.prototype.playSingular = function (loop) {
  * Stop playing this sample.
  */
 Audio.prototype.stop = function () {
-    this.audio.oncanplay = null;
-    if (!this.loaded) {
-        var that = this;
-        this.audio.oncanplay = function() {
-            that.markLoaded();
-        }
+    if (this.playWhenReady !== null) {
+        this.audio.removeEventListener('canplay', this.playWhenReady);
+        this.playWhenReady = null;
     }
     this.audio.pause();
     this.audio.currentTime = 0;
@@ -154,11 +157,10 @@ Audio.prototype.ensureOneClone = function() {
  * Mark this audio sample loaded.
  * @protected
  */
-Audio.prototype.markLoaded = function() {
+Audio.prototype._markLoaded = function() {
     if (this.loaded) {
         return;
     }
     this.loaded = true;
     Audio.loadedCount++;
-    this.audio.oncanplay = null;
 };
