@@ -106,7 +106,7 @@ Audio.prototype.playSingular = function (loop) {
     } else {
         this.audio.loop = loop;
     }
-    if (this.audio.readyState === 4) {
+    if (this.audio.readyState >= 2) {
         if (this.playWhenReady !== null) {
             this.audio.removeEventListener('canplay', this.playWhenReady);
             this.playWhenReady = null;
