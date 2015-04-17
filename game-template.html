@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!-- This template provides a starting point for implementing a game that takes full advantage of gameutils.js -->
+<title>Gameutils.js game</title>
+<meta charset="UTF-8">
+<!-- output -->
+<script src="sprite.js"></script>
+<script src="animatedsprite.js"></script>
+<script src="audio.js"></script>
+<script src="canvasresizer.js"></script>
+<script src="loadingbar.js"></script>
+<script src="particle.js"></script>
+<!-- input -->
+<script src="lib/mousetrap.js"></script>
+<script src="lib/mousetrap-global-bind.js"></script>
+<script src="gamepad.js"></script>
+<script src="inputmapper.js"></script>
+
+<script src="mainloop.js"></script>
+<script src="util2d.js"></script>
+<script>
+'use strict'
+
+var Game = function(canvas) {
+    this.canvas = canvas;
+    this.ctx = this.canvas.getContext('2d');
+    this.time = 0;
+};
+
+Game.prototype.render = function() {
+    this.ctx.fillStyle = cssUtil.rgbString([0, 0, (Math.sin(this.time) * 0.5 + 0.5) * 255]);
+    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    return this.ctx;
+};
+
+Game.prototype.update = function(deltaTime) {
+    this.time += deltaTime;
+};
+
+var start = function() {
+    var resizer = new CanvasResizer({});
+    var game = new Game(resizer.getCanvas());
+    startMainLoop([resizer, game, new LoadingBar()]);
+};
+</script>
+</head>
+
+<body onload="start()">
+</body>
+
+</html>
