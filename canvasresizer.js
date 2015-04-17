@@ -59,6 +59,7 @@ var CanvasResizer = function(options) {
     if (this.parentElement === document.body) {
         document.body.style.padding = '0';
         document.body.style.margin = '0';
+        document.body.style.overflow = 'hidden';
     } else {
         this.parentElement.style.padding = '0';
     }
