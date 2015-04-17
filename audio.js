@@ -109,10 +109,10 @@ Audio.prototype.playSingular = function (loop) {
         this.audio.play();
         this.markLoaded();
     } else {
-        var that = this.audio;
+        var audio = this.audio;
         this.audio.oncanplay = function() {
-            that.play();
-            that.markLoaded();
+            audio.play();
+            audio.markLoaded();
         };
     }
 };
@@ -121,6 +121,13 @@ Audio.prototype.playSingular = function (loop) {
  * Stop playing this sample.
  */
 Audio.prototype.stop = function () {
+    this.audio.oncanplay = null;
+    if (!this.loaded) {
+        var that = this;
+        this.audio.oncanplay = function() {
+            that.markLoaded();
+        }
+    }
     this.audio.pause();
     this.audio.currentTime = 0;
 };
