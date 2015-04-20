@@ -18,13 +18,15 @@
  *  Every update is not necessarily displayed on the screen.
  *
  * debugMode: boolean
- *  When debug mode is on, a timeline of frames is drawn on the canvas returned
+ *  If Mousetrap is imported, you may hold F to speed up the game
+ *  execution while in debug mode.
+ *
+ * frameLog: boolean
+ *  When frame log is on, a timeline of frames is drawn on the canvas returned
  *  from updateables[i].render().
  *  - Green in the log is an update which was rendered to the screen.
  *  - Orange in the log is an update which was not rendered to the screen.
  *  - White in the log is a frame on which the game state was not updated.
- *  If Mousetrap is imported, you may also hold T to speed up the game
- *  execution while in debug mode.
  *
  * onRefocus: function
  *  Function that should be called when the window becomes visible after it
@@ -34,6 +36,7 @@ var startMainLoop = function(updateables, options) {
     var defaults = {
         updateFPS: 60,
         debugMode: false,
+        frameLog: false,
         onRefocus: null
     };
 
@@ -156,7 +159,7 @@ var startMainLoop = function(updateables, options) {
             }
             updates++;
         }
-        if (options.debugMode) {
+        if (options.frameLog) {
             frameLog.push({time: callbackTime, updates: updates});
         }
         if (updates > 0) {
@@ -167,7 +170,7 @@ var startMainLoop = function(updateables, options) {
                     ctx = candidateCtx;
                 }
             }
-            if (options.debugMode && (ctx instanceof CanvasRenderingContext2D)) {
+            if (options.frameLog && (ctx instanceof CanvasRenderingContext2D)) {
                 drawFrameLog(ctx, callbackTime);
                 if (frameLog.length >= 1024) {
                     frameLog.splice(0, 512);
