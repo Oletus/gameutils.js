@@ -12,7 +12,7 @@ var Audio = function(filename, fileExtensions) {
     if (fileExtensions === undefined) {
         fileExtensions = Audio.defaultExtensions;
     }
-    Audio.createdCount++;
+    Audio.allAudio.push(this);
     this.loaded = false; // Used purely for purposes of marking the audio loaded.
     this.audio = document.createElement('audio');
     this.filenames = [];
@@ -55,14 +55,25 @@ Audio.audioPath = 'assets/sounds/';
 Audio.defaultExtensions = ['ogg', 'mp3'];
 
 /**
- * Set to true to mute all audio.
+ * True when all audio is muted. Set this by calling muteAll.
  */
-Audio.muteAll = false;
+Audio.allMuted = false;
 
 /**
- * How many Audio objects have been created.
+ * @param {boolean} mute Set to true to mute all audio.
  */
-Audio.createdCount = 0;
+Audio.muteAll = function(mute) {
+    Audio.allMuted = mute;
+    for (var i = 0; i < Audio.allAudio.length; ++i) {
+        Audio.allAudio[i].audio.muted = mute;
+    }
+};
+
+/**
+ * All audio objects that have been created.
+ */
+Audio.allAudio = [];
+
 /**
  * How many Audio objects have been fully loaded.
  */
@@ -72,7 +83,7 @@ Audio.loadedCount = 0;
  * @return {number} Amount of Audio objects that have been fully loaded per amount that has been created.
  */
 Audio.loadedFraction = function() {
-    return Audio.loadedCount / Audio.createdCount;
+    return Audio.loadedCount / Audio.allAudio.length;
 };
 
 /**
@@ -91,7 +102,7 @@ Audio.prototype.addSourcesTo = function(audioElement) {
  * Play a clone of this sample. Will not affect other clones. Playback will not loop and playback can not be stopped.
  */
 Audio.prototype.play = function () {
-    if (Audio.muteAll) {
+    if (Audio.allMuted) {
         return;
     }
     if (this.audio.readyState < 4) {
@@ -108,7 +119,7 @@ Audio.prototype.play = function () {
  * @param {boolean=} loop Whether the sample should loop when played. Defaults to false.
  */
 Audio.prototype.playSingular = function (loop) {
-    if (Audio.muteAll) {
+    if (Audio.allMuted) {
         return;
     }
     if (loop === undefined) {
