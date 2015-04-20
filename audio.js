@@ -54,6 +54,10 @@ Audio.audioPath = 'assets/sounds/';
  */
 Audio.defaultExtensions = ['ogg', 'mp3'];
 
+/**
+ * Set to true to mute all audio.
+ */
+Audio.muteAll = false;
 
 /**
  * How many Audio objects have been created.
@@ -87,6 +91,9 @@ Audio.prototype.addSourcesTo = function(audioElement) {
  * Play a clone of this sample. Will not affect other clones. Playback will not loop and playback can not be stopped.
  */
 Audio.prototype.play = function () {
+    if (Audio.muteAll) {
+        return;
+    }
     if (this.audio.readyState < 4) {
         return;
     }
@@ -101,6 +108,9 @@ Audio.prototype.play = function () {
  * @param {boolean=} loop Whether the sample should loop when played. Defaults to false.
  */
 Audio.prototype.playSingular = function (loop) {
+    if (Audio.muteAll) {
+        return;
+    }
     if (loop === undefined) {
         this.audio.loop = false;
     } else {
