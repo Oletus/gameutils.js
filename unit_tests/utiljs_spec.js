@@ -60,3 +60,19 @@ describe('stringUtil', function() {
         expect(str).toEqual(original);
     });
 });
+
+describe('objectUtil', function() {
+    it('initializes an object with default values', function() {
+        var Constructor = function(options) {
+            var defaults = {
+                a: 0,
+                b: 1
+            };
+            objectUtil.initWithDefaults(this, defaults, options);
+        };
+        var obj = new Constructor({b: 2, c: 3});
+        expect(obj.a).toBe(0);
+        expect(obj.b).toBe(2);
+        expect(obj.hasOwnProperty('c')).toBe(false);
+    });
+});

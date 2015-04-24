@@ -2,6 +2,7 @@
 
 var arrayUtil = {}; // Utilities for working with JS arrays
 var stringUtil = {}; // Utilities for working with JS strings
+var objectUtil = {}; // Utilities for working with JS objects
 
 /**
  * Filter an array by removing elements that are found in the other array.
@@ -68,6 +69,25 @@ arrayUtil.setPropertyInAll = function(array, key, value) {
 stringUtil.capitalizeFirstLetter = function(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 };
+
+
+
+/**
+ * Initialize an object with default values.
+ * @param {Object} obj Object to set properties on.
+ * @param {Object} defaults Default properties. Every property needs to have a default value here.
+ * @param {Object} options Options to override the default properties.
+ */
+objectUtil.initWithDefaults = function(obj, defaults, options) {
+    for(var key in defaults) {
+        if (!options.hasOwnProperty(key)) {
+            obj[key] = defaults[key];
+        } else {
+            obj[key] = options[key];
+        }
+    }
+};
+
 
 
 
