@@ -17,5 +17,5 @@ It targets browsers that support modern APIs, and has been tested on Chrome, Fir
 
 ## Games created with these utilities
 
-[Totem Takedown](http://oletus.github.io/totemteardown/)
-[Panjandrum vs. Triebflügel](http://oletus.github.io/codename-x/)
+* [Totem Takedown](http://oletus.github.io/totemteardown/)
+* [Panjandrum vs. TriebflÃ¼gel](http://oletus.github.io/codename-x/)
