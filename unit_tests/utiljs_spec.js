@@ -46,6 +46,57 @@ describe('arrayUtil', function() {
         
         expectIdentical(arr1, original);
     });
+    
+    it('stable sorts an array', function() {
+        var arr = [
+            {x: 1, y: 1},
+            {x: 1, y: 2},
+            {x: 1, y: 3},
+            {x: 2, y: 1},
+            {x: 2, y: 2},
+            {x: 2, y: 3},
+            {x: 3, y: 1},
+            {x: 3, y: 2},
+            {x: 3, y: 3}
+        ];
+        // Original order
+        for (var i = 0; i < arr.length; ++i) {
+            expect(arr[i].x).toBe(Math.floor(i / 3) + 1);
+            expect(arr[i].y).toBe(i % 3 + 1);
+        }
+
+        // Sort to a different order
+        arrayUtil.stableSort(arr, function(a, b) {
+            if (a.y === b.y) {
+                return 0;
+            } else if (a.y < b.y) {
+                return -1;
+            } else {
+                return 1;
+            }
+        });
+        expect(arr.length).toBe(9);
+        for (var i = 0; i < arr.length; ++i) {
+            expect(arr[i].y).toBe(Math.floor(i / 3) + 1);
+            expect(arr[i].x).toBe(i % 3 + 1);
+        }
+
+        arrayUtil.stableSort(arr, function(a, b) {
+            if (a.x === b.x) {
+                return 0;
+            } else if (a.x < b.x) {
+                return -1;
+            } else {
+                return 1;
+            }
+        });
+        // Original order
+        expect(arr.length).toBe(9);
+        for (var i = 0; i < arr.length; ++i) {
+            expect(arr[i].x).toBe(Math.floor(i / 3) + 1);
+            expect(arr[i].y).toBe(i % 3 + 1);
+        }
+    });
 });
 
 describe('stringUtil', function() {

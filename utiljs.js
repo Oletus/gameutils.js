@@ -60,7 +60,46 @@ arrayUtil.setPropertyInAll = function(array, key, value) {
     }
 };
 
+/**
+ * Stable sort an array in place.
+ * @param {Array} array Array to sort.
+ * @param {function} compareFunction Function as in Array.prototype.sort.
+ * @return {Array} The sorted array.
+ */
+arrayUtil.stableSort = function(array, compareFunction) {
+    if (array.length < 2) {
+        return array;
+    }
+    var merge = function(left, right) {
+        var result  = [];
+        var l = 0;
+        var r = 0;
 
+        while (l < left.length && r < right.length) {
+            if (compareFunction(left[l], right[r]) <= 0) {
+                result.push(left[l]);
+                ++l;
+            } else {
+                result.push(right[r]);
+                ++r;
+            }
+        }
+        result = result.concat(left.slice(l));
+        result = result.concat(right.slice(r));
+        return result;
+    };
+    
+    var middle = Math.floor(array.length / 2);
+    var left = array.slice(0, middle);
+    var right = array.slice(middle);
+    arrayUtil.stableSort(left, compareFunction);
+    arrayUtil.stableSort(right, compareFunction);
+    var spliceParams = [0, array.length]; // First two parameters of splice()
+    var merged = merge(left, right);
+    spliceParams = spliceParams.concat(merged);
+    array.splice.apply(array, spliceParams);
+    return array;
+};
 
 /**
  * @param {string} string Input string.
