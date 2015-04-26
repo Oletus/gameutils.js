@@ -11,6 +11,7 @@
 <script src="canvasresizer.js"></script>
 <script src="loadingbar.js"></script>
 <script src="particle.js"></script>
+<script src="canvasui.js"></script>
 <!-- input -->
 <script src="lib/mousetrap.js"></script>
 <script src="lib/mousetrap-global-bind.js"></script>
@@ -23,9 +24,15 @@
 <script>
 'use strict';
 
-var Game = function(canvas) {
-    this.canvas = canvas;
+var Game = function(resizer) {
+    this.canvas = resizer.getCanvas();
     this.ctx = this.canvas.getContext('2d');
+    this.canvasUI = new CanvasUI({
+        element: this.canvas,
+        getCanvasPositionFromEvent: function(event) {
+            return resizer.getCanvasPosition(event);
+        }
+    });
     this.time = 0;
 };
 
@@ -46,7 +53,7 @@ var start = function() {
     Audio.muteAll(DEV_MODE && false); // Set to true if sounds annoy developers
 
     var resizer = new CanvasResizer({});
-    var game = new Game(resizer.getCanvas());
+    var game = new Game(resizer);
     startMainLoop([resizer, game, new LoadingBar()], {debugMode: DEBUG_MAIN_LOOP});
 };
 </script>
