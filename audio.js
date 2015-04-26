@@ -65,7 +65,11 @@ Audio.allMuted = false;
 Audio.muteAll = function(mute) {
     Audio.allMuted = mute;
     for (var i = 0; i < Audio.allAudio.length; ++i) {
-        Audio.allAudio[i].audio.muted = mute;
+        var audio = Audio.allAudio[i];
+        audio.audio.muted = mute;
+        for (var j = 0; j < audio.clones.length; ++j) {
+            audio.clones[j].muted = mute;
+        }
     }
 };
 
