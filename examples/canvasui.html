@@ -28,7 +28,10 @@ var Tester = function(canvas) {
         width: 120,
         height: 70,
         label: 'Button',
-        clickCallback: function() { console.log('clicked!') }
+        clickCallback: function() { console.log('clicked!') },
+        dragTargetCallback: function(draggedObject) {
+            console.log('dragged to button: ' + draggedObject);
+        }
     });
     this.ui.addElement(button);
 
@@ -59,7 +62,8 @@ var Tester = function(canvas) {
             ctx.fillStyle = 'black';
             ctx.fillText('DRAG ME', button.visualX(), button.visualY() + 6);
         },
-        draggable: true
+        draggable: true,
+        draggedObjectFunc: function() { return 'dragged object X'; }
     });
     this.ui.addElement(customButton);
 };
