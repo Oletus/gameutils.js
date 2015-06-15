@@ -19,3 +19,4 @@ It targets browsers that support modern APIs, and has been tested on Chrome, Fir
 
 * [Totem Takedown](http://oletus.github.io/totemteardown/)
 * [Panjandrum vs. Triebflügel](http://oletus.github.io/codename-x/)
+* [Megatitan vs. Cthulhu](http://oletus.github.io/megatitan/)
