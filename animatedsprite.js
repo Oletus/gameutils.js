@@ -123,7 +123,23 @@ AnimatedSpriteInstance.prototype.setAnimation = function(animationKey) {
     this.framePos = 0;
 };
 
+/**
+ * Update the current animation frame.
+ * @param {number} deltaTime Time that has passed since the last update.
+ */
 AnimatedSpriteInstance.prototype.update = function(deltaTime) {
+    this._scrubInternal(deltaTime, this.finishedAnimationCallback);
+};
+
+/**
+ * Scrub the animation backwards or forwards.
+ * @param {number} deltaTime Amount to scrub by.
+ */
+AnimatedSpriteInstance.prototype.scrub = function(deltaTime) {
+    this._scrubInternal(deltaTime);
+};
+
+AnimatedSpriteInstance.prototype._scrubInternal = function(deltaTime, finishCallback) {
     var currentAnimation = this.animatedSprite.animations[this.animationKey];
     if (currentAnimation[this.frame].duration > 0) {
         this.framePos += deltaTime * 1000;
@@ -132,9 +148,24 @@ AnimatedSpriteInstance.prototype.update = function(deltaTime) {
             ++this.frame;
             if (this.frame >= currentAnimation.length) {
                 this.frame = 0;
-                if (this.finishedAnimationCallback !== undefined) {
-                    this.finishedAnimationCallback(this.animationKey);
+                if (finishCallback !== undefined) {
+                    finishCallback(this.animationKey);
                 }
+            }
+            if (currentAnimation[this.frame].duration <= 0) {
+                this.framePos = 0.0;
+                return;
+            }
+        }
+        while (this.framePos < 0) {
+            --this.frame;
+            if (this.frame < 0) {
+                this.frame = currentAnimation.length - 1;
+            }
+            this.framePos += currentAnimation[this.frame].duration;
+            if (currentAnimation[this.frame].duration <= 0) {
+                this.framePos = 0.0;
+                return;
             }
         }
     }
