@@ -305,4 +305,5 @@ CanvasResizer.prototype._resizeFixedResolution = function() {
     this._scale = styleHeight / this.canvas.height;
     this.canvas.style.marginLeft = Math.round((parentWidth - styleWidth) * 0.5) + 'px';
     this.canvas.style.marginTop = Math.round((parentHeight - styleHeight) * 0.5) + 'px';
+    this.canvas.style.marginBottom = '-5px'; // This is to work around a bug in Firefox 38
 };
