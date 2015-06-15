@@ -48,7 +48,7 @@ ParticleEngine.prototype.update = function(deltaTime) {
  * @param {CanvasRenderingContext2D|Object} ctx A context to draw the particles to. In case you have a custom
  * appearance function, 
  */
-ParticleEngine.prototype.draw = function(ctx) {
+ParticleEngine.prototype.render = function(ctx) {
     if (ctx instanceof CanvasRenderingContext2D) {
         ctx.save();
     }
@@ -160,19 +160,33 @@ Particle.Appearance = {
 
 /**
  * To use with the Sprite class from gameutils.js
+ * @param {Sprite} sprite Sprite to draw.
+ * @param {number=} scaleMultiplier Scale multiplier for all the sprites. Useful for example if you run the particle
+ * engine in a game world's coordinate system which has different scale compared to the canvas.
  */
-Particle.spriteAppearance = function(sprite, sizeMultiplier) {
+Particle.spriteAppearance = function(sprite, scaleMultiplier) {
+    if (scaleMultiplier === undefined) {
+        scaleMultiplier = 1.0;
+    }
     return function(ctx, x, y, size, opacity) {
         ctx.globalAlpha = opacity;
-        sprite.drawRotated(ctx, x, y, 0, size * sizeMultiplier);
+        sprite.drawRotated(ctx, x, y, 0, size * scaleMultiplier);
     };
 };
 
 /**
  * Prerendered circle using the Sprite class from gameutils.js.
  * May be faster than drawing a circle as a path.
+ * @param {string} color CSS color string for the circle.
+ * @param {resolution} Resolution of the sprite to create in pixels. Will not affect the size of the particle when
+ * drawing.
+ * @param {number=} scaleMultiplier Scale multiplier for all the sprites. Useful for example if you run the particle
+ * engine in a game world's coordinate system which has different scale compared to the canvas.
  */
-Particle.prerenderedCircleAppearance = function(color, resolution) {
+Particle.prerenderedCircleAppearance = function(color, resolution, scaleMultiplier) {
+    if (scaleMultiplier === undefined) {
+        scaleMultiplier = 1.0;
+    }
     var helperCanvas = document.createElement('canvas');
     helperCanvas.width = resolution;
     helperCanvas.height = resolution;
@@ -182,7 +196,7 @@ Particle.prerenderedCircleAppearance = function(color, resolution) {
     helperCtx.arc(resolution * 0.5, resolution * 0.5, resolution * 0.5, 0, Math.PI * 2);
     helperCtx.fill();
     var sprite = new Sprite(helperCanvas);
-    return Particle.spriteAppearance(sprite, 1.0 / resolution);
+    return Particle.spriteAppearance(sprite, scaleMultiplier / resolution);
 };
 
 Particle.fastAppearSlowDisappear = function(t, seed) {
