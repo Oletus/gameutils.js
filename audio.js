@@ -109,7 +109,8 @@ Audio.prototype.play = function () {
     if (Audio.allMuted) {
         return;
     }
-    if (this.audio.readyState < 4) {
+    // If readyState was compared against 4, Firefox wouldn't play audio at all sometimes. That's why using 2 here.
+    if (this.audio.readyState < 2) {
         return;
     }
     var clone = this.ensureOneClone();
