@@ -83,7 +83,7 @@ CanvasResizer.Mode = {
     FIXED_RESOLUTION_INTERPOLATED: 1,
     // Only available for 2D canvas. Set the canvas transform on render to
     // emulate a fixed coordinate system:
-    // TODO: FIXED_COORDINATE_SYSTEM: 2,
+    FIXED_COORDINATE_SYSTEM: 2,
     // Fix the aspect ratio, but not the exact width/height of the coordinate
     // space:
     FIXED_ASPECT_RATIO: 3,
@@ -120,7 +120,7 @@ CanvasResizer.prototype.render = function() {
         if (this.mode === CanvasResizer.Mode.FIXED_RESOLUTION ||
             this.mode === CanvasResizer.Mode.FIXED_RESOLUTION_INTERPOLATED) {
             this._resizeFixedResolution();
-        } else if (/*this.mode === CanvasResizer.Mode.FIXED_COORDINATE_SYSTEM ||*/
+        } else if (this.mode === CanvasResizer.Mode.FIXED_COORDINATE_SYSTEM ||
                    this.mode === CanvasResizer.Mode.FIXED_ASPECT_RATIO) {
             if (parentWidthToHeight > this.canvasWidthToHeight) {
                 // Parent is wider, so there will be empty space on the left and right
@@ -154,6 +154,32 @@ CanvasResizer.prototype.render = function() {
             this.canvas.style.marginLeft = '0';
         }
         this.resizeOnNextRender = false;
+    }
+    if (this.mode == CanvasResizer.Mode.FIXED_COORDINATE_SYSTEM) {
+        var ctx = this.canvas.getContext('2d');
+        var scale = this.canvas.width / this.width;
+        ctx.setTransform(scale, 0, 0, scale, 0, 0);
+        // TODO: It's hugely inefficient to recreate the context wrapper every time. Get rid of that.
+        var wrapCtx = {};
+        for (var prop in ctx) {
+            if (prop.indexOf('webkit') != 0) {
+                (function(p) {
+                    if (typeof ctx[prop] == 'function') {
+                        wrapCtx[p] = function() {
+                            ctx[p].apply(ctx, arguments); 
+                        };
+                    } else if (prop != 'canvas') {
+                        Object.defineProperty(wrapCtx, p, {
+                            get: function() { return ctx[p]; },
+                            set: function(v) { ctx[p] = v; }
+                        });
+                    }
+                })(prop);
+            }
+        }
+        
+        wrapCtx.canvas = {width: this.width, height: this.height };
+        return wrapCtx;
     }
 };
 
