@@ -270,8 +270,10 @@ CanvasResizer.prototype.changeMode = function(mode) {
  * @return {number} the scale at which the canvas coordinate space is drawn.
  */
 CanvasResizer.prototype.getScale = function() {
-    if (this.mode === CanvasResizer.Mode.FIXED_RESOLUTION ||
-        this.mode === CanvasResizer.Mode.FIXED_RESOLUTION_INTERPOLATED)
+    if (this.mode === CanvasResizer.Mode.FIXED_COORDINATE_SYSTEM) {
+        return this.canvas.width / this.width;
+    } else if (this.mode === CanvasResizer.Mode.FIXED_RESOLUTION ||
+               this.mode === CanvasResizer.Mode.FIXED_RESOLUTION_INTERPOLATED)
     {
         return this._scale;
     } else {
