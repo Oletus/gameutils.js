@@ -6,12 +6,17 @@
 <script>
 'use strict';
 
-var ctx;
+var realCtx;
 var resizer;
 var pos = {x: 37.5, y: 37.5};
 
 var frame = function() {
-    resizer.render();
+    // The resizer returns a wrapped canvas 2D context in FIXED_COORDINATE_SYSTEM mode.
+    var ctx = realCtx;
+    var resizerCtx = resizer.render();
+    if (resizerCtx !== undefined) {
+        ctx = resizerCtx;
+    }
     ctx.fillStyle = '#fff';
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     ctx.fillStyle = '#000';
@@ -32,7 +37,7 @@ var start = function() {
         parentElement: parent
     });
     var canvas = resizer.getCanvas();
-    ctx = canvas.getContext('2d');
+    realCtx = canvas.getContext('2d');
     canvas.addEventListener('click', eventListener);
     canvas.addEventListener('touchmove', eventListener);
     frame();
@@ -48,6 +53,8 @@ var start = function() {
 Unfortunately pixel-perfect rendering of this mode is currently only possible in Chrome.</li>
 <li>FIXED_RESOLUTION_INTERPOLATED: Fix the resolution of the canvas, but fill the screen by scaling it. This may result
 in blurred graphics, but can be helpful in rapid prototyping.</li>
+<li>FIXED_COORDINATE_SYSTEM: Simulate a fixed coordinate system by applying a transform to the canvas context. This is
+in effect a better-quality version of FIXED_RESOLUTION_INTERPOLATED that works only with the 2D context.</li>
 <li>FIXED_ASPECT_RATIO: Fill the screen with the canvas, but preserving aspect ratio.</li>
 <li>DYNAMIC: Simply fill the screen with the canvas.</li>
 </ul>
@@ -60,6 +67,8 @@ in blurred graphics, but can be helpful in rapid prototyping.</li>
     onclick="resizer.changeMode(CanvasResizer.Mode.FIXED_RESOLUTION)"></input>
 <input type="button" value="Set mode to FIXED_RESOLUTION_INTERPOLATED"
     onclick="resizer.changeMode(CanvasResizer.Mode.FIXED_RESOLUTION_INTERPOLATED)"></input>
+<input type="button" value="Set mode to FIXED_COORDINATE_SYSTEM"
+    onclick="resizer.changeMode(CanvasResizer.Mode.FIXED_COORDINATE_SYSTEM)"></input>
 <input type="button" value="Set mode to FIXED_ASPECT_RATIO"
     onclick="resizer.changeMode(CanvasResizer.Mode.FIXED_ASPECT_RATIO)"></input>
 <input type="button" value="Set mode to DYNAMIC"
