@@ -74,6 +74,7 @@ var CanvasResizer = function(options) {
     window.addEventListener('resize', resize, false);
     this.resize();
     this._scale = 1.0;
+    this._wrapCtx = null;
 };
 
 CanvasResizer.Mode = {
@@ -159,27 +160,38 @@ CanvasResizer.prototype.render = function() {
         var ctx = this.canvas.getContext('2d');
         var scale = this.canvas.width / this.width;
         ctx.setTransform(scale, 0, 0, scale, 0, 0);
-        // TODO: It's hugely inefficient to recreate the context wrapper every time. Get rid of that.
-        var wrapCtx = {};
-        for (var prop in ctx) {
-            if (prop.indexOf('webkit') != 0) {
-                (function(p) {
-                    if (typeof ctx[prop] == 'function') {
-                        wrapCtx[p] = function() {
-                            ctx[p].apply(ctx, arguments); 
-                        };
-                    } else if (prop != 'canvas') {
-                        Object.defineProperty(wrapCtx, p, {
-                            get: function() { return ctx[p]; },
-                            set: function(v) { ctx[p] = v; }
-                        });
-                    }
-                })(prop);
+
+        // Wrap the context so that when ctx.canvas.width/height is queried, they return the coordinate system width/height.
+        if (this._wrapCtx == null) {
+            var wrapCtx = {};
+            for (var prop in ctx) {
+                if (prop.indexOf('webkit') != 0) {
+                    (function(p) {
+                        if (typeof ctx[prop] == 'function') {
+                            wrapCtx[p] = function() {
+                                ctx[p].apply(ctx, arguments); 
+                            };
+                        } else if (prop != 'canvas') {
+                            Object.defineProperty(wrapCtx, p, {
+                                get: function() { return ctx[p]; },
+                                set: function(v) { ctx[p] = v; }
+                            });
+                        }
+                    })(prop);
+                }
             }
+            
+            wrapCtx.canvas = {};
+            var that = this;
+            Object.defineProperty(wrapCtx.canvas, 'width', {
+                get: function() { return that.width; }
+            });
+            Object.defineProperty(wrapCtx.canvas, 'height', {
+                get: function() { return that.height; }
+            });
+            this._wrapCtx = wrapCtx;
         }
-        
-        wrapCtx.canvas = {width: this.width, height: this.height };
-        return wrapCtx;
+        return this._wrapCtx;
     }
 };
 
