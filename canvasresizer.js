@@ -217,9 +217,15 @@ CanvasResizer.prototype.getCanvasPosition = function(event) {
     // +0.5 to position the coordinates to the pixel center.
     var xRel = x - rect.left + 0.5;
     var yRel = y - rect.top + 0.5;
-    if (rect.width != this.canvas.width) {
-        xRel *= this.canvas.width / rect.width;
-        yRel *= this.canvas.height / rect.height;
+    var coordWidth = this.canvas.width;
+    var coordHeight = this.canvas.height;
+    if (this.mode == CanvasResizer.Mode.FIXED_COORDINATE_SYSTEM) {
+        coordWidth = this.width;
+        coordHeight = this.height;
+    }
+    if (rect.width != coordWidth) {
+        xRel *= coordWidth / rect.width;
+        yRel *= coordHeight / rect.height;
     }
     if ('Vec2' in window) {
         return new Vec2(xRel, yRel);
