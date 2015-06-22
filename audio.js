@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * An object representing one audio sample.
+ * An object representing one audio sample. Uses Howler.js under the hood if it is available.
  * @param {string} filename Name of the audio file without a file extension. Assumes that the audio file is located
  * in Audio.audioPath.
  * @param {Array.<string>} fileExtensions Array of extensions. Defaults to ogg and mp3, which should be enough for
@@ -12,14 +12,33 @@ var Audio = function(filename, fileExtensions) {
     if (fileExtensions === undefined) {
         fileExtensions = Audio.defaultExtensions;
     }
+    var that = this;
     Audio.allAudio.push(this);
     this.loaded = false; // Used purely for purposes of marking the audio loaded.
-    this.audio = document.createElement('audio');
+    var markLoaded = function() {
+        that._markLoaded();
+    }
+
     this.filenames = [];
-    this.playWhenReady = null; // Event listener to start playing when audio is ready.
     var canDetermineLoaded = false;
     for (var i = 0; i < fileExtensions.length; ++i) {
-        this.filenames.push(filename + '.' + fileExtensions[i]);
+        this.filenames.push(Audio.audioPath + filename + '.' + fileExtensions[i]);
+    }
+    // Don't use howler when using the file protocol, since it requires CORS requests
+    if ('Howl' in window && window.location.origin.substring(0, 4) != 'file') {
+        // Use howler.js to implement Audio
+        this._howl = new Howl({
+            src: this.filenames,
+            onload: markLoaded,
+            onloaderror: markLoaded
+        });
+        return;
+    } else {
+        this._howl = null;
+    }
+
+    this.audio = document.createElement('audio');
+    for (var i = 0; i < fileExtensions.length; ++i) {
         if (fileExtensions[i] === 'ogg' && !canDetermineLoaded) {
             canDetermineLoaded = this.audio.canPlayType('audio/ogg;codecs="vorbis"') == 'probably';
         }
@@ -27,11 +46,9 @@ var Audio = function(filename, fileExtensions) {
             canDetermineLoaded = this.audio.canPlayType('audio/mpeg') == 'probably';
         }
     }
+
+    this.playWhenReady = null; // Event listener to start playing when audio is ready.
     if (canDetermineLoaded) {
-        var that = this;
-        var markLoaded = function() {
-            that._markLoaded();
-        }
         this.audio.addEventListener('canplay', markLoaded);
         // Can never be sure that the audio will load. Fake loaded after 10 seconds to unblock loading bar.
         setTimeout(markLoaded, 10000);
@@ -64,11 +81,19 @@ Audio.allMuted = false;
  */
 Audio.muteAll = function(mute) {
     Audio.allMuted = mute;
-    for (var i = 0; i < Audio.allAudio.length; ++i) {
-        var audio = Audio.allAudio[i];
-        audio.audio.muted = mute;
-        for (var j = 0; j < audio.clones.length; ++j) {
-            audio.clones[j].muted = mute;
+    if (this._howl) {
+        if (mute) {
+            Howler.mute();
+        } else {
+            Howler.unmute();
+        }
+    } else {
+        for (var i = 0; i < Audio.allAudio.length; ++i) {
+            var audio = Audio.allAudio[i];
+            audio.audio.muted = mute;
+            for (var j = 0; j < audio.clones.length; ++j) {
+                audio.clones[j].muted = mute;
+            }
         }
     }
 };
@@ -97,7 +122,7 @@ Audio.loadedFraction = function() {
 Audio.prototype.addSourcesTo = function(audioElement) {
     for (var i = 0; i < this.filenames.length; ++i) {
         var source = document.createElement('source');
-        source.src = Audio.audioPath + this.filenames[i];
+        source.src = this.filenames[i];
         audioElement.appendChild(source);
     }
 };
@@ -107,6 +132,10 @@ Audio.prototype.addSourcesTo = function(audioElement) {
  */
 Audio.prototype.play = function () {
     if (Audio.allMuted) {
+        return;
+    }
+    if (this._howl) {
+        this._howl.play();
         return;
     }
     // If readyState was compared against 4, Firefox wouldn't play audio at all sometimes. That's why using 2 here.
@@ -128,10 +157,17 @@ Audio.prototype.playSingular = function (loop) {
         return;
     }
     if (loop === undefined) {
-        this.audio.loop = false;
-    } else {
-        this.audio.loop = loop;
+        loop = false;
     }
+    if (this._howl) {
+        if (this._howl.playing(0)) {
+            return;
+        }
+        this._howl.play();
+        this._howl.loop(loop);
+        return;
+    }
+    this.audio.loop = loop;
     if (this.audio.readyState >= 2) {
         if (this.playWhenReady !== null) {
             this.audio.removeEventListener('canplay', this.playWhenReady);
@@ -153,6 +189,10 @@ Audio.prototype.playSingular = function (loop) {
  * Stop playing this sample.
  */
 Audio.prototype.stop = function () {
+    if (this._howl) {
+        this._howl.stop();
+        return;
+    }
     if (this.playWhenReady !== null) {
         this.audio.removeEventListener('canplay', this.playWhenReady);
         this.playWhenReady = null;
