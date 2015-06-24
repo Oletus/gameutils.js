@@ -1141,7 +1141,7 @@ Rect.prototype.intersectsCoordsRoundedOut = function(left, right, top, bottom) {
  * @return {boolean} Does this rectangle contain the given coordinates?
  */
 Rect.prototype.containsVec2 = function(coords) {
-    return !this.isEmpty() && 
+    return !this.isEmpty() &&
            this.left <= coords.x &&
            this.right >= coords.x &&
            this.top <= coords.y &&
