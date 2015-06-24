@@ -48,6 +48,7 @@ var colorUtil = {
     approximateAlphaForNBlends: null,
     alphaForNBlends: null,
     differentColor: null,
+    blendWithFunction: null,
     blendMultiply: null,
     blendScreen: null,
     blendDarken: null,
@@ -143,19 +144,10 @@ colorUtil.blend = function(dstRGBA, srcRGBA) {
 /**
  * Serialize an RGB value.
  * @param {Array.<number>|Uint8Array} RGB RGB value.
- * @return {string} Serialized representation of the value.
+ * @return {Array} Copy of the value suitable for adding to JSON.
  */
 colorUtil.serializeRGB = function(RGB) {
-    return RGB[0] + ' ' + RGB[1] + ' ' + RGB[2];
-};
-
-/**
- * Serialize an RGBA value.
- * @param {Array.<number>|Uint8Array} RGBA RGBA value.
- * @return {string} Serialized representation of the value.
- */
-colorUtil.serializeRGBA = function(RGBA) {
-    return RGBA[0] + ' ' + RGBA[1] + ' ' + RGBA[2] + ' ' + RGBA[3];
+    return [RGB[0], RGB[1], RGB[2]];
 };
 
 /**
@@ -256,6 +248,30 @@ colorUtil.differentColor = function(color) {
         hsl[2] = (hsl[2] + 0.4) % 1;
     }
     return hslToRgb(hsl[0], hsl[1], hsl[2]);
+};
+
+/**
+ * Blend the two single-channel values to each other, taking into account bottom and top layer alpha.
+ * @param {function} blendFunction The blend function to use, one of colorUtil.blend*
+ * @param {number} target Single-channel color value of the bottom layer, 0 to 255.
+ * @param {number} source Single-channel color value of the top layer, 0 to 255.
+ * @param {number} targetAlpha Alpha value of the bottom layer, 0.0 to 1.0.
+ * @param {number} sourceAlpha Alpha value of the top layer, 0.0 to 1.0.
+ * @return {number} Blend result as an integer from 0 to 255.
+ */
+colorUtil.blendWithFunction = function(blendFunction, target, source, targetAlpha, sourceAlpha) {
+    var alpha = targetAlpha + sourceAlpha * (1.0 - targetAlpha);
+    if (alpha > 0.0) {
+        // First calculate the blending result without taking the transparency of the target into account.
+        var rawResult = blendFunction(target, source);
+        // Then mix according to weights.
+        // See KHR_blend_equation_advanced specification for reference.
+        return Math.round((rawResult * targetAlpha * sourceAlpha +
+                           source * sourceAlpha * (1.0 - targetAlpha) +
+                           target * targetAlpha * (1.0 - sourceAlpha)) / alpha);
+    } else {
+        return 0.0;
+    }
 };
 
 /**
@@ -367,9 +383,7 @@ colorUtil.blendColorBurn = function(a, b) {
         return 255;
     if (b === 0)
         return 0;
-    a /= 255;
-    b /= 255;
-    return mathUtil.clamp(0, 255, 255. * (1. - (1. - a) / b));
+    return mathUtil.clamp(0, 255, 255 - (255 - a) / b * 255);
 };
 
 /**
@@ -396,7 +410,7 @@ colorUtil.blendVividLight = function(a, b) {
     a /= 255;
     b /= 255;
     return mathUtil.clamp(0, 255, 255 * (b <= .5 ?
-            1 - (1 - a) / (2 * (b)) :
+            1 - (1 - a) / (2 * b) :
             a / (2 * (1 - b))));
 };
 
@@ -947,7 +961,7 @@ Rect.prototype.area = function() {
  * return value includes numbers x (left edge), y (top edge), w (width) and h
  * (height).
  */
-Rect.prototype.getXYWH = function() {
+Rect.prototype.getXYWHRoundedOut = function() {
     return {
         x: Math.floor(this.left),
         y: Math.floor(this.top),
@@ -1246,7 +1260,7 @@ canvasUtil.getCurrentTransform = function(ctx) {
  * @param {Rect} rect Rectangle to set as canvas clip rectangle.
  */
 canvasUtil.clipRect = function(ctx, rect) {
-    var xywh = rect.getXYWH();
+    var xywh = rect.getXYWHRoundedOut();
     ctx.beginPath();
     ctx.rect(xywh.x, xywh.y, xywh.w, xywh.h);
     ctx.clip();
