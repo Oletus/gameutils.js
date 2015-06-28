@@ -303,7 +303,7 @@ CanvasUIElement.prototype.isDragged = function() {
  */
 CanvasUIElement.prototype.hitTest = function(x, y) {
     if (this.clickCallback !== null) {
-        return this.getRect().containsRoundedOut(new Vec2(x, y));
+        return this.getRect().containsVec2(new Vec2(x, y));
     }
     return false;
 };
