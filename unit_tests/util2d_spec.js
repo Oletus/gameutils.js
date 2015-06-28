@@ -150,30 +150,6 @@ describe('util2d', function() {
                 expect(resultA[i]).toBeNear(resultB[i], 5);
             }
         });
-        it('computes the alpha value that results to given alpha with n blends', function() {
-            for (var flow = 0.01; flow < 0.99; flow += 0.01) {
-                for (var n = 2; n < 10; ++n) {
-                    var alpha = colorUtil.alphaForNBlends(flow, n);
-                    expect(alpha).toBeLessThan(flow);
-                    expect(colorUtil.nBlends(alpha, n)).toBeNear(flow, 0.01);
-                }
-            }
-        });
-        it('approximates what would happen with less than 1 blends', function() {
-            expect(colorUtil.nBlends(1.0, 0.5)).toBeNear(0.5, 0.001);
-            expect(colorUtil.nBlends(0.5, 0.5)).toBeNear(0.25, 0.001);
-        });
-        it('computes the alpha value that results to given alpha with less than one blends', function() {
-            // Make sure it does not get stuck when n < 1.0:
-            var flow = 0.5;
-            for (var n = 0.1; n < 0.9; n += 0.1) {
-                var alpha = colorUtil.alphaForNBlends(flow, n);
-                expect(alpha).toBeGreaterThan(flow);
-                if (alpha < 1.0) {
-                    expect(colorUtil.nBlends(alpha, n)).toBeNear(flow, 0.01);
-                }
-            }
-        });
         it('generates a visually distinct color for a given color', function() {
             var RGB = [255, 127, 255];
             var differentRGB = colorUtil.differentColor(RGB);
@@ -390,6 +366,16 @@ describe('util2d', function() {
             rect.makeEmpty();
             expect(rect.isEmpty()).toBe(true);
         });
+        
+        it('calculates its union with another Rect', function() {
+            var rectA = testRect();
+            var rectB = testRect2();
+            rectA.unionRect(rectB);
+            expect(rectA.left).toBe(0);
+            expect(rectA.right).toBe(3);
+            expect(rectA.top).toBe(3);
+            expect(rectA.bottom).toBe(6);
+        });
 
         it('calculates its intersection with another Rect', function() {
             var rectA = testRect();
@@ -419,78 +405,21 @@ describe('util2d', function() {
             expect(rectA.isEmpty()).toBe(true);
         });
 
-        it('calculates a rounded out intersection', function() {
+        it('determines whether a Vec2 is inside it', function() {
+            var rectA = testRect();
+            expect(rectA.containsVec2(new Vec2(1, 3))).toBe(true);
+            expect(rectA.containsVec2(new Vec2(2, 5))).toBe(true);
+            expect(rectA.containsVec2(new Vec2(0.5, 3.5))).toBe(false);
+            expect(rectA.containsVec2(new Vec2(2.5, 3.5))).toBe(false);
+            expect(rectA.containsVec2(new Vec2(1.5, 2.5))).toBe(false);
+            expect(rectA.containsVec2(new Vec2(1.5, 5.5))).toBe(false);
+        });
+
+        it('determines whether a Rect is inside it', function() {
             var rectA = testRect3();
-            var rectB = testRect4();
-            expect(rectA.intersectsRectRoundedOut(rectB)).toBe(true);
-
-            rectA.intersectRectRoundedOut(rectB);
-            expect(rectA.isEmpty()).toBe(false);
-            expect(rectA.left).toBe(2);
-            expect(rectA.right).toBe(3);
-            expect(rectA.top).toBe(5);
-            expect(rectA.bottom).toBe(6);
-        });
-
-        it('calculates an empty rounded out intersection', function() {
-            var rectA = testRect();
-            var rectB = testRect4();
-            expect(rectA.intersectsRectRoundedOut(rectB)).toBe(false);
-
-            rectA.intersectRectRoundedOut(rectB);
-            expect(rectA.isEmpty()).toBe(true);
-        });
-
-        it('determines whether a circle might intersect it' +
-           'based on its rounded out bounding box', function() {
-            var rect = testRect();
-            expect(rect.mightIntersectCircleRoundedOut(1.5, 2, 1)).toBe(false);
-            expect(rect.mightIntersectCircleRoundedOut(1.5, 2, 1.1)).toBe(true);
-            expect(rect.mightIntersectCircleRoundedOut(1.5, 6, 1)).toBe(false);
-            expect(rect.mightIntersectCircleRoundedOut(1.5, 6, 1.1)).toBe(true);
-            expect(rect.mightIntersectCircleRoundedOut(0, 4, 1)).toBe(false);
-            expect(rect.mightIntersectCircleRoundedOut(0, 4, 1.1)).toBe(true);
-            expect(rect.mightIntersectCircleRoundedOut(3, 4, 1)).toBe(false);
-            expect(rect.mightIntersectCircleRoundedOut(3, 4, 1.1)).toBe(true);
-        });
-
-        it('determines whether a point is inside it' +
-           'based on its rounded out bounding box', function() {
-            var rectA = testRect();
-            expect(rectA.containsRoundedOut(new Vec2(1, 3))).toBe(true);
-            expect(rectA.containsRoundedOut(new Vec2(2, 5))).toBe(true);
-            expect(rectA.containsRoundedOut(new Vec2(0.5, 3.5))).toBe(false);
-            expect(rectA.containsRoundedOut(new Vec2(2.5, 3.5))).toBe(false);
-            expect(rectA.containsRoundedOut(new Vec2(1.5, 2.5))).toBe(false);
-            expect(rectA.containsRoundedOut(new Vec2(1.5, 5.5))).toBe(false);
-            var rectB = testRect4();
-            expect(rectB.containsRoundedOut(new Vec2(2, 5))).toBe(true);
-            expect(rectB.containsRoundedOut(new Vec2(4, 6))).toBe(true);
-        });
-
-        it('calculates its union with another Rect', function() {
-            var rectA = testRect();
-            var rectB = testRect2();
-            rectA.unionRect(rectB);
-            expect(rectA.left).toBe(0);
-            expect(rectA.right).toBe(3);
-            expect(rectA.top).toBe(3);
-            expect(rectA.bottom).toBe(6);
-        });
-
-        it('calculates its union with a circle', function() {
-            var rectA = testRect();
-            rectA.unionCircle(1.5, 4, 0.5);
-            expect(rectA.left).toBe(1);
-            expect(rectA.right).toBe(2);
-            expect(rectA.top).toBe(3);
-            expect(rectA.bottom).toBe(5);
-
-            rectA.unionCircle(2, 6, 2);
-            expect(rectA.left).toBe(0);
-            expect(rectA.right).toBe(4);
-            expect(rectA.top).toBe(3);
-            expect(rectA.bottom).toBe(8);
+            expect(rectA.containsRect(testRect())).toBe(true);
+            expect(rectA.containsRect(testRect2())).toBe(false);
+            expect(rectA.containsRect(testRect4())).toBe(false);
         });
 
         it('clips from the top', function() {
