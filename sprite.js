@@ -59,6 +59,54 @@ Sprite.turnSolidColored = function(solidColor) {
 };
 
 /**
+ * Filter for generating a different hued variation of the sprite.
+ */
+Sprite.varyHue = function(options) {
+    var defaults = {
+        minHue: 0,
+        maxHue: 1,
+        hueChange: 0
+    };
+    for(var key in defaults) {
+        if(!options.hasOwnProperty(key)) {
+            options[key] = defaults[key];
+        }
+    }
+    while (options.hueChange < 0) {
+        options.hueChange += 1;
+    }
+    while (options.hueChange > 1) {
+        options.hueChange -= 1;
+    }
+    return function(sprite) {
+        var canvas = document.createElement('canvas');
+        canvas.width = sprite.width;
+        canvas.height = sprite.height;
+        var ctx = canvas.getContext('2d');
+        sprite.draw(ctx, 0, 0);
+        var data = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        for (var i = 0; i < data.data.length; i += 4) {
+            var r = data.data[i];
+            var g = data.data[i + 1];
+            var b = data.data[i + 2];
+            var hsl = rgbToHsl(r, g, b);
+            if (hsl[0] >= options.minHue && hsl[0] <= options.maxHue) {
+                hsl[0] += options.hueChange;
+                if (hsl[0] > 1.0) {
+                    hsl[0] -= 1.0;
+                }
+                var rgb = hslToRgb(hsl[0], hsl[1], hsl[2]);
+                data.data[i] = rgb[0];
+                data.data[i + 1] = rgb[1];
+                data.data[i + 2] = rgb[2];
+            }
+        }
+        ctx.putImageData(data, 0, 0);
+        sprite.img = canvas;
+    };
+};
+
+/**
  * How many Sprite objects have been created.
  */
 Sprite.createdCount = 0;

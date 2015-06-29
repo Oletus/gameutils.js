@@ -3,6 +3,7 @@
 <title>Gameutils.js: Using the Sprite class</title>
 <link rel="stylesheet" type="text/css" href="assets/default.css">
 <script src="../sprite.js"></script>
+<script src="../lib/hsl.js"></script><!-- Needed for varyHue -->
 <script>
 'use strict';
 
@@ -15,6 +16,7 @@ var Tester = function() {
     this.time = 0;
     this.carrotSprite = new Sprite('carrot.png');
     this.blackCarrot = new Sprite('carrot.png', Sprite.turnSolidColored('black'));
+    this.purpleCarrot = new Sprite('carrot.png', Sprite.varyHue({hueChange: 0.7, minHue: 0.0, maxHue: 0.2}));
 };
 
 Tester.prototype.update = function() {
@@ -26,7 +28,7 @@ Tester.prototype.update = function() {
     // No need to wait for async loading... just start drawing!
     this.carrotSprite.draw(ctx, 50, 100 + Math.sin(this.time * 3) * 10);
     this.blackCarrot.draw(ctx, 50, 150 + Math.sin(this.time * 3) * 3);
-    this.carrotSprite.drawRotated(ctx, width * 0.4, height * 0.5, this.time);
+    this.purpleCarrot.drawRotated(ctx, width * 0.4, height * 0.5, this.time);
     this.carrotSprite.drawRotated(ctx, width * 0.6, height * 0.5, this.time,
                                   Math.sin(this.time));
     this.carrotSprite.drawRotatedNonUniform(ctx, width * 0.8, height * 0.5, 0,
