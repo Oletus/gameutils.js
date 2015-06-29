@@ -220,3 +220,22 @@ Sprite.prototype.fillCanvasFitBottom = function(ctx) {
     var scale = Math.max(ctx.canvas.width / this.width, ctx.canvas.height / this.height);
     this.drawRotated(ctx, ctx.canvas.width * 0.5, ctx.canvas.height - scale * this.height * 0.5, 0, scale);
 };
+
+/**
+ * Fill the canvas horizontally with the sprite, preserving the sprite's aspect ratio, with the sprite's bottom touching the bottom
+ * of the canvas.
+ * @param {CanvasRenderingContext2D} ctx
+ */
+Sprite.prototype.fillCanvasHorizontallyFitBottom = function(ctx) {
+    if (!this.loaded) {
+        return;
+    }
+    var scale = ctx.canvas.width / this.width;
+    this.drawRotated(ctx, ctx.canvas.width * 0.5, ctx.canvas.height - scale * this.height * 0.5, 0, scale);
+};
+
+/**
+ * Just here to make Sprite and AnimatedSpriteInstance interchangeable.
+ */
+Sprite.prototype.update = function() {
+};
