@@ -5,20 +5,9 @@
  * @constructor
  * @param {string|HTMLImageElement|HTMLCanvasElement} filename File to load or a graphical element that's already
  * loaded.
- * @param {string=} solidColor Optional CSS color string to turn the Sprite solid colored.
+ * @param {string=} filter Filter function to convert the sprite, for example Sprite.turnSolidColored('black')
  */
-var Sprite = function(filename, /* Optional */ solidColor) {
-    var turnSolidColored = function(sprite, cssColor) {
-        var canvas2 = document.createElement('canvas');
-        canvas2.width = sprite.width;
-        canvas2.height = sprite.height;
-        var ctx2 = canvas2.getContext('2d');
-        ctx2.fillStyle = cssColor;
-        ctx2.fillRect(0, 0, canvas2.width, canvas2.height);
-        ctx2.globalCompositeOperation = 'destination-in';
-        sprite.draw(ctx2, 0, 0);
-        sprite.img = canvas2;
-    };
+var Sprite = function(filename, /* Optional */ filter) {
     this.filename = filename;
     Sprite.createdCount++;
     if (typeof this.filename != typeof '') {
@@ -27,8 +16,8 @@ var Sprite = function(filename, /* Optional */ solidColor) {
         Sprite.loadedCount++;
         this.width = this.filename.width;
         this.height = this.filename.height;
-        if (solidColor !== undefined) {
-            turnSolidColored(this, solidColor);
+        if (filter !== undefined) {
+            filter(this);
         }
     } else {
         this.img = document.createElement('img');
@@ -40,8 +29,8 @@ var Sprite = function(filename, /* Optional */ solidColor) {
             Sprite.loadedCount++;
             that.width = that.img.width;
             that.height = that.img.height;
-            if (solidColor !== undefined) {
-                turnSolidColored(that, solidColor);
+            if (filter !== undefined) {
+                filter(that);
             }
         };
     }
@@ -51,6 +40,23 @@ var Sprite = function(filename, /* Optional */ solidColor) {
  * Path for graphics files. Set this before creating any Sprite objects.
  */
 Sprite.gfxPath = 'assets/gfx/';
+
+/**
+ * Filter for turning the sprite solid colored.
+ */
+Sprite.turnSolidColored = function(solidColor) {
+    return function(sprite) {
+        var canvas = document.createElement('canvas');
+        canvas.width = sprite.width;
+        canvas.height = sprite.height;
+        var ctx = canvas.getContext('2d');
+        ctx.fillStyle = solidColor;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.globalCompositeOperation = 'destination-in';
+        sprite.draw(ctx, 0, 0);
+        sprite.img = canvas;
+    };
+};
 
 /**
  * How many Sprite objects have been created.

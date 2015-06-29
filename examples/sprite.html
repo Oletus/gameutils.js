@@ -14,7 +14,7 @@ Sprite.gfxPath = 'assets/gfx/';
 var Tester = function() {
     this.time = 0;
     this.carrotSprite = new Sprite('carrot.png');
-    this.blackCarrot = new Sprite('carrot.png', 'black');
+    this.blackCarrot = new Sprite('carrot.png', Sprite.turnSolidColored('black'));
 };
 
 Tester.prototype.update = function() {
