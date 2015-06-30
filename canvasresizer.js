@@ -138,6 +138,7 @@ CanvasResizer.prototype.render = function() {
             }
             this.canvas.style.width = this.canvas.width + 'px';
             this.canvas.style.height = this.canvas.height + 'px';
+            this.canvas.style.marginBottom = '-5px'; // This is to work around a bug in Firefox 38
         } else { // CanvasResizer.Mode.DYNAMIC
             this.canvas.width = parentWidth;
             this.canvas.height = parentHeight;
