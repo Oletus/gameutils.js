@@ -389,7 +389,8 @@ var mathUtil = {
     angleGreater: null,
     ease: null,
     clamp: null,
-    bezierLength: null
+    bezierLength: null,
+    randomInt: null
 };
 
 /**
@@ -528,6 +529,13 @@ mathUtil.bezierLength = function(x0, y0, x1, y1, x2, y2, steps) {
         prevY = yd;
     }
     return len;
+};
+
+/**
+ * @return {number} Random integer between 0 and max, inclusive.
+ */
+mathUtil.randomInt = function(max) {
+    return Math.floor(Math.random() * (max + 1));
 };
 
 /**
