@@ -19,7 +19,7 @@
  *
  * debugMode: boolean
  *  If Mousetrap is imported, you may hold F to speed up the game
- *  execution while in debug mode.
+ *  execution or G to slow it down while in debug mode.
  *
  * frameLog: boolean
  *  When frame log is on, a timeline of frames is drawn on the canvas returned
@@ -117,15 +117,24 @@ var startMainLoop = function(updateables, options) {
     document.addEventListener('visibilitychange', visibilityChange);
 
     var fastForward = false;
+    var slowedDown = false;
     if (options.debugMode && 'Mousetrap' in window && 'bindGlobal' in Mousetrap) {
         var speedUp = function() {
             fastForward = true;
         };
-        var slowDown = function() {
+        var noSpeedUp = function() {
             fastForward = false;
         };
+        var slowDown = function() {
+            slowedDown = true;
+        };
+        var noSlowDown = function() {
+            slowedDown = false;
+        };
         Mousetrap.bindGlobal('f', speedUp, 'keydown');
-        Mousetrap.bindGlobal('f', slowDown, 'keyup');
+        Mousetrap.bindGlobal('f', noSpeedUp, 'keyup');
+        Mousetrap.bindGlobal('g', slowDown, 'keydown');
+        Mousetrap.bindGlobal('g', noSlowDown, 'keyup');
     }
 
     var frame = function() {
@@ -152,7 +161,11 @@ var startMainLoop = function(updateables, options) {
             if (fastForward) {
                 nextFrameTime += timePerUpdate / 5;
             } else {
-                nextFrameTime += timePerUpdate;
+                if (slowedDown) {
+                    nextFrameTime += timePerUpdate * 5;
+                } else {
+                    nextFrameTime += timePerUpdate;
+                }
             }
             for (var i = 0; i < updateables.length; ++i) {
                 updateables[i].update(timePerUpdate * 0.001);
