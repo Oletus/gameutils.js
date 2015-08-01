@@ -46,7 +46,7 @@ ParticleEngine.prototype.update = function(deltaTime) {
 /**
  * Draw the particle effects.
  * @param {CanvasRenderingContext2D|Object} ctx A context to draw the particles to. In case you have a custom
- * appearance function, 
+ * appearance function, the context will be passed to that.
  */
 ParticleEngine.prototype.render = function(ctx) {
     if (ctx instanceof CanvasRenderingContext2D) {
