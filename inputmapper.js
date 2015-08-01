@@ -36,8 +36,12 @@ InputMapper.Controller = function(controllerType, controllerIndex) {
 
 /**
  * Reset the map between controllers and player numbers.
+ * @param {number?} maxPlayers Maximum player count. Default is to keep existing value.
  */
-InputMapper.prototype.resetPlayerMap = function() {
+InputMapper.prototype.resetPlayerMap = function(maxPlayers) {
+    if (maxPlayers !== undefined) {
+        this.maxPlayers = maxPlayers;
+    }
     this.players = []; // An array of arrays of controllers. Each player can have multiple controllers.
     for (var i = 0; i < this.maxPlayers; ++i) {
         this.players.push([]);
