@@ -1133,3 +1133,8 @@ canvasUtil.clipRect = function(ctx, rect) {
     ctx.rect(xywh.x, xywh.y, xywh.w, xywh.h);
     ctx.clip();
 };
+
+canvasUtil.flipY = function(ctx) {
+    ctx.scale(1, -1);
+    ctx.translate(0, -ctx.canvas.height);
+};
