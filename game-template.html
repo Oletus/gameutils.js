@@ -39,14 +39,15 @@ var Game = function(resizer) {
 };
 
 Game.prototype.render = function(ctx) {
-    // CanvasResizer returns a wrapped 2D context to use when run in FIXED_COORDINATE_SYSTEM mode, where
-    // ctx.canvas.width/height are set to the coordinate system width/height.
+    // CanvasResizer passes a wrapped 2D context to use here when run in FIXED_COORDINATE_SYSTEM mode,
+    // where ctx.canvas.width/height are set to the coordinate system width/height.
+    // Otherwise the context initialized here is used.
     if (ctx === undefined) {
         ctx = this.realCtx;
     }
     ctx.fillStyle = cssUtil.rgbString([0, 0, (Math.sin(this.time) * 0.5 + 0.5) * 255]);
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    return this.ctx;
+    return ctx;
 };
 
 Game.prototype.update = function(deltaTime) {
