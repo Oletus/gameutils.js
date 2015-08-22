@@ -173,3 +173,102 @@ TileMap.prototype.overlapsTiles = function(rect, matchFunc) {
     var tileMax = this.tileAt(rect.right - epsilon, rect.bottom - epsilon);
     return this.tileInArea(tile, tileMax, matchFunc);
 };
+
+/**
+ * Move an object inside the given tile map colliding with it.
+ * This function should be added as a member function to an object that wants to use it.
+ * Requires following properties in the TileMap coordinate system on the object the function
+ * is applied to:
+ * x, y, dx, dy, getRect()
+ * Properties to react to y collisions:
+ * touchGround(), touchCeiling()
+ */
+TileMap.moveAndCollide = function(deltaTime, dim, tileMap, isWall, colliders) {
+    var rect = this.getRect();
+    if (dim == 'x') {
+        var delta = this.dx * deltaTime;
+        var wallX = this.x; // Position where the character will be stuck if it meets a wall.
+        var rectRightHalfWidth = rect.right - this.x;
+        var rectLeftHalfWidth = this.x - rect.left;
+        if (Math.abs(delta) > 0) {
+            this.x += delta;
+            var xColliders = [];
+            if (colliders !== undefined) {
+                for (var i = 0; i < colliders.length; ++i) {
+                    if (colliders[i] === this) {
+                        continue;
+                    }
+                    var collider = colliders[i].getRect();
+                    if (rect.top < collider.bottom && collider.top < rect.bottom) {
+                        xColliders.push(collider);
+                    }
+                }
+            }
+            if (delta > 0) {
+                wallX = tileMap.nearestTileRightFromRect(rect, isWall);
+                for (var i = 0; i < xColliders.length; ++i) {
+                    if (xColliders[i].right > rect.left && wallX > xColliders[i].left) {
+                        wallX = xColliders[i].left;
+                    }
+                }
+                if (this.x > wallX - rectRightHalfWidth) {
+                    this.x = wallX - rectRightHalfWidth;
+                }
+            } else {
+                wallX = tileMap.nearestTileLeftFromRect(rect, isWall) + 1;
+                for (var i = 0; i < xColliders.length; ++i) {
+                    if (xColliders[i].left < rect.right && wallX < xColliders[i].right) {
+                        wallX = xColliders[i].right;
+                    }
+                }
+                if (this.x < wallX + rectLeftHalfWidth) {
+                    this.x = wallX + rectLeftHalfWidth;
+                }
+            }
+        }
+    }
+    if (dim == 'y') {
+        var delta = this.dy * deltaTime;
+        var wallY = this.y; // Position where the character will be stuck if it meets a wall.
+        var rectBottomHalfHeight = rect.bottom - this.y;
+        var rectTopHalfHeight = this.y - rect.top;
+        if (Math.abs(delta) > 0) {
+            this.y += delta;
+            var yColliders = [];
+            if (colliders !== undefined) {
+                for (var i = 0; i < colliders.length; ++i) {
+                    if (colliders[i] === this) {
+                        continue;
+                    }
+                    var collider = colliders[i].getRect();
+                    if (rect.left < collider.right && collider.left < rect.right) {
+                        yColliders.push(collider);
+                    }
+                }
+            }
+            if (delta > 0) {
+                wallY = tileMap.nearestTileDownFromRect(rect, isWall);
+                for (var i = 0; i < yColliders.length; ++i) {
+                    if (yColliders[i].bottom > rect.top && wallY > yColliders[i].top) {
+                        wallY = yColliders[i].top;
+                    }
+                }
+                if (this.y > wallY - rectBottomHalfHeight) {
+                    this.y = wallY - rectBottomHalfHeight;
+                    this.touchGround();
+                }
+            } else {
+                wallY = tileMap.nearestTileUpFromRect(rect, isWall) + 1;
+                for (var i = 0; i < yColliders.length; ++i) {
+                    if (yColliders[i].top < rect.bottom && wallY < yColliders[i].bottom) {
+                        wallY = yColliders[i].bottom;
+                    }
+                }
+                if (this.y < wallY + rectTopHalfHeight) {
+                    this.y = wallY + rectTopHalfHeight;
+                    this.touchCeiling();
+                }
+            }
+        }
+    }
+};
