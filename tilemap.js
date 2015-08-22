@@ -1,6 +1,10 @@
 'use strict';
 
 /**
+ * Using TileMap requires the Vec2 and Rect classes from util2d.
+ */
+
+/**
  * A 2D grid made out of tiles. Tiles can be of any type, but they are strings by default.
  * @constructor
  */
