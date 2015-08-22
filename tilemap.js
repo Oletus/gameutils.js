@@ -182,6 +182,13 @@ TileMap.prototype.overlapsTiles = function(rect, matchFunc) {
  * x, y, dx, dy, getRect()
  * Properties to react to y collisions:
  * touchGround(), touchCeiling()
+ * @param {number} deltaTime Time step to use to move the object.
+ * @param {string} dim Either 'x' or 'y' to move the object horizontally or vertically.
+ * @param {TileMap} tileMap Tile map to collide against.
+ * @param {function} isWall A function that takes a tile and returns boolean indicating whether
+ * it is a wall for the purposes of collision.
+ * @param {Array?} colliders List of objects with a getRect() function to collide against. The moved
+ * object is automatically excluded in case it is in this array.
  */
 TileMap.moveAndCollide = function(deltaTime, dim, tileMap, isWall, colliders) {
     var rect = this.getRect();
