@@ -74,6 +74,7 @@ TileMap.epsilon = 0.0001;
 /**
  * @param {Vec2} tileMin
  * @param {Vec2} tileMax
+ * @param {function} matchFunc Gets passed a tile and returns true if it matches.
  * @return {boolean} True if there are matching tiles within the area limited by tileMin and tileMax
  * Coordinates are inclusive.
  */
@@ -89,14 +90,18 @@ TileMap.prototype.tileInArea = function(tileMin, tileMax, matchFunc) {
 };
 
 /**
+ * @param {Rect} rect Rect to test.
+ * @param {function} matchFunc Gets passed a tile and returns true if it matches.
+ * @param {number} maxDistance How far from the rect to extend the search.
  * @return {number} x X coordinate of the matching tile, or -1 if no match found.
  */
-TileMap.prototype.nearestTileLeftFromRect = function(rect, matchFunc) {
+TileMap.prototype.nearestTileLeftFromRect = function(rect, matchFunc, maxDistance) {
     var epsilon = TileMap.epsilon;
     var tileMin = this.tileAt(rect.left + epsilon, rect.top + epsilon);
     var tileMax = this.tileAt(rect.left + epsilon, rect.bottom - epsilon);
     var match = false;
-    while (!match && tileMin.x >= 0) {
+    var minX = Math.floor(rect.left - maxDistance);
+    while (!match && tileMin.x >= 0 && tileMin.x >= minX) {
         // Test one column of tiles
         match = this.tileInArea(tileMin, tileMax, matchFunc);
         if (!match) {
@@ -108,14 +113,18 @@ TileMap.prototype.nearestTileLeftFromRect = function(rect, matchFunc) {
 };
 
 /**
+ * @param {Rect} rect Rect to test.
+ * @param {function} matchFunc Gets passed a tile and returns true if it matches.
+ * @param {number} maxDistance How far from the rect to extend the search.
  * @return {number} x X coordinate of the matching tile, or -1 if no match found.
  */
-TileMap.prototype.nearestTileRightFromRect = function(rect, matchFunc) {
+TileMap.prototype.nearestTileRightFromRect = function(rect, matchFunc, maxDistance) {
     var epsilon = TileMap.epsilon;
     var tileMin = this.tileAt(rect.right - epsilon, rect.top + epsilon);
     var tileMax = this.tileAt(rect.right - epsilon, rect.bottom - epsilon);
     var match = false;
-    while (!match && tileMin.x < this.width) {
+    var maxX = Math.floor(rect.right + maxDistance);
+    while (!match && tileMin.x < this.width && tileMax.x <= maxX) {
         // Test one column of tiles
         match = this.tileInArea(tileMin, tileMax, matchFunc);
         if (!match) {
@@ -127,14 +136,18 @@ TileMap.prototype.nearestTileRightFromRect = function(rect, matchFunc) {
 };
 
 /**
+ * @param {Rect} rect Rect to test.
+ * @param {function} matchFunc Gets passed a tile and returns true if it matches.
+ * @param {number} maxDistance How far from the rect to extend the search.
  * @return {number} y Y coordinate of the matching tile, or -1 if no match found.
  */
-TileMap.prototype.nearestTileUpFromRect = function(rect, matchFunc) {
+TileMap.prototype.nearestTileUpFromRect = function(rect, matchFunc, maxDistance) {
     var epsilon = TileMap.epsilon;
     var tileMin = this.tileAt(rect.left + epsilon, rect.top + epsilon);
     var tileMax = this.tileAt(rect.right - epsilon, rect.top + epsilon);
     var match = false;
-    while (!match && tileMin.y >= 0) {
+    var minY = Math.floor(rect.top - maxDistance);
+    while (!match && tileMin.y >= 0 && tileMin.y >= minY) {
         // Test one column of tiles
         match = this.tileInArea(tileMin, tileMax, matchFunc);
         if (!match) {
@@ -146,14 +159,18 @@ TileMap.prototype.nearestTileUpFromRect = function(rect, matchFunc) {
 };
 
 /**
+ * @param {Rect} rect Rect to test.
+ * @param {function} matchFunc Gets passed a tile and returns true if it matches.
+ * @param {number} maxDistance How far from the rect to extend the search.
  * @return {number} y Y coordinate of the matching tile, or -1 if no match found.
  */
-TileMap.prototype.nearestTileDownFromRect = function(rect, matchFunc) {
+TileMap.prototype.nearestTileDownFromRect = function(rect, matchFunc, maxDistance) {
     var epsilon = TileMap.epsilon;
     var tileMin = this.tileAt(rect.left + epsilon, rect.bottom - epsilon);
     var tileMax = this.tileAt(rect.right - epsilon, rect.bottom - epsilon);
     var match = false;
-    while (!match && tileMin.y < this.height) {
+    var maxY = Math.floor(rect.bottom + maxDistance);
+    while (!match && tileMin.y < this.height && tileMax.y <= maxY) {
         // Test one column of tiles
         match = this.tileInArea(tileMin, tileMax, matchFunc);
         if (!match) {
@@ -212,7 +229,10 @@ TileMap.moveAndCollide = function(deltaTime, dim, tileMap, isWall, colliders) {
                 }
             }
             if (delta > 0) {
-                wallX = tileMap.nearestTileRightFromRect(rect, isWall);
+                wallX = tileMap.nearestTileRightFromRect(rect, isWall, Math.abs(delta));
+                if (wallX == -1) {
+                    wallX = tileMap.width;
+                }
                 for (var i = 0; i < xColliders.length; ++i) {
                     if (xColliders[i].right > rect.left && wallX > xColliders[i].left) {
                         wallX = xColliders[i].left;
@@ -222,7 +242,7 @@ TileMap.moveAndCollide = function(deltaTime, dim, tileMap, isWall, colliders) {
                     this.x = wallX - rectRightHalfWidth;
                 }
             } else {
-                wallX = tileMap.nearestTileLeftFromRect(rect, isWall) + 1;
+                wallX = tileMap.nearestTileLeftFromRect(rect, isWall, Math.abs(delta)) + 1;
                 for (var i = 0; i < xColliders.length; ++i) {
                     if (xColliders[i].left < rect.right && wallX < xColliders[i].right) {
                         wallX = xColliders[i].right;
@@ -254,7 +274,10 @@ TileMap.moveAndCollide = function(deltaTime, dim, tileMap, isWall, colliders) {
                 }
             }
             if (delta > 0) {
-                wallY = tileMap.nearestTileDownFromRect(rect, isWall);
+                wallY = tileMap.nearestTileDownFromRect(rect, isWall, Math.abs(delta));
+                if (wallY == -1) {
+                    wallY = tileMap.height;
+                }
                 for (var i = 0; i < yColliders.length; ++i) {
                     if (yColliders[i].bottom > rect.top && wallY > yColliders[i].top) {
                         wallY = yColliders[i].top;
@@ -265,7 +288,7 @@ TileMap.moveAndCollide = function(deltaTime, dim, tileMap, isWall, colliders) {
                     this.touchGround();
                 }
             } else {
-                wallY = tileMap.nearestTileUpFromRect(rect, isWall) + 1;
+                wallY = tileMap.nearestTileUpFromRect(rect, isWall, Math.abs(delta)) + 1;
                 for (var i = 0; i < yColliders.length; ++i) {
                     if (yColliders[i].top < rect.bottom && wallY < yColliders[i].bottom) {
                         wallY = yColliders[i].bottom;
