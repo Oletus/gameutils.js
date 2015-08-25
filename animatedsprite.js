@@ -60,7 +60,7 @@ var AnimatedSprite = function(animationData, options) {
  * Default constructor for single frames. Set this before loading any animations.
  */
 AnimatedSprite.frameConstructor = null;
-if ('Sprite' in window) {
+if (typeof Sprite !== 'undefined') {
     AnimatedSprite.frameConstructor = Sprite;
 }
 

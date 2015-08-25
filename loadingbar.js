@@ -9,10 +9,10 @@
 var LoadingBar = function(objectsToPoll) {
     if (objectsToPoll === undefined) {
         objectsToPoll = [];
-        if ('Sprite' in window) {
+        if (typeof Sprite !== 'undefined') {
             objectsToPoll.push(Sprite);
         }
-        if ('Audio' in window) {
+        if (typeof Audio !== 'undefined') {
             objectsToPoll.push(Audio);
         }
     }

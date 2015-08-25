@@ -53,7 +53,7 @@ var startMainLoop = function(updateables, options) {
     }
 
     var now = function() {
-        if ('performance' in window && 'now' in performance) {
+        if (typeof performance !== 'undefined' && 'now' in performance) {
             return performance.now();
         } else {
             return Date.now();
@@ -118,7 +118,7 @@ var startMainLoop = function(updateables, options) {
 
     var fastForward = false;
     var slowedDown = false;
-    if (options.debugMode && 'Mousetrap' in window && 'bindGlobal' in Mousetrap) {
+    if (options.debugMode && typeof Mousetrap !== 'undefined' && 'bindGlobal' in Mousetrap) {
         var speedUp = function() {
             fastForward = true;
         };

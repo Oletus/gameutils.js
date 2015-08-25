@@ -228,7 +228,7 @@ CanvasResizer.prototype.getCanvasPosition = function(event) {
         xRel *= coordWidth / rect.width;
         yRel *= coordHeight / rect.height;
     }
-    if ('Vec2' in window) {
+    if (typeof Vec2 !== 'undefined') {
         return new Vec2(xRel, yRel);
     } else {
         return {x: xRel, y: yRel};

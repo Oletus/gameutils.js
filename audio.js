@@ -25,7 +25,7 @@ var Audio = function(filename, fileExtensions) {
         this.filenames.push(Audio.audioPath + filename + '.' + fileExtensions[i]);
     }
     // Don't use howler when using the file protocol, since it requires CORS requests
-    if ('Howl' in window && window.location.origin.substring(0, 4) != 'file') {
+    if (typeof Howl !== 'undefined' && window.location.origin.substring(0, 4) != 'file') {
         // Use howler.js to implement Audio
         this._howl = new Howl({
             src: this.filenames,
