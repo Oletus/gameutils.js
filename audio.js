@@ -131,9 +131,6 @@ Audio.prototype.addSourcesTo = function(audioElement) {
  * Play a clone of this sample. Will not affect other clones. Playback will not loop and playback can not be stopped.
  */
 Audio.prototype.play = function () {
-    if (Audio.allMuted) {
-        return;
-    }
     if (this._howl) {
         this._howl.play();
         return;
@@ -153,9 +150,6 @@ Audio.prototype.play = function () {
  * @param {boolean=} loop Whether the sample should loop when played. Defaults to false.
  */
 Audio.prototype.playSingular = function (loop) {
-    if (Audio.allMuted) {
-        return;
-    }
     if (loop === undefined) {
         loop = false;
     }
@@ -214,6 +208,9 @@ Audio.prototype.ensureOneClone = function() {
         }
     }
     var clone = document.createElement('audio');
+    if (Audio.allMuted) {
+        clone.muted = true;
+    }
     this.addSourcesTo(clone);
     this.clones.push(clone);
     return clone;
