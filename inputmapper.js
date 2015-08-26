@@ -5,6 +5,7 @@
  * This can be used to implement keyboard / gamepad controls for a single player or a local
  * multiplayer game that allows players on the keyboard to play against players on gamepads.
  * Requires gamepad.js, mousetrap.js and mousetrap-global-bind.js to be included.
+ * @constructor
  * @param {Object} callbackObj Object on which the callback functions will be called.
  * @param {number} maxPlayers Maximum number of players. If there are more active controllers
  * than this, then two controllers may be mapped to the same player.
@@ -24,6 +25,7 @@ InputMapper.KEYBOARD = 1;
 
 /**
  * Helper class to store the controller config each player has.
+ * @constructor
  * @param {number} controllerType Controller type: either InputMapper.GAMEPAD or InputMapper.KEYBOARD
  * @param {number} controllerIndex Controller index: in case of keyboard, index into the array of keyboard keys given
  * to addListener. In case of gamepad, index of the gamepad.

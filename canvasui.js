@@ -4,6 +4,7 @@
 
 /**
  * Class for rendering and interacting with UI elements on a canvas.
+ * @constructor
  */
 var CanvasUI = function(options) {
     var defaults = {
@@ -163,6 +164,7 @@ CanvasUI.minimumClickInterval = 0.5;
 /**
  * A single UI element to draw on a canvas, typically either a button or a label.
  * Will be rendered with text by default, but can also be drawn with a custom rendering function renderFunc.
+ * @constructor
  */
 var CanvasUIElement = function(options) {
     var defaults = {

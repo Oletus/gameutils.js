@@ -1,5 +1,8 @@
 'use strict';
 
+/**
+ * @constructor
+ */
 var Gamepad = function(callbackObj) {
     this.downListeners = [];
     this.indexToPlayer = {};

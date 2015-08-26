@@ -3,6 +3,7 @@
 /**
  * A class to help keeping canvas size suitable for the window or parent
  * element size and screen resolution.
+ * @constructor
  * @param {Object} options Object with the following optional keys:
  *  canvas: HTMLCanvasElement (one is created by default)
  *  mode: CanvasResizer.Mode (defaults to filling the window)

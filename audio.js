@@ -81,7 +81,7 @@ Audio.allMuted = false;
  */
 Audio.muteAll = function(mute) {
     Audio.allMuted = mute;
-    if (this._howl) {
+    if (typeof Howler !== 'undefined') {
         if (mute) {
             Howler.mute();
         } else {

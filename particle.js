@@ -2,6 +2,7 @@
 
 /**
  * A particle engine to run particle effects.
+ * @constructor
  * @param {Object} options Options for the particle engine.
  */
 var ParticleEngine = function(options) {
@@ -64,6 +65,7 @@ ParticleEngine.prototype.render = function(ctx) {
  * A class that can generate particles based on a distribution of angles/velocities.
  * The class only has parameters for generating particles - you need to call emitParticle
  * when you actually want to create a particle based on the parameters.
+ * @constructor
  * @param {Object} options Options to use on this ParticleEmitter.
  */
 var ParticleEmitter = function(options) {
@@ -126,6 +128,7 @@ ParticleEmitter.prototype.emitParticle = function(options) {
 
 /**
  * Flexible class for implementing particle effects.
+ * @constructor
  */
 var Particle = function(options) {
     var defaults = {

@@ -2,6 +2,7 @@
 
 /**
  * An object for storing animations.
+ * @constructor
  * @param {Object} animationData Data for animation frames. Keys are animation ids. 
  * Values are arrays containing objects specifying frames.
  * Each frame has two mandatory keys: 'src' for frame source and 'duration' for a duration in milliseconds.
@@ -89,6 +90,7 @@ AnimatedSprite._getFrame = (function() {
 
 /**
  * An object that stores the current state of an animated sprite.
+ * @constructor
  * @param {AnimatedSprite} animatedSprite The animated sprite to use.
  * @param {function=} finishedFrameCallback A callback to execute when an animation has finished. Can be used to
  * switch to a different animation, for example. Takes the finished animation key as a parameter.
