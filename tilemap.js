@@ -192,34 +192,32 @@ TileMap.prototype.overlapsTiles = function(rect, matchFunc) {
 };
 
 /**
- * Move an object inside the given tile map colliding with it.
- * This function should be added as a member function to an object that wants to use it.
- * Requires following properties in the TileMap coordinate system on the object the function
- * is applied to:
- * x, y, dx, dy, getRect()
+ * Move an object inside the given tile map along one axis, reacting to collisions.
+ * @param {Object} movingObj Object that moves inside the TileMap. Needs to have the following
+ * properties in the TileMap coordinate system:
+ *   x, y, dx, dy, getRect()
  * Properties to react to y collisions:
- * touchGround(), touchCeiling()
+ *   touchGround(), touchCeiling()
  * @param {number} deltaTime Time step to use to move the object.
  * @param {string} dim Either 'x' or 'y' to move the object horizontally or vertically.
- * @param {TileMap} tileMap Tile map to collide against.
  * @param {function} isWall A function that takes a tile and returns boolean indicating whether
  * it is a wall for the purposes of collision.
  * @param {Array?} colliders List of objects with a getRect() function to collide against. The moved
  * object is automatically excluded in case it is in this array.
  */
-TileMap.moveAndCollide = function(deltaTime, dim, tileMap, isWall, colliders) {
-    var rect = this.getRect();
+TileMap.prototype.moveAndCollide = function(movingObj, deltaTime, dim, isWall, colliders) {
+    var rect = movingObj.getRect();
     if (dim == 'x') {
-        var delta = this.dx * deltaTime;
-        var wallX = this.x; // Position where the character will be stuck if it meets a wall.
-        var rectRightHalfWidth = rect.right - this.x;
-        var rectLeftHalfWidth = this.x - rect.left;
+        var delta = movingObj.dx * deltaTime;
+        var wallX = movingObj.x; // Position where the character will be stuck if it meets a wall.
+        var rectRightHalfWidth = rect.right - movingObj.x;
+        var rectLeftHalfWidth = movingObj.x - rect.left;
         if (Math.abs(delta) > 0) {
-            this.x += delta;
+            movingObj.x += delta;
             var xColliders = [];
             if (colliders !== undefined) {
                 for (var i = 0; i < colliders.length; ++i) {
-                    if (colliders[i] === this) {
+                    if (colliders[i] === movingObj) {
                         continue;
                     }
                     var collider = colliders[i].getRect();
@@ -229,42 +227,42 @@ TileMap.moveAndCollide = function(deltaTime, dim, tileMap, isWall, colliders) {
                 }
             }
             if (delta > 0) {
-                wallX = tileMap.nearestTileRightFromRect(rect, isWall, Math.abs(delta));
+                wallX = this.nearestTileRightFromRect(rect, isWall, Math.abs(delta));
                 if (wallX == -1) {
-                    wallX = tileMap.width;
+                    wallX = this.width;
                 }
                 for (var i = 0; i < xColliders.length; ++i) {
                     if (xColliders[i].right > rect.left && wallX > xColliders[i].left) {
                         wallX = xColliders[i].left;
                     }
                 }
-                if (this.x > wallX - rectRightHalfWidth) {
-                    this.x = wallX - rectRightHalfWidth;
+                if (movingObj.x > wallX - rectRightHalfWidth) {
+                    movingObj.x = wallX - rectRightHalfWidth;
                 }
             } else {
-                wallX = tileMap.nearestTileLeftFromRect(rect, isWall, Math.abs(delta)) + 1;
+                wallX = this.nearestTileLeftFromRect(rect, isWall, Math.abs(delta)) + 1;
                 for (var i = 0; i < xColliders.length; ++i) {
                     if (xColliders[i].left < rect.right && wallX < xColliders[i].right) {
                         wallX = xColliders[i].right;
                     }
                 }
-                if (this.x < wallX + rectLeftHalfWidth) {
-                    this.x = wallX + rectLeftHalfWidth;
+                if (movingObj.x < wallX + rectLeftHalfWidth) {
+                    movingObj.x = wallX + rectLeftHalfWidth;
                 }
             }
         }
     }
     if (dim == 'y') {
-        var delta = this.dy * deltaTime;
-        var wallY = this.y; // Position where the character will be stuck if it meets a wall.
-        var rectBottomHalfHeight = rect.bottom - this.y;
-        var rectTopHalfHeight = this.y - rect.top;
+        var delta = movingObj.dy * deltaTime;
+        var wallY = movingObj.y; // Position where the character will be stuck if it meets a wall.
+        var rectBottomHalfHeight = rect.bottom - movingObj.y;
+        var rectTopHalfHeight = movingObj.y - rect.top;
         if (Math.abs(delta) > 0) {
-            this.y += delta;
+            movingObj.y += delta;
             var yColliders = [];
             if (colliders !== undefined) {
                 for (var i = 0; i < colliders.length; ++i) {
-                    if (colliders[i] === this) {
+                    if (colliders[i] === movingObj) {
                         continue;
                     }
                     var collider = colliders[i].getRect();
@@ -274,29 +272,29 @@ TileMap.moveAndCollide = function(deltaTime, dim, tileMap, isWall, colliders) {
                 }
             }
             if (delta > 0) {
-                wallY = tileMap.nearestTileDownFromRect(rect, isWall, Math.abs(delta));
+                wallY = this.nearestTileDownFromRect(rect, isWall, Math.abs(delta));
                 if (wallY == -1) {
-                    wallY = tileMap.height;
+                    wallY = this.height;
                 }
                 for (var i = 0; i < yColliders.length; ++i) {
                     if (yColliders[i].bottom > rect.top && wallY > yColliders[i].top) {
                         wallY = yColliders[i].top;
                     }
                 }
-                if (this.y > wallY - rectBottomHalfHeight) {
-                    this.y = wallY - rectBottomHalfHeight;
-                    this.touchGround();
+                if (movingObj.y > wallY - rectBottomHalfHeight) {
+                    movingObj.y = wallY - rectBottomHalfHeight;
+                    movingObj.touchGround();
                 }
             } else {
-                wallY = tileMap.nearestTileUpFromRect(rect, isWall, Math.abs(delta)) + 1;
+                wallY = this.nearestTileUpFromRect(rect, isWall, Math.abs(delta)) + 1;
                 for (var i = 0; i < yColliders.length; ++i) {
                     if (yColliders[i].top < rect.bottom && wallY < yColliders[i].bottom) {
                         wallY = yColliders[i].bottom;
                     }
                 }
-                if (this.y < wallY + rectTopHalfHeight) {
-                    this.y = wallY + rectTopHalfHeight;
-                    this.touchCeiling();
+                if (movingObj.y < wallY + rectTopHalfHeight) {
+                    movingObj.y = wallY + rectTopHalfHeight;
+                    movingObj.touchCeiling();
                 }
             }
         }
