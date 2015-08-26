@@ -1102,27 +1102,6 @@ canvasUtil.lightStroke = function(ctx) {
 };
 
 /**
- * NOTE: Didn't work on released browsers other than Firefox yet on 2014-01-24.
- * @param {CanvasRenderingContext2D} ctx The canvas rendering context.
- * @return {SVGMatrix} The current transform of the canvas rendering context.
- */
-canvasUtil.getCurrentTransform = function(ctx) {
-    var t = null;
-    if (ctx.mozCurrentTransform) {
-        t = canvasUtil.dummySvg.createSVGMatrix();
-        t.a = ctx.mozCurrentTransform[0];
-        t.b = ctx.mozCurrentTransform[1];
-        t.c = ctx.mozCurrentTransform[2];
-        t.d = ctx.mozCurrentTransform[3];
-        t.e = ctx.mozCurrentTransform[4];
-        t.f = ctx.mozCurrentTransform[5];
-    } else {
-        t = ctx.currentTransform.scale(1);
-    }
-    return t;
-};
-
-/**
  * Set the canvas clip rectangle.
  * @param {CanvasRenderingContext2D} ctx Context to set the rectangle to.
  * @param {Rect} rect Rectangle to set as canvas clip rectangle.
