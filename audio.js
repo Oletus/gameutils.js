@@ -110,8 +110,9 @@ Audio.loadedCount = 0;
 
 /**
  * @return {number} Amount of Audio objects that have been fully loaded per amount that has been created.
+ * Name specified as string to support Closure compiler together with loadingbar.js.
  */
-Audio.loadedFraction = function() {
+Audio['loadedFraction'] = function() {
     return Audio.loadedCount / Audio.allAudio.length;
 };
 

@@ -36,7 +36,8 @@ LoadingBar.prototype.update = function(deltaTime) {
     this.loadedFraction = 0;
     this.allLoaded = true;
     for (var i = 0; i < this.objectsToPoll.length; ++i) {
-        var loadedFraction = this.objectsToPoll[i].loadedFraction();
+        // 'loadedFraction' function name specified as string to support Closure compiler.
+        var loadedFraction = this.objectsToPoll[i]['loadedFraction']();
         if (loadedFraction < 1) {
             this.allLoaded = false;
         }

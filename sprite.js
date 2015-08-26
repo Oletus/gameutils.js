@@ -117,8 +117,9 @@ Sprite.loadedCount = 0;
 
 /**
  * @return {number} Amount of Sprite objects that have been fully loaded per amount that has been created.
+ * Name specified as string to support Closure compiler together with loadingbar.js.
  */
-Sprite.loadedFraction = function() {
+Sprite['loadedFraction'] = function() {
     return Sprite.loadedCount / Sprite.createdCount;
 };
 
