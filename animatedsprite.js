@@ -101,17 +101,24 @@ var AnimatedSpriteInstance = function(animatedSprite, finishedAnimationCallback)
     this.setAnimation(this.animatedSprite.defaultAnimation);
     var frame = this.animatedSprite.animations[this.animationKey][this.frame].frame;
 
-    // Add draw functions dynamically - this is a bit inefficient, but makes this class very generic.
-    var that = this;
-    for (var key in frame) {
-        if ((typeof(frame[key]) === 'function') && key.substr(0, 4) === 'draw') {
-            (function(drawFuncName) {
-                that[drawFuncName] = function() {
-                    var frame = that.getCurrentFrame();
-                    frame[drawFuncName].apply(frame, arguments);
-                }
-            })(key);
-        }
+    // Add draw functions from Sprite if they are defined
+    // A bit slow way to do this but needed to make the animation classes more generic.
+    if (frame instanceof Sprite && frame.draw !== undefined &&
+        frame.drawRotated !== undefined && frame.drawRotatedNonUniform !== undefined)
+    {
+        var that = this;
+        this.draw = function(ctx, leftX, topY) {
+            var frame = that.getCurrentFrame();
+            frame.draw(ctx, leftX, topY);
+        };
+        this.drawRotated = function(ctx, centerX, centerY, angleRadians, /* optional */ scale) {
+            var frame = that.getCurrentFrame();
+            frame.drawRotated(ctx, centerX, centerY, angleRadians, /* optional */ scale);
+        };
+        this.drawRotatedNonUniform = function(ctx, centerX, centerY, angleRadians, scaleX, scaleY) {
+            var frame = that.getCurrentFrame();
+            frame.drawRotatedNonUniform(ctx, centerX, centerY, angleRadians, scaleX, scaleY);
+        };
     }
 };
 
