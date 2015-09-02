@@ -159,8 +159,8 @@ InputMapper.prototype.addListener = function(gamepadButton, keyboardButtons, dow
                     upCallback.call(that.callbackObj, player);
                 }
             };
-            Mousetrap.bindGlobal(keyboardButtons[kbIndex], keyDownCallback, 'keydown');
-            Mousetrap.bindGlobal(keyboardButtons[kbIndex], keyUpCallback, 'keyup');
+            window.Mousetrap.bindGlobal(keyboardButtons[kbIndex], keyDownCallback, 'keydown');
+            window.Mousetrap.bindGlobal(keyboardButtons[kbIndex], keyUpCallback, 'keyup');
         })(i);
         if (downCallback !== undefined) {
             this.callbacks.push({key: keyboardButtons[i], callback: downCallback, controllerType: InputMapper.KEYBOARD, kbIndex: i});

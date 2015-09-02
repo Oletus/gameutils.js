@@ -118,7 +118,7 @@ var startMainLoop = function(updateables, options) {
 
     var fastForward = false;
     var slowedDown = false;
-    if (options.debugMode && typeof Mousetrap !== 'undefined' && 'bindGlobal' in Mousetrap) {
+    if (options.debugMode && typeof window.Mousetrap !== 'undefined' && window.Mousetrap.bindGlobal !== undefined) {
         var speedUp = function() {
             fastForward = true;
         };
@@ -131,10 +131,10 @@ var startMainLoop = function(updateables, options) {
         var noSlowDown = function() {
             slowedDown = false;
         };
-        Mousetrap.bindGlobal('f', speedUp, 'keydown');
-        Mousetrap.bindGlobal('f', noSpeedUp, 'keyup');
-        Mousetrap.bindGlobal('g', slowDown, 'keydown');
-        Mousetrap.bindGlobal('g', noSlowDown, 'keyup');
+        window.Mousetrap.bindGlobal('f', speedUp, 'keydown');
+        window.Mousetrap.bindGlobal('f', noSpeedUp, 'keyup');
+        window.Mousetrap.bindGlobal('g', slowDown, 'keydown');
+        window.Mousetrap.bindGlobal('g', noSlowDown, 'keyup');
     }
 
     var frame = function() {
