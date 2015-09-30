@@ -69,7 +69,7 @@ TileMap.prototype.render = function(ctx, matchFunc) {
     }
 };
 
-TileMap.epsilon = 0.0001;
+TileMap.epsilon = 0.00001;
 
 /**
  * @param {Vec2} tileMin
@@ -236,8 +236,8 @@ TileMap.prototype.moveAndCollide = function(movingObj, deltaTime, dim, isWall, c
                         wallX = xColliders[i].left;
                     }
                 }
-                if (movingObj.x > wallX - rectRightHalfWidth) {
-                    movingObj.x = wallX - rectRightHalfWidth;
+                if (movingObj.x > wallX - rectRightHalfWidth - TileMap.epsilon) {
+                    movingObj.x = wallX - rectRightHalfWidth - TileMap.epsilon;
                 }
             } else {
                 wallX = this.nearestTileLeftFromRect(rect, isWall, Math.abs(delta)) + 1;
@@ -246,8 +246,8 @@ TileMap.prototype.moveAndCollide = function(movingObj, deltaTime, dim, isWall, c
                         wallX = xColliders[i].right;
                     }
                 }
-                if (movingObj.x < wallX + rectLeftHalfWidth) {
-                    movingObj.x = wallX + rectLeftHalfWidth;
+                if (movingObj.x < wallX + rectLeftHalfWidth + TileMap.epsilon) {
+                    movingObj.x = wallX + rectLeftHalfWidth + TileMap.epsilon;
                 }
             }
         }
@@ -281,8 +281,8 @@ TileMap.prototype.moveAndCollide = function(movingObj, deltaTime, dim, isWall, c
                         wallY = yColliders[i].top;
                     }
                 }
-                if (movingObj.y > wallY - rectBottomHalfHeight) {
-                    movingObj.y = wallY - rectBottomHalfHeight;
+                if (movingObj.y > wallY - rectBottomHalfHeight - TileMap.epsilon) {
+                    movingObj.y = wallY - rectBottomHalfHeight - TileMap.epsilon;
                     movingObj.touchGround();
                 }
             } else {
@@ -292,8 +292,8 @@ TileMap.prototype.moveAndCollide = function(movingObj, deltaTime, dim, isWall, c
                         wallY = yColliders[i].bottom;
                     }
                 }
-                if (movingObj.y < wallY + rectTopHalfHeight) {
-                    movingObj.y = wallY + rectTopHalfHeight;
+                if (movingObj.y < wallY + rectTopHalfHeight + TileMap.epsilon) {
+                    movingObj.y = wallY + rectTopHalfHeight + TileMap.epsilon;
                     movingObj.touchCeiling();
                 }
             }
