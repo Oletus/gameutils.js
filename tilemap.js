@@ -57,13 +57,31 @@ TileMap.prototype.tileAt = function(x, y) {
 /**
  * A function for debug rendering of the tiles. Will fill rectangles at the
  * coordinates of tiles that match.
+ * @param {CanvasRenderingContext2D} ctx Context to use.
+ * @param {function} matchFunc Gets passed a tile and returns true if the tile should be drawn.
+ * @param {number?} extraY How much to extend the drawn tiles in the y direction. Defaults to 0.
  */
-TileMap.prototype.render = function(ctx, matchFunc) {
+TileMap.prototype.render = function(ctx, matchFunc, extraY) {
+    if (extraY === undefined) {
+        extraY = 0;
+    }
     for (var y = 0; y < this.height; ++y) {
+        var matchingTiles = 0;
+        var firstMatching = 0;
         for (var x = 0; x < this.width; ++x) {
             var tile = this.tiles[y][x];
-            if (matchFunc(tile)) {
-                ctx.fillRect(x, y, 1, 1);
+            var matching = matchFunc(tile);
+            if (matching) {
+                if (matchingTiles == 0) {
+                    firstMatching = x;
+                }
+                matchingTiles++;
+            }
+            if ((!matching || x + 1 >= this.width) && matchingTiles > 0) {
+                ctx.fillRect(firstMatching, y - extraY, matchingTiles, 1.0 + extraY * 2.0);
+            }
+            if (!matching) {
+                matchingTiles = 0;
             }
         }
     }
