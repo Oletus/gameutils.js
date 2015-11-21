@@ -59,11 +59,19 @@ TileMap.prototype.tileAt = function(x, y) {
  * coordinates of tiles that match.
  * @param {CanvasRenderingContext2D} ctx Context to use.
  * @param {function} matchFunc Gets passed a tile and returns true if the tile should be drawn.
- * @param {number?} extraY How much to extend the drawn tiles in the y direction. Defaults to 0.
+ * @param {number?} extraYTop How much to extend the drawn tiles in the y direction. Defaults to 0.
+ * @param {number?} extraYBottom How much to extend the drawn tiles in the y direction. Defaults to 0.
+ * @param {number?} extraX How much to extend the drawn tiles in the x direction. Defaults to 0.
  */
-TileMap.prototype.render = function(ctx, matchFunc, extraY) {
-    if (extraY === undefined) {
-        extraY = 0;
+TileMap.prototype.render = function(ctx, matchFunc, extraYTop, extraYBottom, extraX) {
+    if (extraYTop === undefined) {
+        extraYTop = 0;
+    }
+    if (extraYBottom === undefined) {
+        extraYBottom = 0;
+    }
+    if (extraX === undefined) {
+        extraX = 0;
     }
     for (var y = 0; y < this.height; ++y) {
         var matchingTiles = 0;
@@ -78,7 +86,8 @@ TileMap.prototype.render = function(ctx, matchFunc, extraY) {
                 matchingTiles++;
             }
             if ((!matching || x + 1 >= this.width) && matchingTiles > 0) {
-                ctx.fillRect(firstMatching, y - extraY, matchingTiles, 1.0 + extraY * 2.0);
+                ctx.fillRect(firstMatching - extraX, y - extraYTop,
+                             matchingTiles + extraX * 2, 1.0 + extraYTop + extraYBottom);
             }
             if (!matching) {
                 matchingTiles = 0;
@@ -166,7 +175,7 @@ TileMap.prototype.nearestTileUpFromRect = function(rect, matchFunc, maxDistance)
     var match = false;
     var minY = Math.floor(rect.top - maxDistance);
     while (!match && tileMin.y >= 0 && tileMin.y >= minY) {
-        // Test one column of tiles
+        // Test one row of tiles
         match = this.tileInArea(tileMin, tileMax, matchFunc);
         if (!match) {
             --tileMin.y;
@@ -186,10 +195,12 @@ TileMap.prototype.nearestTileDownFromRect = function(rect, matchFunc, maxDistanc
     var epsilon = TileMap.epsilon;
     var tileMin = this.tileAt(rect.left + epsilon, rect.bottom - epsilon);
     var tileMax = this.tileAt(rect.right - epsilon, rect.bottom - epsilon);
+    ++tileMin.y;
+    ++tileMax.y;
     var match = false;
     var maxY = Math.floor(rect.bottom + maxDistance);
     while (!match && tileMin.y < this.height && tileMax.y <= maxY) {
-        // Test one column of tiles
+        // Test one row of tiles
         match = this.tileInArea(tileMin, tileMax, matchFunc);
         if (!match) {
             ++tileMin.y;
@@ -222,9 +233,14 @@ TileMap.prototype.overlapsTiles = function(rect, matchFunc) {
  * it is a wall for the purposes of collision.
  * @param {Array?} colliders List of objects with a getRect() function to collide against. The moved
  * object is automatically excluded in case it is in this array.
+ * @param {function?} isWallUp A function that takes a tile and returns whether it is a wall for upwards movement
+ * (negative y). By default isWall is used.
  */
-TileMap.prototype.moveAndCollide = function(movingObj, deltaTime, dim, isWall, colliders) {
+TileMap.prototype.moveAndCollide = function(movingObj, deltaTime, dim, isWall, colliders, isWallUp) {
     var rect = movingObj.getRect();
+    if (isWallUp === undefined) {
+        isWallUp = isWall;
+    }
     if (dim == 'x') {
         var delta = movingObj.dx * deltaTime;
         var wallX = movingObj.x; // Position where the character will be stuck if it meets a wall.
@@ -245,7 +261,7 @@ TileMap.prototype.moveAndCollide = function(movingObj, deltaTime, dim, isWall, c
                 }
             }
             if (delta > 0) {
-                wallX = this.nearestTileRightFromRect(rect, isWall, Math.abs(delta));
+                wallX = this.nearestTileRightFromRect(rect, isWallUp, Math.abs(delta));
                 if (wallX == -1) {
                     wallX = this.width;
                 }
@@ -258,7 +274,7 @@ TileMap.prototype.moveAndCollide = function(movingObj, deltaTime, dim, isWall, c
                     movingObj.x = wallX - rectRightHalfWidth - TileMap.epsilon;
                 }
             } else {
-                wallX = this.nearestTileLeftFromRect(rect, isWall, Math.abs(delta)) + 1;
+                wallX = this.nearestTileLeftFromRect(rect, isWallUp, Math.abs(delta)) + 1;
                 for (var i = 0; i < xColliders.length; ++i) {
                     if (xColliders[i].left < rect.right && wallX < xColliders[i].right) {
                         wallX = xColliders[i].right;
@@ -304,7 +320,7 @@ TileMap.prototype.moveAndCollide = function(movingObj, deltaTime, dim, isWall, c
                     movingObj.touchGround();
                 }
             } else {
-                wallY = this.nearestTileUpFromRect(rect, isWall, Math.abs(delta)) + 1;
+                wallY = this.nearestTileUpFromRect(rect, isWallUp, Math.abs(delta)) + 1;
                 for (var i = 0; i < yColliders.length; ++i) {
                     if (yColliders[i].top < rect.bottom && wallY < yColliders[i].bottom) {
                         wallY = yColliders[i].bottom;
