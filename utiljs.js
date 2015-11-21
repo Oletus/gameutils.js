@@ -49,6 +49,15 @@ arrayUtil.randomSubset = function(array, maxSubsetLength) {
 };
 
 /**
+ * @param {Array} array Array to shuffle.
+ * @return {Object} A random item from the array.
+ */
+arrayUtil.randomItem = function(array) {
+    var index = Math.floor(Math.random() * array.length);
+    return array[index];
+};
+
+/**
  * Set a property in all elements in an array to a certain value.
  * @param {Array} array Array to edit.
  * @param {string} key Property to set in all elements.
@@ -142,5 +151,48 @@ var requestFullscreen = function(elem) {
         elem.mozRequestFullScreen();
     } else if (elem.webkitRequestFullscreen) {
         elem.webkitRequestFullscreen();
+    }
+};
+
+
+/**
+ * Change 'state' property of an object and set its 'stateTime' property to zero. Meant for very simple state machines.
+ * @param {Object} that Object to set state on.
+ * @param {Object} state State to set.
+ */
+var changeState = function(that, newState) {
+    that.state = newState;
+    that.stateTime = 0.0;
+};
+
+/**
+ * Change an attribute of an object closer to zero by a certain delta value.
+ * @param {Object} that Object to set state on.
+ * @param {string} key Property name to set. Note: always refer to properties changed by this function with [] notation
+ * if you want Closure compiler compatibility.
+ * @param {number} delta How much to change that[key].
+ */
+var propertyToZero = function(that, key, delta) {
+    propertyToValue(that, key, 0, delta);
+};
+
+/**
+ * Change an attribute of an object closer to a target value by a certain delta value.
+ * @param {Object} that Object to set state on.
+ * @param {string} key Property name to set. Note: always refer to properties changed by this function with [] notation
+ * if you want Closure compiler compatibility.
+ * @param {number} value Value that[key] should approach.
+ * @param {number} delta How much to change that[key].
+ */
+var propertyToValue = function(that, key, value, delta) {
+    if (that[key] > value) {
+        that[key] -= delta;
+        if (that[key] < value)
+            that[key] = value;
+    }
+    if (that[key] < value) {
+        that[key] += delta;
+        if (that[key] > value)
+            that[key] = value;
     }
 };
