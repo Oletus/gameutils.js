@@ -727,8 +727,8 @@ Vec2.prototype.rotate = function(angle) {
  * @constructor
  */
 var AffineTransform = function() {
-    this.scale = 1.0;
-    this.translate = new Vec2(0, 0);
+    this._scale = 1.0;
+    this._translate = new Vec2(0, 0);
     this.generation = 0; // Id number that can be used to determine the transform's identity.
 };
 
@@ -737,8 +737,8 @@ var AffineTransform = function() {
  * @param {Vec2} vec Vector to transform in-place.
  */
 AffineTransform.prototype.transform = function(vec) {
-    vec.x = vec.x * this.scale + this.translate.x;
-    vec.y = vec.y * this.scale + this.translate.y;
+    vec.x = vec.x * this._scale + this._translate.x;
+    vec.y = vec.y * this._scale + this._translate.y;
 };
 
 /**
@@ -746,8 +746,8 @@ AffineTransform.prototype.transform = function(vec) {
  * @param {Vec2} vec Vector to transform in-place.
  */
 AffineTransform.prototype.inverseTransform = function(vec) {
-    vec.x = (vec.x - this.translate.x) / this.scale;
-    vec.y = (vec.y - this.translate.y) / this.scale;
+    vec.x = (vec.x - this._translate.x) / this._scale;
+    vec.y = (vec.y - this._translate.y) / this._scale;
 };
 
 /**
@@ -757,7 +757,7 @@ AffineTransform.prototype.inverseTransform = function(vec) {
  * @return {number} Transformed x coordinate.
  */
 AffineTransform.prototype.transformX = function(x, y) {
-    return x * this.scale + this.translate.x;
+    return x * this._scale + this._translate.x;
 };
 
 /**
@@ -767,7 +767,7 @@ AffineTransform.prototype.transformX = function(x, y) {
  * @return {number} Transformed y coordinate.
  */
 AffineTransform.prototype.transformY = function(x, y) {
-    return y * this.scale + this.translate.y;
+    return y * this._scale + this._translate.y;
 };
 
 /**
@@ -776,7 +776,7 @@ AffineTransform.prototype.transformY = function(x, y) {
  * @return {number} Scaled coordinate.
  */
 AffineTransform.prototype.scaleValue = function(v) {
-    return v * this.scale;
+    return v * this._scale;
 };
 
 /**
@@ -785,7 +785,7 @@ AffineTransform.prototype.scaleValue = function(v) {
  * @return {number} Scaled coordinate.
  */
 AffineTransform.prototype.inverseScale = function(v) {
-    return v / this.scale;
+    return v / this._scale;
 };
 
 /**
@@ -798,6 +798,33 @@ AffineTransform.prototype.transformRect = function(rect) {
     rect.right = this.transformX(rect.right, rect.top);
     rect.top = this.transformY(left, rect.top);
     rect.bottom = this.transformY(left, rect.bottom);
+};
+
+/**
+ * Scale this transform as if calling CanvasRenderingContext2D.scale()
+ * @param {number} scale Scale to apply.
+ */
+AffineTransform.prototype.scale = function(scale) {
+    this._scale *= scale;
+};
+
+/**
+ * Translate this transform as if calling CanvasRenderingContext2D.translate()
+ * @param {number} x Horizontal translation.
+ * @param {number} y Vertical translation.
+ */
+AffineTransform.prototype.translate = function(x, y) {
+    this._translate.x += x * this._scale;
+    this._translate.y += y * this._scale;
+};
+
+/**
+ * Apply this transform to the canvas context.
+ * @param {CanvasRenderingContext2D} ctx The canvas rendering context.
+ */
+AffineTransform.prototype.applyToCanvas = function(ctx) {
+    ctx.translate(this._translate.x, this._translate.y);
+    ctx.scale(this._scale, this._scale);
 };
 
 
@@ -1116,4 +1143,17 @@ canvasUtil.clipRect = function(ctx, rect) {
 canvasUtil.flipY = function(ctx) {
     ctx.scale(1, -1);
     ctx.translate(0, -ctx.canvas.height);
+};
+
+/**
+ * Draw coordinate system axis reference to canvas.
+ * @param {CanvasRenderingContext2D} ctx Context to draw to.
+ */
+canvasUtil.drawCoordinateSystemRef = function(ctx) {
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(10, 0);
+    ctx.moveTo(0, 0);
+    ctx.lineTo(0, 10);
+    ctx.stroke();
 };
