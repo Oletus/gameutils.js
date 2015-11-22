@@ -35,11 +35,21 @@ var TileMap = function(options)
 
 /**
  * @param {Array} data Tiles in an array in row-major form.
+ * @param {boolean?} flippedX Set to true to flip the data in the x direction.
  * @return {function} Function to pass as an init function to TileMap constructor.
  */
-TileMap.initFromData = function(data) {
-    return function(x, y) {
-        return data[y][x];
+TileMap.initFromData = function(data, flippedX) {
+    if (flippedX === undefined) {
+        flippedX = false;
+    }
+    if (flippedX) {
+        return function(x, y) {
+            return data[y][data[y].length - x - 1];
+        }
+    } else {
+        return function(x, y) {
+            return data[y][x];
+        }
     }
 };
 
