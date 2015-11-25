@@ -17,6 +17,8 @@ var InputMapper = function(callbackObj, maxPlayers) {
     this.resetPlayerMap();
     this.keysDown = []; // Keyboard keys that are currently down
     this.callbacks = []; // Callback information for mapping callbacks back to buttons
+    this.upCallbacksForKey = {}; // Map from keys to lists of callbacks, so each key can have multiple callbacks
+    this.downCallbacksForKey = {}; // Map from keys to lists of callbacks, so each key can have multiple callbacks
 };
 
 // Controller types
@@ -141,26 +143,38 @@ InputMapper.prototype.addListener = function(gamepadButton, keyboardButtons, dow
     var that = this;
     for (var i = 0; i < keyboardButtons.length; ++i) {
         (function(kbIndex) {
-            that.keysDown[keyboardButtons[kbIndex]] = false;
-            // TODO: down events get generated multiple times while a key is down. Work around this...
-            var keyDownCallback = function() {
-                var player = that.getPlayerIndex(InputMapper.KEYBOARD, kbIndex);
-                if (!that.keysDown[keyboardButtons[kbIndex]]) {
-                    that.keysDown[keyboardButtons[kbIndex]] = true;
-                    if (downCallback !== undefined) {
-                        downCallback.call(that.callbackObj, player);
-                    }
-                }
-            };
-            var keyUpCallback = function() {
-                var player = that.getPlayerIndex(InputMapper.KEYBOARD, kbIndex);
+            if (!that.downCallbacksForKey.hasOwnProperty(keyboardButtons[kbIndex])) {
                 that.keysDown[keyboardButtons[kbIndex]] = false;
-                if (upCallback !== undefined) {
-                    upCallback.call(that.callbackObj, player);
-                }
-            };
-            window.Mousetrap.bindGlobal(keyboardButtons[kbIndex], keyDownCallback, 'keydown');
-            window.Mousetrap.bindGlobal(keyboardButtons[kbIndex], keyUpCallback, 'keyup');
+                that.downCallbacksForKey[keyboardButtons[kbIndex]] = [];
+                that.upCallbacksForKey[keyboardButtons[kbIndex]] = [];
+                var keyDownCallback = function() {
+                    var player = that.getPlayerIndex(InputMapper.KEYBOARD, kbIndex);
+                    // Down events get generated multiple times while a key is down. Work around this.
+                    if (!that.keysDown[keyboardButtons[kbIndex]]) {
+                        that.keysDown[keyboardButtons[kbIndex]] = true;
+                        var callbacksToCall = that.downCallbacksForKey[keyboardButtons[kbIndex]];
+                        for (var i = 0; i < callbacksToCall.length; ++i) {
+                            callbacksToCall[i].call(that.callbackObj, player);
+                        }
+                    }
+                };
+                var keyUpCallback = function() {
+                    var player = that.getPlayerIndex(InputMapper.KEYBOARD, kbIndex);
+                    that.keysDown[keyboardButtons[kbIndex]] = false;
+                    var callbacksToCall = that.upCallbacksForKey[keyboardButtons[kbIndex]];
+                    for (var i = 0; i < callbacksToCall.length; ++i) {
+                        callbacksToCall[i].call(that.callbackObj, player);
+                    }
+                };
+                window.Mousetrap.bindGlobal(keyboardButtons[kbIndex], keyDownCallback, 'keydown');
+                window.Mousetrap.bindGlobal(keyboardButtons[kbIndex], keyUpCallback, 'keyup');
+            }
+            if (downCallback !== undefined) {
+                that.downCallbacksForKey[keyboardButtons[kbIndex]].push(downCallback);
+            }
+            if (upCallback !== undefined) {
+                that.upCallbacksForKey[keyboardButtons[kbIndex]].push(upCallback);
+            }
         })(i);
         if (downCallback !== undefined) {
             this.callbacks.push({key: keyboardButtons[i], callback: downCallback, controllerType: InputMapper.KEYBOARD, kbIndex: i});
