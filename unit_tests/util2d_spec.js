@@ -484,15 +484,15 @@ describe('util2d', function() {
     describe('AffineTransform', function() {
         it('initializes', function() {
             var a = new AffineTransform();
-            expect(a.translate.x).toBe(0);
-            expect(a.translate.y).toBe(0);
-            expect(a.scale).toBe(1);
+            expect(a._translate.x).toBe(0);
+            expect(a._translate.y).toBe(0);
+            expect(a._scale).toBe(1);
         });
 
         it('translates a vector', function() {
             var a = new AffineTransform();
-            a.translate.x = 7;
-            a.translate.y = 11;
+            a._translate.x = 7;
+            a._translate.y = 11;
             var v = new Vec2(2, 3);
             a.transform(v);
             expect(v.x).toBe(9);
@@ -501,7 +501,7 @@ describe('util2d', function() {
 
         it('scales a vector', function() {
             var a = new AffineTransform();
-            a.scale = 5;
+            a._scale = 5;
             var v = new Vec2(2, 3);
             a.transform(v);
             expect(v.x).toBe(10);
@@ -510,9 +510,9 @@ describe('util2d', function() {
 
         it('scales and translates a vector', function() {
             var a = new AffineTransform();
-            a.translate.x = 7;
-            a.translate.y = 11;
-            a.scale = 5;
+            a._translate.x = 7;
+            a._translate.y = 11;
+            a._scale = 5;
             var v = new Vec2(2, 3);
             a.transform(v);
             expect(v.x).toBe(17);
@@ -521,9 +521,9 @@ describe('util2d', function() {
 
         it('inverse transforms a vector', function() {
             var a = new AffineTransform();
-            a.translate.x = 7;
-            a.translate.y = 11;
-            a.scale = 5;
+            a._translate.x = 7;
+            a._translate.y = 11;
+            a._scale = 5;
             var v = new Vec2(2, 3);
             a.transform(v);
             a.inverseTransform(v);
@@ -533,9 +533,9 @@ describe('util2d', function() {
 
         it('scales and translates a rectangle', function() {
             var a = new AffineTransform();
-            a.translate.x = 7;
-            a.translate.y = 11;
-            a.scale = 5;
+            a._translate.x = 7;
+            a._translate.y = 11;
+            a._scale = 5;
             var r = new Rect(2, 3, 5, 13);
             a.transformRect(r);
             expect(r.left).toBe(17);
