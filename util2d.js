@@ -648,25 +648,38 @@ Vec2.prototype.slope = function(vec) {
  * @param {Vec2} lineB Another point on the line to project to.
  */
 Vec2.prototype.projectToLine = function(lineA, lineB) {
-    if (lineA.x === lineB.x) {
-        this.x = lineA.x;
-        return;
-    } else if (lineA.y === lineB.y) {
-        this.y = lineA.y;
-        return;
+    var ax = this.x - lineA.x;
+    var ay = this.y - lineA.y;
+    var projectionTarget = new Vec2(lineB.x - lineA.x, lineB.y - lineA.y);
+    projectionTarget.normalize();
+    var projectionLength = ax * projectionTarget.x + ay * projectionTarget.y;
+    this.x = lineA.x + projectionTarget.x * projectionLength;
+    this.y = lineA.y + projectionTarget.y * projectionLength;
+};
+
+
+/**
+ * Projects this vector to the nearest point on the line segment defined by two points.
+ * @param {Vec2} lineA One end point of the line segment to project to.
+ * @param {Vec2} lineB Another end point of the line segment to project to.
+ */
+Vec2.prototype.projectToLineSegment = function(lineA, lineB) {
+    var ax = this.x - lineA.x;
+    var ay = this.y - lineA.y;
+    var projectionTarget = new Vec2(lineB.x - lineA.x, lineB.y - lineA.y);
+    projectionTarget.normalize();
+    var projectionLength = ax * projectionTarget.x + ay * projectionTarget.y;
+    if (projectionLength < 0) {
+        this.setVec2(lineA);
+    } else {
+        var maxLength = lineB.distance(lineA);
+        if (projectionLength > maxLength) {
+            this.setVec2(lineB);
+        } else {
+            this.x = lineA.x + projectionTarget.x * projectionLength;
+            this.y = lineA.y + projectionTarget.y * projectionLength;
+        }
     }
-
-    // The line's equation: y = lineSlope * x + lineYAtZero
-    var lineSlope = lineA.slope(lineB);
-    var lineYAtZero = lineA.y - lineSlope * lineA.x;
-
-    var perpVector = new Vec2(1.0, -1.0 / lineSlope);
-    perpVector.normalize();
-    // perpVector's dot product with a vector that goes from line to this Vec2
-    var perpProjLength = perpVector.y *
-                         (this.y - (lineSlope * this.x + lineYAtZero));
-    this.x -= perpVector.x * perpProjLength;
-    this.y -= perpVector.y * perpProjLength;
 };
 
 /**
@@ -1203,7 +1216,7 @@ Polygon.prototype.intersectsCircle = function(center, radius) {
         var vert1 = this._vertices[i];
         var vert2 = this._vertices[(i + 1) % this._vertices.length];
         projected.setVec2(center);
-        projected.projectToLine(vert1, vert2);
+        projected.projectToLineSegment(vert1, vert2);
         if (projected.distance(center) < radius) {
             return true;
         }
@@ -1245,6 +1258,21 @@ Polygon.prototype.intersectsRect = function(rect) {
     var rectPolygon = new Polygon([new Vec2(rect.left, rect.top), new Vec2(rect.right, rect.top),
                                    new Vec2(rect.right, rect.bottom), new Vec2(rect.left, rect.bottom)]);
     return this.intersectsPolygon(rectPolygon);
+};
+
+/**
+ * Stroke the polygon to the given context.
+ * @param {CanvasRenderingContext2D} ctx Context to draw this polygon to.
+ */
+Polygon.prototype.renderStroke = function(ctx) {
+    ctx.beginPath();
+    var last = this._vertices[this._vertices.length - 1];
+    ctx.moveTo(last.x, last.y);
+    for (var i = 0; i < this._vertices.length; ++i) {
+        var vert = this._vertices[i];
+        ctx.lineTo(vert.x, vert.y);
+    }
+    ctx.stroke();
 };
 
 

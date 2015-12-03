@@ -550,6 +550,9 @@ describe('util2d', function() {
             expect(p.intersectsCircle(new Vec2(0.5, -0.1), 0.11)).toBe(true);
             expect(p.intersectsCircle(new Vec2(0.5 + 1, 0.5 + 1), 0.99 * Math.sqrt(2))).toBe(false);
             expect(p.intersectsCircle(new Vec2(0.5 + 1, 0.5 + 1), 1.01 * Math.sqrt(2))).toBe(true);
+
+            expect(p.intersectsCircle(new Vec2(0.5, -1.1), 1.0)).toBe(false);
+            expect(p.intersectsCircle(new Vec2(-1.1, 0.5), 1.0)).toBe(false);
         });
 
         it ('determines if it intersects with a rect', function() {
