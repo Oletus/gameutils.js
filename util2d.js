@@ -1148,6 +1148,106 @@ Rect.prototype.translate = function(offset) {
 };
 
 
+/**
+ * An arbitrary 2D polygon.
+ * @param {Array.<Vec2>} vertices Vertices that make up this polygon, in order.
+ * @constructor
+ */
+var Polygon = function(vertices) {
+    this._vertices = vertices;
+};
+
+/**
+ * @param {Vec2} vec2 Vector to test.
+ * @return {boolean} True if the vector is inside the polygon.
+ */
+Polygon.prototype.containsVec2 = function(vec) {
+    var intersections = 0;
+    for (var i = 0; i < this._vertices.length; ++i) {
+        var vert1 = this._vertices[i];
+        var vert2 = this._vertices[(i + 1) % this._vertices.length];
+        // Solve vec + Vec2(t, 0) == vert1 + (vert2 - vert1) * u
+        // cy = v1y + (v2y - v1y) * u
+        // u = (cy - v1y) / (v2y - v1y)
+        // cx + t = v1x + (v2x - v1x) * u
+        // t = v1x + (v2x - v1x) * u - cx
+        if (vert2.y - vert1.y != 0) {
+            var u = (vec.y - vert1.y) / (vert2.y - vert1.y);
+            var t = vert1.x + (vert2.x - vert1.x) * u - vec.x;
+            if (t > 0) {
+                if (vert2.y > vert1.y) {
+                    if (u > 0 && u <= 1) {
+                        ++intersections;
+                    }
+                } else {
+                    if (u >= 0 && u < 1) {
+                        ++intersections;
+                    }
+                }
+            }
+        }
+    }
+    return ((intersections & 1) === 1);
+};
+
+/**
+ * @param {Vec2} center Center of the circle to test.
+ * @param {number} radius Radius of the circle to test.
+ * @return {boolean} True if the polygon and circle intersect. If the circle only touches the polygon edge, returns
+                     false.
+ */
+Polygon.prototype.intersectsCircle = function(center, radius) {
+    var projected = new Vec2(0, 0);
+    // Phase 1: To determine if circle intersects an edge, check closest point on each segment against circle radius.
+    for (var i = 0; i < this._vertices.length; ++i) {
+        var vert1 = this._vertices[i];
+        var vert2 = this._vertices[(i + 1) % this._vertices.length];
+        projected.setVec2(center);
+        projected.projectToLine(vert1, vert2);
+        if (projected.distance(center) < radius) {
+            return true;
+        }
+    }
+    // Phase 2: Check how many segments ray casted towards right from circle center touches.
+    return this.containsVec2(center);
+};
+
+/**
+ * @param {Polygon} other Polygon to test.
+ * @return {boolean} True if this polygon intersects the other polygon. Can return true for polygons with zero area.
+ */
+Polygon.prototype.intersectsPolygon = function(other) {
+    for (var i = 0; i < this._vertices.length; ++i) {
+        if (other.containsVec2(this._vertices[i])) {
+            // If the other polygon contains any of this polygon's vertices, the two must intersect.
+            return true;
+        }
+    }
+    for (var i = 0; i < other._vertices.length; ++i) {
+        if (this.containsVec2(other._vertices[i])) {
+            // If this contains any of the other polygon's vertices, the two must intersect.
+            // It's possible that all of the other polygon's vertices are contained.
+            return true;
+        }
+    }
+    return false;
+};
+
+/**
+ * @param {Rect} rect Rect to test.
+ * @return {boolean} True if this polygon intersects the rect.
+ */
+Polygon.prototype.intersectsRect = function(rect) {
+    if (rect.isEmpty()) {
+        return false;
+    }
+    // TODO: quick AABB test.
+    var rectPolygon = new Polygon([new Vec2(rect.left, rect.top), new Vec2(rect.right, rect.top),
+                                   new Vec2(rect.right, rect.bottom), new Vec2(rect.left, rect.bottom)]);
+    return this.intersectsPolygon(rectPolygon);
+};
+
+
 var canvasUtil = {
     dummySvg: document.createElementNS('http://www.w3.org/2000/svg', 'svg')
 };

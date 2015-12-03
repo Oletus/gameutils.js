@@ -508,6 +508,62 @@ describe('util2d', function() {
                                                  rectA.bottom))).toBe(false);
         });
     });
+    
+    var testPolygon = function() {
+        return new Polygon([new Vec2(0, 0), new Vec2(1, 0), new Vec2(0, 1)]);
+    };
+    
+    describe('Polygon', function() {
+        it ('initializes', function() {
+            var p = testPolygon();
+            expect(p._vertices[0].x).toBe(0);
+            expect(p._vertices[0].y).toBe(0);
+            expect(p._vertices[1].x).toBe(1);
+            expect(p._vertices[1].y).toBe(0);
+            expect(p._vertices[2].x).toBe(0);
+            expect(p._vertices[2].y).toBe(1);
+        });
+
+        it ('determines whether a vector is inside', function() {
+            var p = testPolygon();
+            expect(p.containsVec2(new Vec2(0.1, 0.1))).toBe(true);
+
+            // Customarily points on top or right edge are considered outside, and left and bottom edge inside.
+            expect(p.containsVec2(new Vec2(0, 0))).toBe(false);
+            expect(p.containsVec2(new Vec2(0, 0.5))).toBe(true);
+            expect(p.containsVec2(new Vec2(0.5, 0))).toBe(false);
+
+            expect(p.containsVec2(new Vec2(-0.1, -0.1))).toBe(false);
+            expect(p.containsVec2(new Vec2(0.49, 0.49))).toBe(true);
+            expect(p.containsVec2(new Vec2(0.51, 0.51))).toBe(false);
+        });
+
+        it ('determines if it intersects with a circle', function() {
+            var p = testPolygon();
+            expect(p.intersectsCircle(new Vec2(0.1, 0.1), 0.01)).toBe(true);
+            expect(p.intersectsCircle(new Vec2(-0.1, -0.1), 0.1)).toBe(false);
+            expect(p.intersectsCircle(new Vec2(-0.1, -0.1), 0.2)).toBe(true);
+
+            expect(p.intersectsCircle(new Vec2(-0.1, 0.5), 0.09)).toBe(false);
+            expect(p.intersectsCircle(new Vec2(-0.1, 0.5), 0.11)).toBe(true);
+            expect(p.intersectsCircle(new Vec2(0.5, -0.1), 0.09)).toBe(false);
+            expect(p.intersectsCircle(new Vec2(0.5, -0.1), 0.11)).toBe(true);
+            expect(p.intersectsCircle(new Vec2(0.5 + 1, 0.5 + 1), 0.99 * Math.sqrt(2))).toBe(false);
+            expect(p.intersectsCircle(new Vec2(0.5 + 1, 0.5 + 1), 1.01 * Math.sqrt(2))).toBe(true);
+        });
+
+        it ('determines if it intersects with a rect', function() {
+            var p = testPolygon();
+            expect(p.intersectsRect(testRect())).toBe(false);
+            expect(p.intersectsRect(new Rect(0, 1, 0, 1))).toBe(true);
+            expect(p.intersectsRect(new Rect(0.01, 1.01, 0.01, 1.01))).toBe(true);
+            expect(p.intersectsRect(new Rect(0.01, 1.01, 0.01, 1.01))).toBe(true);
+
+            // Test identical rect intersection corner case
+            var p2 = new Polygon([new Vec2(0, 0), new Vec2(1, 0), new Vec2(1, 1), new Vec2(0, 1)]);
+            expect(p2.intersectsRect(new Rect(0, 1, 0, 1))).toBe(true);
+        });
+    });
 
     describe('AffineTransform', function() {
         it('initializes', function() {
