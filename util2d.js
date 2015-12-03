@@ -997,6 +997,61 @@ Rect.prototype.getIntersection = function(rect) {
 };
 
 /**
+ * Test if the rect intersects another.
+ * @param {Rect} rect Another rectangle.
+ * @return {boolean} True if the Rect intersects the given rectangle.
+ */
+Rect.prototype.intersectsRect = function(rect) {
+    if (this.isEmpty()) {
+        return false;
+    }
+    if (rect.isEmpty()) {
+        return false;
+    }
+    var left = Math.max(this.left, rect.left);
+    var right = Math.min(this.right, rect.right);
+    if (left >= right) {
+        return false;
+    }
+    var top = Math.max(this.top, rect.top);
+    var bottom = Math.min(this.bottom, rect.bottom);
+    if (top >= bottom) {
+        return false;
+    }
+    return true;
+};
+
+/**
+ * @return {Vec2} Center of the rectangle.
+ */
+Rect.prototype.getCenter = function() {
+    return new Vec2((this.left + this.right) * 0.5, (this.top + this.bottom) * 0.5);
+};
+
+/**
+ * Test if the rect intersects a circle.
+ * @param {Vec2} center Center of the circle.
+ * @param {number} radius Radius of the circle.
+ * @return {boolean} True if the Rect intersects the given circle.
+ */
+Rect.prototype.intersectsCircle = function(center, radius) {
+    var rectCenter = this.getCenter();
+    var circleDistance = new Vec2(Math.abs(center.x - rectCenter.x),
+                                  Math.abs(center.y - rectCenter.y));
+
+    if (circleDistance.x > (this.width() * 0.5 + radius)) { return false; }
+    if (circleDistance.y > (this.height() * 0.5 + radius)) { return false; }
+
+    if (circleDistance.x <= (this.width() * 0.5)) { return true; }
+    if (circleDistance.y <= (this.height() * 0.5)) { return true; }
+
+    var cornerDistanceSquared = Math.pow(circleDistance.x - this.width() * 0.5, 2) +
+                                Math.pow(circleDistance.y - this.height() * 0.5, 2);
+
+    return (cornerDistanceSquared < radius * radius);
+};
+
+/**
  * Clip the rectangle from the top.
  * @param {number} top Coordinate to clip with.
  */

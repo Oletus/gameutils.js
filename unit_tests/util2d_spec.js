@@ -217,11 +217,11 @@ describe('util2d', function() {
         });
 
         it('translates', function() {
-                var vecA = new Vec2(1, 3);
-                var vecB = new Vec2(5, 7);
-                vecA.translate(vecB);
-                expect(vecA.x).toBe(6);
-                expect(vecA.y).toBe(10);
+            var vecA = new Vec2(1, 3);
+            var vecB = new Vec2(5, 7);
+            vecA.translate(vecB);
+            expect(vecA.x).toBe(6);
+            expect(vecA.y).toBe(10);
         });
 
         it('calculates a slope to another Vec2', function() {
@@ -360,6 +360,14 @@ describe('util2d', function() {
             expect(rect.area()).toBe(2);
         });
 
+        it ('calculates its center', function() {
+            var rect = testRect();
+            var center = rect.getCenter();
+            expect(center instanceof Vec2).toBe(true);
+            expect(center.x).toBe(1.5);
+            expect(center.y).toBe(4);
+        });
+
         it('can be made empty', function() {
             var rect = testRect();
             expect(rect.isEmpty()).toBe(false);
@@ -386,6 +394,8 @@ describe('util2d', function() {
             expect(rect.right).toBe(2);
             expect(rect.top).toBe(4);
             expect(rect.bottom).toBe(5);
+            
+            expect(rectA.intersectsRect(rectB)).toBe(true);
 
             rectA.intersectRect(rectB);
             expect(rectA.isEmpty()).toBe(false);
@@ -401,8 +411,26 @@ describe('util2d', function() {
             var rect = rectA.getIntersection(rectB);
             expect(rect.isEmpty()).toBe(true);
 
+            expect(rectA.intersectsRect(rectB)).toBe(false);
+
             rectA.intersectRect(rectB);
             expect(rectA.isEmpty()).toBe(true);
+        });
+
+        it('calculates whether it intersects a circle', function() {
+            var rect = testRect();
+            expect(rect.intersectsCircle(new Vec2(0, 0), 6)).toBe(true);
+            expect(rect.intersectsCircle(rect.getCenter(), 0.1)).toBe(true);
+            expect(rect.intersectsCircle(new Vec2(rect.left - 1, rect.top - 1), 1)).toBe(false);
+            expect(rect.intersectsCircle(new Vec2(rect.left - 1, rect.top - 1), 2)).toBe(true);
+            expect(rect.intersectsCircle(new Vec2(rect.left - 1, rect.top - 1), Math.sqrt(2) * 0.99)).toBe(false);
+            expect(rect.intersectsCircle(new Vec2(rect.left - 1, rect.top - 1), Math.sqrt(2) * 1.01)).toBe(true);
+            expect(rect.intersectsCircle(new Vec2(rect.left - 1, rect.bottom + 1), Math.sqrt(2) * 0.99)).toBe(false);
+            expect(rect.intersectsCircle(new Vec2(rect.left - 1, rect.bottom + 1), Math.sqrt(2) * 1.01)).toBe(true);
+            expect(rect.intersectsCircle(new Vec2(rect.right + 1, rect.top - 1), Math.sqrt(2) * 0.99)).toBe(false);
+            expect(rect.intersectsCircle(new Vec2(rect.right + 1, rect.top - 1), Math.sqrt(2) * 1.01)).toBe(true);
+            expect(rect.intersectsCircle(new Vec2(rect.right + 1, rect.bottom + 1), Math.sqrt(2) * 0.99)).toBe(false);
+            expect(rect.intersectsCircle(new Vec2(rect.right + 1, rect.bottom + 1), Math.sqrt(2) * 1.01)).toBe(true);            
         });
 
         it('determines whether a Vec2 is inside it', function() {
