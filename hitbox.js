@@ -152,7 +152,7 @@ HitBox.prototype.intersects = function(other) {
             // segment edge.
             var segmentCenterAngle = mathUtil.mixAngles(other._angle1, other._angle2, 0.5);
             var pointAngle = Math.atan2(that._pos.y - other._center.y, that._pos.x - other._center.x);
-            pointAngle = mathUtil._angleDifference(pointAngle, segmentCenterAngle);
+            pointAngle = mathUtil.angleDifference(pointAngle, segmentCenterAngle);
             var distAlongSegmentNormal = Math.cos(pointAngle) * dist;
             return distAlongSegmentNormal > other._lineSegmentCenter.distance(other._center);
         } /*else if (other._shape === HitBox.Shape.SECTOR) { // TODO
@@ -162,7 +162,7 @@ HitBox.prototype.intersects = function(other) {
             }
             // Test against sector
             var pointAngle = Math.atan2(that._pos.y - other._center.y, that._pos.x - other._center.x);
-            if (mathUtil._angleGreater(pointAngle, other._angle2) || mathUtil._angleGreater(other._angle1, pointAngle)) {
+            if (mathUtil.angleGreater(pointAngle, other._angle2) || mathUtil.angleGreater(other._angle1, pointAngle)) {
                 return false;
             }
         }*/
