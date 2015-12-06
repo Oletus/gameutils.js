@@ -1226,6 +1226,37 @@ Polygon.prototype.intersectsCircle = function(center, radius) {
 };
 
 /**
+ * @param {Vec2} aPoint0 First end point of line segment A.
+ * @param {Vec2} aPoint1 Second end point of line segment A.
+ * @param {Vec2} bPoint0 First end point of line segment B.
+ * @param {Vec2} bPoint1 Second end point of line segment B.
+ * @return {boolean} True if the line segments intersect at any point.
+ */
+Polygon.lineSegmentsIntersect = function(aPoint0, aPoint1, bPoint0, bPoint1) {
+    // http://stackoverflow.com/questions/563198/how-do-you-detect-where-two-line-segments-intersect
+    var rx = aPoint1.x - aPoint0.x;
+    var ry = aPoint1.y - aPoint0.y;
+    var sx = bPoint1.x - bPoint0.x;
+    var sy = bPoint1.y - bPoint0.y;
+
+    var rxs = rx * sy - ry * sx;
+    var prod0 = ((bPoint0.x - aPoint0.x) * sy - (bPoint0.y - aPoint0.y) * sx);
+    var prod1 = ((aPoint0.x - bPoint0.x) * ry - (aPoint0.y - bPoint0.y) * rx);
+    var t = prod0 / rxs;
+    var u = prod1 / -rxs;
+    if (rxs === 0) {
+        if (prod0 === 0) {
+            // Colinear
+            return true;
+        }
+        // Parallel
+        return false;
+    }
+    // Return true if the intersection of the lines is within the line segments.
+    return (t >= 0.0 && u >= 0.0 && t <= 1.0 && u <= 1.0);
+};
+
+/**
  * @param {Polygon} other Polygon to test.
  * @return {boolean} True if this polygon intersects the other polygon. Can return true for polygons with zero area.
  */
@@ -1234,6 +1265,14 @@ Polygon.prototype.intersectsPolygon = function(other) {
         if (other.containsVec2(this._vertices[i])) {
             // If the other polygon contains any of this polygon's vertices, the two must intersect.
             return true;
+        }
+        for (var j = 0; j < other._vertices.length; ++j) {
+            if (Polygon.lineSegmentsIntersect(this._vertices[i], this._vertices[(i + 1) % this._vertices.length],
+                                              other._vertices[j], other._vertices[(j + 1) % other._vertices.length]))
+            {
+                // If the other polygon's edges intersect this polygon's edges, the two must intersect.
+                return true;
+            }
         }
     }
     for (var i = 0; i < other._vertices.length; ++i) {

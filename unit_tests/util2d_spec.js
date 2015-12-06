@@ -559,6 +559,7 @@ describe('util2d', function() {
             var p = testPolygon();
             expect(p.intersectsRect(testRect())).toBe(false);
             expect(p.intersectsRect(new Rect(0, 1, 0, 1))).toBe(true);
+            expect(p.intersectsRect(new Rect(-1, 2, 0.2, 0.8))).toBe(true);
             expect(p.intersectsRect(new Rect(0.01, 1.01, 0.01, 1.01))).toBe(true);
             expect(p.intersectsRect(new Rect(0.01, 1.01, 0.01, 1.01))).toBe(true);
 
