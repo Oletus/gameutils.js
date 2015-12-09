@@ -9,6 +9,7 @@
  */
 var Sprite = function(filename, /* Optional */ filter) {
     this.filename = filename;
+    this.missing = false;
     Sprite.createdCount++;
     if (typeof this.filename != typeof '') {
         this.img = this.filename;
@@ -21,7 +22,7 @@ var Sprite = function(filename, /* Optional */ filter) {
         }
     } else {
         this.img = document.createElement('img');
-        this.img.src = Sprite.gfxPath + filename;
+        this.img.src = Sprite.gfxPath + this.filename;
         var that = this;
         this.loaded = false;
         this.img.onload = function() {
@@ -32,6 +33,22 @@ var Sprite = function(filename, /* Optional */ filter) {
             if (filter !== undefined) {
                 filter(that);
             }
+        };
+        this.img.onerror = function() {
+            that.loaded = true;
+            that.missing = true;
+            Sprite.loadedCount++;
+            that.img = document.createElement('canvas');
+            that.img.width = 150;
+            that.img.height = 20;
+            that.width = that.img.width;
+            that.height = that.img.height;
+            var ctx =that.img.getContext('2d');
+            ctx.textBaseline = 'top';
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            ctx.fillStyle = '#000';
+            ctx.fillText('Missing: ' + that.filename, 0, 0);
         };
     }
 };
