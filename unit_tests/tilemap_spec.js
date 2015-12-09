@@ -10,7 +10,9 @@ describe('TileMap', function() {
         expect(tilemap.tiles[0][0]).toBe(' ');
         expect(tilemap.tiles[2][1]).toBe(' ');
     });
-    
+});
+
+describe('PlatformingPhysics', function() {
     var TestCollider = function(width) {
         this.x = 0;
         this.y = 0;
@@ -32,13 +34,20 @@ describe('TileMap', function() {
     
     TestCollider.prototype.touchCeiling = function() {
     };
+    
+    var testInitParams = {
+        width: 4,
+        height: 3,
+        initTile: PlatformingPhysics.initFromData(['    ', '    ', '    '], false)
+    };
 
     it('handles collisions between objects', function() {
-        var tilemap = new TileMap({width: 4, height: 3});
+        var tilemap = new TileMap(testInitParams);
         var colliders = [];
         var colliderWidth = 0.2;
         colliders.push(new TestCollider(colliderWidth));
         colliders.push(new TestCollider(colliderWidth));
+        colliders.push(tilemap);
 
         var origY = 1.0;
         var origX1 = 1.0; 
@@ -60,8 +69,10 @@ describe('TileMap', function() {
         
         var deltaTime = 0.01;
         for (var i = 0; i < colliders.length; ++i) {
-            tilemap.moveAndCollide(colliders[i], deltaTime, 'x', function() { return false; }, colliders);
-            tilemap.moveAndCollide(colliders[i], deltaTime, 'y', function() { return false; }, colliders);
+            if (!(colliders[i] instanceof TileMap)) {
+                PlatformingPhysics.moveAndCollide(colliders[i], deltaTime, 'x', colliders);
+                PlatformingPhysics.moveAndCollide(colliders[i], deltaTime, 'y', colliders);
+            }
         }
         expect(colliders[0].x).toBeCloseTo(origX1, 4);
         expect(colliders[0].y).toBeCloseTo(origY + colliders[0].dy * deltaTime, 4);

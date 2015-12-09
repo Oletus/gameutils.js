@@ -14,7 +14,8 @@ var TileMap = function(options)
         width: 1,
         height: 1,
         initTile: function(x, y) { return ' '; }, // Function that returns an initial tile. x and y parameters.
-        initEdgeTile: null // Function that returns a tile to fill the edges with. x and y parameters. Optional.
+        initEdgeTile: null, // Function that returns a tile to fill the edges with. x and y parameters. Optional.
+        worldPos: new Vec2(0, 0) // Position of the origin of the tile map in the world coordinates.
     };
     objectUtil.initWithDefaults(this, defaults, options);
     this.tiles = [];
@@ -66,7 +67,7 @@ TileMap.prototype.tileAt = function(x, y) {
 
 /**
  * A function for debug rendering of the tiles. Will fill rectangles at the
- * coordinates of tiles that match.
+ * coordinates of tiles that match. Does not take worldPos into account.
  * @param {CanvasRenderingContext2D} ctx Context to use.
  * @param {function} matchFunc Gets passed a tile and returns true if the tile should be drawn.
  * @param {number?} extraYTop How much to extend the drawn tiles in the y direction. Defaults to 0.
@@ -109,21 +110,68 @@ TileMap.prototype.render = function(ctx, matchFunc, extraYTop, extraYBottom, ext
 TileMap.epsilon = 0.00001;
 
 /**
- * @param {Vec2} tileMin
- * @param {Vec2} tileMax
+ * @param {Vec2} tileMin Integer coordinates for top left corner of the area.
+ * @param {Vec2} tileMax Integer coordinates for bottom right corner of the area.
  * @param {function} matchFunc Gets passed a tile and returns true if it matches.
  * @return {boolean} True if there are matching tiles within the area limited by tileMin and tileMax
  * Coordinates are inclusive.
  */
-TileMap.prototype.tileInArea = function(tileMin, tileMax, matchFunc) {
+TileMap.prototype.isTileInArea = function(tileMin, tileMax, matchFunc) {
     for (var y = tileMin.y; y <= tileMax.y; ++y) {
+        if (y < 0) {
+            y = -1;
+            continue;
+        }
+        if (y >= this.height) {
+            continue;
+        }
         for (var x = tileMin.x; x <= tileMax.x; ++x) {
+            if (x < 0) {
+                x = -1;
+                continue;
+            }
+            if (x >= this.width) {
+                break;
+            }
             if (matchFunc(this.tiles[y][x])) {
                 return true;
             }
         }
     }    
     return false;
+};
+
+/**
+ * @param {Vec2} tileMin Integer coordinates for top left corner of the area.
+ * @param {Vec2} tileMax Integer coordinates for bottom right corner of the area.
+ * @param {function} matchFunc Gets passed a tile and returns true if it matches.
+ * @return {Array.<Object>} Matching tiles within the area limited by tileMin and tileMax
+ * Coordinates are inclusive.
+ */
+TileMap.prototype.getTilesInArea = function(tileMin, tileMax, matchFunc) {
+    var tiles = [];
+    for (var y = tileMin.y; y <= tileMax.y; ++y) {
+        if (y < 0) {
+            y = -1;
+            continue;
+        }
+        if (y >= this.height) {
+            continue;
+        }
+        for (var x = tileMin.x; x <= tileMax.x; ++x) {
+            if (x < 0) {
+                x = -1;
+                continue;
+            }
+            if (x >= this.width) {
+                break;
+            }
+            if (matchFunc(this.tiles[y][x])) {
+                tiles.push(this.tiles[y][x]);
+            }
+        }
+    }    
+    return tiles;
 };
 
 /**
@@ -140,7 +188,7 @@ TileMap.prototype.nearestTileLeftFromRect = function(rect, matchFunc, maxDistanc
     var minX = Math.floor(rect.left - maxDistance);
     while (!match && tileMin.x >= 0 && tileMin.x >= minX) {
         // Test one column of tiles
-        match = this.tileInArea(tileMin, tileMax, matchFunc);
+        match = this.isTileInArea(tileMin, tileMax, matchFunc);
         if (!match) {
             --tileMin.x;
             --tileMax.x;
@@ -163,7 +211,7 @@ TileMap.prototype.nearestTileRightFromRect = function(rect, matchFunc, maxDistan
     var maxX = Math.floor(rect.right + maxDistance);
     while (!match && tileMin.x < this.width && tileMax.x <= maxX) {
         // Test one column of tiles
-        match = this.tileInArea(tileMin, tileMax, matchFunc);
+        match = this.isTileInArea(tileMin, tileMax, matchFunc);
         if (!match) {
             ++tileMin.x;
             ++tileMax.x;
@@ -186,7 +234,7 @@ TileMap.prototype.nearestTileUpFromRect = function(rect, matchFunc, maxDistance)
     var minY = Math.floor(rect.top - maxDistance);
     while (!match && tileMin.y >= 0 && tileMin.y >= minY) {
         // Test one row of tiles
-        match = this.tileInArea(tileMin, tileMax, matchFunc);
+        match = this.isTileInArea(tileMin, tileMax, matchFunc);
         if (!match) {
             --tileMin.y;
             --tileMax.y;
@@ -205,13 +253,11 @@ TileMap.prototype.nearestTileDownFromRect = function(rect, matchFunc, maxDistanc
     var epsilon = TileMap.epsilon;
     var tileMin = this.tileAt(rect.left + epsilon, rect.bottom - epsilon);
     var tileMax = this.tileAt(rect.right - epsilon, rect.bottom - epsilon);
-    ++tileMin.y;
-    ++tileMax.y;
     var match = false;
     var maxY = Math.floor(rect.bottom + maxDistance);
     while (!match && tileMin.y < this.height && tileMax.y <= maxY) {
         // Test one row of tiles
-        match = this.tileInArea(tileMin, tileMax, matchFunc);
+        match = this.isTileInArea(tileMin, tileMax, matchFunc);
         if (!match) {
             ++tileMin.y;
             ++tileMax.y;
@@ -220,6 +266,92 @@ TileMap.prototype.nearestTileDownFromRect = function(rect, matchFunc, maxDistanc
     return match ? tileMin.y : -1;
 };
 
+
+/**
+ * @param {Rect} rect Rect to test.
+ * @param {function} matchFunc Gets passed a tile and returns true if it matches.
+ * @param {number} maxDistance How far from the rect to extend the search.
+ * @return {Array.<Object>} Nearest matching tiles. May be empty if none are found.
+ */
+TileMap.prototype.getNearestTilesLeftFromRect = function(rect, matchFunc, maxDistance) {
+    var epsilon = TileMap.epsilon;
+    var tileMin = this.tileAt(rect.left + epsilon, rect.top + epsilon);
+    var tileMax = this.tileAt(rect.left + epsilon, rect.bottom - epsilon);
+    var tiles = [];
+    var minX = Math.floor(rect.left - maxDistance);
+    while (tiles.length == 0 && tileMin.x >= 0 && tileMin.x >= minX) {
+        // Test one column of tiles
+        tiles = this.getTilesInArea(tileMin, tileMax, matchFunc);
+        --tileMin.x;
+        --tileMax.x;
+    }
+    return tiles;
+};
+
+/**
+ * @param {Rect} rect Rect to test.
+ * @param {function} matchFunc Gets passed a tile and returns true if it matches.
+ * @param {number} maxDistance How far from the rect to extend the search.
+ * @return {Array.<Object>} Nearest matching tiles. May be empty if none are found.
+ */
+TileMap.prototype.getNearestTilesRightFromRect = function(rect, matchFunc, maxDistance) {
+    var epsilon = TileMap.epsilon;
+    var tileMin = this.tileAt(rect.right - epsilon, rect.top + epsilon);
+    var tileMax = this.tileAt(rect.right - epsilon, rect.bottom - epsilon);
+    var tiles = [];
+    var maxX = Math.floor(rect.right + maxDistance);
+    while (tiles.length == 0 && tileMin.x < this.width && tileMax.x <= maxX) {
+        // Test one column of tiles
+        tiles = this.getTilesInArea(tileMin, tileMax, matchFunc);
+        ++tileMin.x;
+        ++tileMax.x;
+    }
+    return tiles;
+};
+
+/**
+ * @param {Rect} rect Rect to test.
+ * @param {function} matchFunc Gets passed a tile and returns true if it matches.
+ * @param {number} maxDistance How far from the rect to extend the search.
+ * @return {Array.<Object>} Nearest matching tiles. May be empty if none are found.
+ */
+TileMap.prototype.getNearestTilesUpFromRect = function(rect, matchFunc, maxDistance) {
+    var epsilon = TileMap.epsilon;
+    var tileMin = this.tileAt(rect.left + epsilon, rect.top + epsilon);
+    var tileMax = this.tileAt(rect.right - epsilon, rect.top + epsilon);
+    var tiles = [];
+    var minY = Math.floor(rect.top - maxDistance);
+    while (tiles.length == 0 && tileMin.y >= 0 && tileMin.y >= minY) {
+        // Test one row of tiles
+        tiles = this.getTilesInArea(tileMin, tileMax, matchFunc);
+        --tileMin.y;
+        --tileMax.y;
+    }
+    return tiles;
+};
+
+/**
+ * @param {Rect} rect Rect to test.
+ * @param {function} matchFunc Gets passed a tile and returns true if it matches.
+ * @param {number} maxDistance How far from the rect to extend the search.
+ * @return {Array.<Object>} Nearest matching tiles. May be empty if none are found.
+ */
+TileMap.prototype.getNearestTilesDownFromRect = function(rect, matchFunc, maxDistance) {
+    var epsilon = TileMap.epsilon;
+    var tileMin = this.tileAt(rect.left + epsilon, rect.bottom - epsilon);
+    var tileMax = this.tileAt(rect.right - epsilon, rect.bottom - epsilon);
+    var tiles = [];
+    var maxY = Math.floor(rect.bottom + maxDistance);
+    while (tiles.length == 0 && tileMin.y < this.height && tileMax.y <= maxY) {
+        // Test one row of tiles
+        tiles = this.getTilesInArea(tileMin, tileMax, matchFunc);
+        ++tileMin.y;
+        ++tileMax.y;
+    }
+    return tiles;
+};
+
+
 /**
  * @return {boolean} True if matching tiles overlap the given rectangle.
  */
@@ -227,7 +359,14 @@ TileMap.prototype.overlapsTiles = function(rect, matchFunc) {
     var epsilon = TileMap.epsilon;
     var tile = this.tileAt(rect.left + epsilon, rect.top + epsilon);
     var tileMax = this.tileAt(rect.right - epsilon, rect.bottom - epsilon);
-    return this.tileInArea(tile, tileMax, matchFunc);
+    return this.isTileInArea(tile, tileMax, matchFunc);
+};
+
+/**
+ * @return {Rect} tileMap rect in world coordinates.
+ */
+TileMap.prototype.getRect = function() {
+    return new Rect(this.worldPos.x, this.worldPos.x + this.width, this.worldPos.y, this.worldPos.y + this.height);
 };
 
 /**

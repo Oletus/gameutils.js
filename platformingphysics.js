@@ -148,6 +148,9 @@ WallTile.prototype.isWallUp = function() {
  * @return {function} Function that will initialize a TileMap with PlatformingTiles.
  */
 PlatformingPhysics.initFromData = function(data, flippedX) {
+    if (flippedX === undefined) {
+        flippedX = false;
+    }
     var transformedData = [];
     for (var i = 0; i < data.length; ++i) {
         var row = data[i];
