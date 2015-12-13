@@ -36,6 +36,11 @@ var Game = function(resizer) {
         }
     });
     this.time = 0;
+
+    var numPlayers = 1;
+    this.input = new InputMapper(this, numPlayers);
+    // Example usage of InputMapper
+    //this.input.addListener(Gamepad.BUTTONS.UP_OR_ANALOG_UP, ['up', 'w'], this.upPress, this.upRelease);
 };
 
 Game.prototype.render = function(ctx) {
@@ -52,6 +57,7 @@ Game.prototype.render = function(ctx) {
 
 Game.prototype.update = function(deltaTime) {
     this.time += deltaTime;
+    this.input.update();
 };
 
 var DEV_MODE = (window.location.href.indexOf("?devMode") != -1);
