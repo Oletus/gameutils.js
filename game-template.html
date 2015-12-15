@@ -68,7 +68,7 @@ window['start'] = function() {
 
     var resizer = new CanvasResizer({mode: CanvasResizer.Mode.DYNAMIC});
     var game = new Game(resizer);
-    startMainLoop([resizer, game, new LoadingBar()], {debugMode: DEBUG_MAIN_LOOP});
+    startMainLoop([resizer, game, new LoadingBar(), resizer.pixelator()], {debugMode: DEBUG_MAIN_LOOP});
 };
 </script>
 </head>
