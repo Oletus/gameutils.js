@@ -3,12 +3,16 @@
 <title>Gameutils.js: Using the CanvasResizer class to manage canvas size</title>
 <link rel="stylesheet" type="text/css" href="assets/default.css">
 <script src="../src/canvasresizer.js"></script>
+<script src="../src/sprite.js"></script>
 <script>
 'use strict';
 
 var realCtx;
 var resizer;
 var pos = {x: 37.5, y: 37.5};
+
+Sprite.gfxPath = 'assets/gfx/';
+var pixelArtSprite = new Sprite('pixelartcar.png');
 
 var frame = function() {
     // The resizer returns a wrapped canvas 2D context in FIXED_COORDINATE_SYSTEM mode.
@@ -21,6 +25,11 @@ var frame = function() {
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     ctx.fillStyle = '#000';
     ctx.fillRect(Math.round(pos.x - 12.5), Math.round(pos.y - 12.5), 25, 25);
+    
+    // Draw the pixel art so that its coordinates don't exactly match the pixel boundaries. FIXED_RESOLUTION mode
+    // will snap the coordinates to pixel boundaries automatically.
+    pixelArtSprite.drawRotatedNonUniform(ctx, 100.25, 37.25, 0, -1);
+
     requestAnimationFrame(frame);
 };
 
