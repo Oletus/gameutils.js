@@ -78,6 +78,7 @@ var CanvasResizer = function(options) {
     this._wrapCtx = null; // Wrapper context for coordinate system change
     this._wrapCtxPixelate = null; // Wrapper context for automatically aligning pixel art
     this._copyCanvas = null; // For upscaling pixelated copy of the image
+    this._pixelator = null;
 };
 
 /**
@@ -147,6 +148,9 @@ CanvasResizer.prototype.update = function() {
  * canvas instead of the regular CanvasResizer canvas when supporting the CanvasResizer mode requires that.
  */
 CanvasResizer.prototype.pixelator = function() {
+    if (this._pixelator) {
+        return this._pixelator;
+    }
     var that = this;
     var gl;
     var tex;
@@ -230,7 +234,7 @@ CanvasResizer.prototype.pixelator = function() {
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, that.canvas);
         gl.drawArrays(gl.TRIANGLES, 0, 6);
     }
-    return {
+    this._pixelator = {
         update: function() {},
         render: function() {
             if (that.mode === CanvasResizer.Mode.FIXED_RESOLUTION) {
@@ -248,7 +252,8 @@ CanvasResizer.prototype.pixelator = function() {
                 that.parentElement.removeChild(that._copyCanvas);
             }
         }
-    }
+    };
+    return this._pixelator;
 };
 
 /**
