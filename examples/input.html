@@ -17,6 +17,7 @@ var Tester = function() {
     this.goingDown = [false, false];
     this.input = new InputMapper(this, 2);
     this.input.addListener(Gamepad.BUTTONS.A, ['down', 's'], this.downPressed, this.downReleased);
+    this.untilCycleDefaultController = 2;
 };
 
 Tester.prototype.downPressed = function(playerNumber) {
@@ -30,6 +31,12 @@ Tester.prototype.downReleased = function(playerNumber) {
 Tester.prototype.update = function() {
     this.input.update();
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    
+    this.untilCycleDefaultController -= 1 / 60;
+    if (this.untilCycleDefaultController < 0) {
+        this.untilCycleDefaultController = 2;
+        this.input.cycleDefaultControllerForInstruction();
+    }
     for (var playerNumber = 0; playerNumber < this.playerPositions.length; ++playerNumber) {
         // Use getKeyInstruction to prompt for player input:
         var instruction = 'Press ' + this.input.getKeyInstruction(this.downPressed, playerNumber);
