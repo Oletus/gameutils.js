@@ -7,8 +7,8 @@
  * @param {Object} options Object with the following optional keys:
  *  canvas: HTMLCanvasElement (one is created by default)
  *  mode: CanvasResizer.Mode (defaults to filling the window)
- *  width: number Width of the coordinate space.
- *  height: number Height of the coordinate space.
+ *  width: number Width of the canvas coordinate space.
+ *  height: number Height of the canvas coordinate space.
  *  parentElement: HTMLElement (defaults to the document body)
  *  wrapperElement: HTMLElement Optional wrapper element that tightly wraps
  *      the canvas. Useful for implementing HTML-based UI on top of the canvas.
@@ -71,6 +71,7 @@ var CanvasResizer = function(options) {
         // Assume that wrapper already wraps the canvas - don't re-append the
         // canvas to the wrapper since the wrapper might have other children.
     }
+    this.parentElement.style.position = 'relative'; // Needed for workaround when "imageRendering" is not supported.
     window.addEventListener('resize', resize, false);
     this.resize();
     this._scale = 1.0;
@@ -207,8 +208,14 @@ CanvasResizer.prototype.pixelator = function() {
     }
     var drawToCopyCanvas = function(canvas) {
         // Replace original canvas on page
-        if (that.canvas.parentNode === that.parentElement) {
-            that.parentElement.replaceChild(that._copyCanvas, that.canvas);
+        if (that._copyCanvas.parentNode !== that.parentElement)
+        {
+            // Hack: the original canvas is kept around with opacity 0 so that it can still handle events.
+            that.canvas.style.opacity = "0";
+            that.canvas.style.position = "absolute";
+            that.canvas.style.left = "0";
+            that.canvas.style.top = "0";
+            that.parentElement.insertBefore(that._copyCanvas, that.canvas);
         }
         that._copyCanvas.width = that.canvas.width * that._canvasPixelationRatio;
         that._copyCanvas.height = that.canvas.height * that._canvasPixelationRatio;
@@ -237,7 +244,8 @@ CanvasResizer.prototype.pixelator = function() {
                 }
             }
             else if (that._copyCanvas && that._copyCanvas.parentNode === that.parentElement) {
-                that.parentElement.replaceChild(that.canvas, that._copyCanvas);
+                that.canvas.style.opacity = "1";
+                that.parentElement.removeChild(that._copyCanvas);
             }
         }
     }

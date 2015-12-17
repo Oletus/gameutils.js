@@ -16,7 +16,7 @@ Sprite.gfxPath = 'assets/gfx/';
 var pixelArtSprite = new Sprite('pixelartcar.png');
 
 var frame = function() {
-    // The resizer returns a wrapped canvas 2D context in FIXED_COORDINATE_SYSTEM mode.
+    // The resizer returns a wrapped canvas 2D context in FIXED_COORDINATE_SYSTEM and FIXED_RESOLUTION modes.
     var ctx = realCtx;
     var resizerCtx = resizer.render();
     if (resizerCtx !== undefined) {
@@ -63,7 +63,8 @@ var start = function() {
 <p>With the CanvasResizer, you can set the canvas size several ways:</p>
 <ul>
 <li>FIXED_RESOLUTION: Forces an integer scaling ratio like 2:1 or 3:1, perfect for pixel art based graphics.
-Unfortunately pixel-perfect rendering of this mode is currently only possible in Chrome.</li>
+Pixel-perfect rendering of this mode uses "imageRendering" style property when possible, and otherwise falls back
+to creating an upscaled copy of the canvas with WebGL.</li>
 <li>FIXED_RESOLUTION_INTERPOLATED: Fix the resolution of the canvas, but fill the screen by scaling it. This may result
 in blurred graphics, but can be helpful in rapid prototyping.</li>
 <li>FIXED_COORDINATE_SYSTEM: Simulate a fixed coordinate system by applying a transform to the canvas context. This is
