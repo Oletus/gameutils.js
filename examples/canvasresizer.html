@@ -74,6 +74,8 @@ in effect a better-quality version of FIXED_RESOLUTION_INTERPOLATED that works o
 <li>FIXED_ASPECT_RATIO: Fill the screen with the canvas, but preserving aspect ratio.</li>
 <li>DYNAMIC: Simply fill the screen with the canvas.</li>
 <li>MINIMUM_RESOLUTION: Similar to FIXED_RESOLUTION, but canvas is allowed to grow from the edges to fill the screen.</li>
+<li>MINIMUM_HEIGHT: Similar to MINIMUM_RESOLUTION, but canvas is only allowed to grow vertically.</li>
+<li>MINIMUM_WIDTH: Similar to MINIMUM_RESOLUTION, but canvas is only allowed to grow horizontally.</li>
 </ul>
 <p>With all of the modes, you can map touch and mouse events to the canvas coordinate space with a simple function call.</p>
 <p>Try clicking or touching on the canvas, or resizing the browser window.</p>
@@ -92,6 +94,10 @@ in effect a better-quality version of FIXED_RESOLUTION_INTERPOLATED that works o
     onclick="resizer.changeMode(CanvasResizer.Mode.DYNAMIC)"></input>
 <input type="button" value="Set mode to MINIMUM_RESOLUTION"
     onclick="resizer.changeMode(CanvasResizer.Mode.MINIMUM_RESOLUTION)"></input>
+<input type="button" value="Set mode to MINIMUM_HEIGHT"
+    onclick="resizer.changeMode(CanvasResizer.Mode.MINIMUM_HEIGHT)"></input>
+<input type="button" value="Set mode to MINIMUM_WIDTH"
+    onclick="resizer.changeMode(CanvasResizer.Mode.MINIMUM_WIDTH)"></input>
 
 <input type="button" value="Set width / height to 320 / 180"
     onclick="resizer.changeCanvasDimensions(320, 180)"></input>
