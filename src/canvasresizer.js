@@ -418,7 +418,7 @@ CanvasResizer.prototype.getCanvasPosition = function(event, touchIdentifier) {
         var touchIndex = 0;
         if (touchIdentifier !== undefined) {
             for (var i = 0; i < event.touches.length; ++i) {
-                if (event.touches[i].identifier === touchIdentifier) {
+                if (('' + event.touches[i].identifier) === ('' + touchIdentifier)) {
                     touchIndex = i;
                     break;
                 }
