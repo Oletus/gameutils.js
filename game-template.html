@@ -13,6 +13,9 @@
 <script src="src/loadingbar.js"></script>
 <script src="src/particle.js"></script>
 <script src="src/canvasui.js"></script>
+<!-- dev mode helpers -->
+<script src="src/lib/dat.gui.js"></script>
+<script src="src/gameparameters.js"></script>
 <!-- input -->
 <script src="src/lib/mousetrap.js"></script>
 <script src="src/lib/mousetrap-global-bind.js"></script>
@@ -52,19 +55,30 @@ Game.prototype.render = function(ctx) {
     }
     ctx.fillStyle = cssUtil.rgbString([0, 0, (Math.sin(this.time) * 0.5 + 0.5) * 255]);
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.fillStyle = '#fff';
+    ctx.textAlign = 'center';
+    ctx.fillText("Add ?devMode=1 to the URL to use developer mode!", ctx.canvas.width * 0.5, 20);
     return ctx;
 };
 
 Game.prototype.update = function(deltaTime) {
     this.time += deltaTime;
     this.input.update();
+    Audio.muteAll(Game.parameters.get('muteAudio'));
 };
+
+Game.parameters = new GameParameters({
+    'muteAudio': false
+});
 
 var DEV_MODE = (window.location.href.indexOf("?devMode") != -1);
 
 window['start'] = function() {
     var DEBUG_MAIN_LOOP = DEV_MODE && true; // Set to true to allow fast-forwarding main loop with 'f'
-    Audio.muteAll(DEV_MODE && false); // Set to true if sounds annoy developers
+    Game.parameters.set('muteAudio', (DEV_MODE && true)); // Set to true if sounds annoy developers
+    if (DEV_MODE) {
+        Game.parameters.initGUI();
+    }
 
     var resizer = new CanvasResizer({mode: CanvasResizer.Mode.DYNAMIC});
     var game = new Game(resizer);
