@@ -166,12 +166,13 @@ Particle.Appearance = {
  * @param {Sprite} sprite Sprite to draw.
  * @param {number=} scaleMultiplier Scale multiplier for all the sprites. Useful for example if you run the particle
  * engine in a game world's coordinate system which has different scale compared to the canvas.
+ * @return {function} An appearance function that draws the sprite centered on the particle position.
  */
 Particle.spriteAppearance = function(sprite, scaleMultiplier) {
     if (scaleMultiplier === undefined) {
         scaleMultiplier = 1.0;
     }
-    return function(ctx, x, y, size, opacity) {
+    return function(ctx, x, y, size, opacity, t) {
         ctx.globalAlpha = opacity;
         sprite.drawRotated(ctx, x, y, 0, size * scaleMultiplier);
     };
@@ -202,14 +203,30 @@ Particle.prerenderedCircleAppearance = function(color, resolution, scaleMultipli
     return Particle.spriteAppearance(sprite, scaleMultiplier / resolution);
 };
 
+/**
+ * A function for fast appearance and slow disappearance.
+ * @param {number} t Time.
+ * @param {number} seed Random seed.
+ */
 Particle.fastAppearSlowDisappear = function(t, seed) {
     return Math.sin(Math.sqrt(t) * Math.PI);
 };
 
+/**
+ * A function for linear fade out.
+ * @param {number} t Time.
+ * @param {number} seed Random seed.
+ */
 Particle.fadeOutLinear = function(t, seed) {
     return 1.0 - t;
 };
 
+/** 
+ * Update a particle. This is called by ParticleEngine.
+ * @param {number} deltaTime Time since the last update in seconds.
+ * @param {number} forceX Force to apply to the particle in horizontal direction.
+ * @param {number} forceY Force to apply to the particle in vertical direction.
+ */
 Particle.prototype.update = function (deltaTime, forceX, forceY) {
     this.timeAlive += deltaTime;
     if (this.timeAlive > this.lifetime) {
@@ -223,12 +240,17 @@ Particle.prototype.update = function (deltaTime, forceX, forceY) {
     this.y += this.velY * deltaTime;
 };
 
+/**
+ * Draw the particle.
+ * @param {CanvasRenderingContext2D|Object} ctx A context to draw the particles to. In case you have a custom
+ * appearance function, the context will be passed to that.
+ */
 Particle.prototype.draw = function(ctx) {
     var t = this.timeAlive / this.lifetime;
     var size = this.sizeFunc(t, this.seed) * this.size;
     var opacity = this.opacityFunc(t, this.seed) * this.opacity;
     if (typeof(this.appearance) === 'function') {
-        this.appearance(ctx, this.x, this.y, size, opacity);
+        this.appearance(ctx, this.x, this.y, size, opacity, t);
     } else if (this.appearance === Particle.Appearance.CIRCLE) {
         ctx.fillStyle = this.color;
         ctx.globalAlpha = opacity;
