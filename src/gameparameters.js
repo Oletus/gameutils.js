@@ -54,3 +54,14 @@ GameParameters.prototype.set = function(key, value) {
         this._values[key] = value;
     }
 };
+
+/**
+ * @param {string} key Key for the parameter.
+ * @return {function} Function that returns the value of the parameter.
+ */
+GameParameters.prototype.wrap = function(key) {
+    var values = this._values;
+    return function() {
+        return values[key];
+    };
+};
