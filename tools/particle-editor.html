@@ -1,0 +1,79 @@
+<html>
+<head>
+<title>Gameutils.js Particle Effect Editor</title>
+<link rel="stylesheet" type="text/css" href="assets/default.css">
+<script src="../src/sprite.js"></script><!-- required for Particle.prerenderedCircleAppearance -->
+<script src="../src/particle.js"></script>
+<script src="../src/lib/dat.gui.js"></script>
+<script src="../src/gameparameters.js"></script>
+<script>
+'use strict';
+
+var ctx;
+var tester;
+
+var Tester = function() {
+    this.time = 0;
+    this.particles = new ParticleEngine({gravityY: 100});
+    this.emitter = new ParticleEmitter({
+        appearance: Particle.prerenderedCircleAppearance('#4fd', 8)
+    });
+};
+
+Tester.prototype.update = function() {
+    var deltaTime = 1 / 60; // Assume 60 fps... bad example :P
+    this.time += deltaTime;
+    
+    // Refresh parameters:
+    
+    for (var key in particleParameters) {
+        this.emitter.options[key] = Tester.parameters.get(key);
+    }
+
+    // Update:
+
+    this.particles.update(deltaTime);
+    var width = ctx.canvas.width;
+    var height = ctx.canvas.height;
+    var posX = width * 0.5 + Math.sin(this.time * 2.9) * width * 0.4;
+    var posY = height * 0.5 + Math.cos(this.time * 1.9) * height * 0.4;
+    for (var i = 0; i < 5; ++i) {
+        this.particles.addParticle(this.emitter.emitParticle({x: posX, y: posY}));
+    }
+
+    // Draw:
+
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    this.particles.render(ctx);
+};
+
+var frame = function() {
+    tester.update();
+    requestAnimationFrame(frame);
+};
+
+var particleParameters = {
+    'minVelocity': {initial: 10, min: 0, max: 100},
+    'maxVelocity': {initial: 80, min: 0, max: 1000},
+    'positionSpread': {initial: 10, min: 0, max: 100}
+};
+
+Tester.parameters = new GameParameters(particleParameters);
+
+var start = function() {
+    tester = new Tester();
+    var canvas = document.createElement('canvas');
+    canvas.width = 600;
+    canvas.height = 600;
+    ctx = canvas.getContext('2d');
+    document.body.appendChild(canvas);
+    Tester.parameters.initGUI();
+    frame();
+};
+</script>
+</head>
+<body onload="start()">
+<h2>Gameutils.js Particle Effect Editor</h2>
+</body>
+</html>
