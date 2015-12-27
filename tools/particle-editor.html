@@ -56,7 +56,12 @@ var frame = function() {
 var particleParameters = {
     'minVelocity': {initial: 10, min: 0, max: 100},
     'maxVelocity': {initial: 80, min: 0, max: 1000},
-    'positionSpread': {initial: 10, min: 0, max: 100}
+    'positionSpread': {initial: 10, min: 0, max: 100},
+    'direction': {initial: 0, min: 0, max: 360},
+    'directionSpread': {initial: 360, min: 0, max: 360},
+    'minLifetime': {initial: 1, min: 0.1, max: 20},
+    'maxLifetime': {initial: 3, min: 0.1, max: 20},
+    'size': {initial: 5, min: 1, max: 100}
 };
 
 Tester.parameters = new GameParameters(particleParameters);
