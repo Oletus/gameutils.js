@@ -16,12 +16,13 @@ var Editor = function() {
     this.time = 0;
     this.particles = new ParticleEngine({gravityY: 100});
     this.emitter = new ParticleEmitter({
-        appearance: Particle.prerenderedCircleAppearance('#4fd', 8)
+        appearance: Particle.prerenderedCircleAppearance('#fff', 8)
     });
     this.effect = new ParticleEffect({
         emitter: this.emitter,
         engine: this.particles
     });
+    this._color = '#fff';
 };
 
 Editor.prototype.update = function() {
@@ -37,6 +38,11 @@ Editor.prototype.update = function() {
     }
     this.effect.directionMode = ParticleEffect.DirectionMode[Editor.parameters.get('directionMode')];
     this.effect.particleInterval = Editor.parameters.get('particleInterval');
+    
+    if (this._color !== Editor.parameters.get('color')) {
+        this._color = Editor.parameters.get('color');
+        this.emitter.options.appearance = this.getAppearance(this._color);
+    }
 
     // Update:
 
@@ -53,6 +59,10 @@ Editor.prototype.update = function() {
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     this.particles.render(ctx);
+};
+
+Editor.prototype.getAppearance = function(color) {
+    return Particle.prerenderedCircleAppearance(color, 8);
 };
 
 var frame = function() {
@@ -74,6 +84,7 @@ var particleParameters = {
     'weight': {initial: 1, min: -1, max: 1},
     'directionMode': {options: ['RELATIVE', 'ABSOLUTE']},
     'particleInterval': {initial: 1/60, min: 1/240, max: 0.1},
+    'color': {initial: '#fff', color: true}
 };
 
 Editor.parameters = new GameParameters(particleParameters);

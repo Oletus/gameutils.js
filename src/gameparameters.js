@@ -14,7 +14,7 @@ var GameParameters = function(params) {
     this._values = {};
     for (var key in params) {
         if (params.hasOwnProperty(key)) {
-            if (params[key].options !== undefined) {
+            if (params[key].options !== undefined && params[key].initial === undefined) {
                 this._values[key] = params[key].options[0];
             } else {
                 this._values[key] = params[key].initial;
@@ -38,7 +38,9 @@ GameParameters.prototype.initGUI = function(preset) {
         if (params.hasOwnProperty(key)) {
             var param = params[key];
             var added = null;
-            if (param.options !== undefined) {
+            if (param.color !== undefined) {
+                gui.addColor(this._values, key);
+            } else if (param.options !== undefined) {
                 added = gui.add(this._values, key, param.options);
             } else if (param.min !== undefined) {
                 added = gui.add(this._values, key, param.min, param.max);
