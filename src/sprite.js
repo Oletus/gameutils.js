@@ -34,7 +34,11 @@ Sprite.prototype._reload = function() {
         }
     } else {
         this.img = document.createElement('img');
-        this.img.src = Sprite.gfxPath + this.filename;
+        if (this.filename.substring(0, 5) === 'data:' || this.filename.substring(0, 5) === 'http:') {
+            this.img.src = this.filename;
+        } else {
+            this.img.src = Sprite.gfxPath + this.filename;
+        }
         var that = this;
         this.loaded = false;
         this.img.onload = function() {

@@ -50,6 +50,9 @@ GameParameters.prototype.initGUI = function(preset) {
             if (param.step !== undefined) {
                 added.step(param.step);
             }
+            if (added) {
+                added.listen();
+            }
         }
     }
 };

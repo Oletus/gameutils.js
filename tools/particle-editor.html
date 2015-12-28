@@ -12,6 +12,22 @@
 var ctx;
 var editor;
 
+var loadFileInput = function(fileInput, urlCallback) {
+    var file = fileInput.files[0];
+    var reader = new FileReader();
+    reader.onload = function(evt) {
+        urlCallback(evt.target.result);
+    };
+    reader.readAsDataURL(file);
+};
+
+var loadSpriteFromFileInput = function() {
+    var fileInput = document.getElementById('imageFile');
+    loadFileInput(fileInput, function(fileSrc) {
+        editor.parameters.set('spriteURL', fileSrc);
+    });
+};
+
 var Editor = function() {
     this.time = 0;
     this.particles = new ParticleEngine({gravityY: 100});
@@ -23,80 +39,12 @@ var Editor = function() {
         engine: this.particles
     });
     this._color = '#fff';
-};
-
-Editor.prototype.update = function() {
-    var deltaTime = 1 / 60; // Assume 60 fps... bad example :P
-    this.time += deltaTime;
+    this._colorSprite = false;
+    this.sprite = null;
+    this.loadedSpriteURL = '';
     
-    // Refresh parameters:
-    
-    for (var key in particleParameters) {
-        if (this.emitter.options.hasOwnProperty(key)) {
-            this.emitter.options[key] = Editor.parameters.get(key);
-        }
-    }
-    this.effect.directionMode = ParticleEffect.DirectionMode[Editor.parameters.get('directionMode')];
-    this.effect.particleInterval = Editor.parameters.get('particleInterval');
-    
-    if (this._color !== Editor.parameters.get('color')) {
-        this._color = Editor.parameters.get('color');
-        this.emitter.options.appearance = this.getAppearance(this._color);
-    }
-
-    // Update:
-
-    this.particles.update(deltaTime);
-    var width = ctx.canvas.width;
-    var height = ctx.canvas.height;
-    var posX = width * 0.5 + Math.sin(this.time * 2.9) * width * 0.4;
-    var posY = height * 0.5 + Math.cos(this.time * 1.9) * height * 0.4;
-    this.effect.setCoords(posX, posY);
-    this.effect.update(deltaTime);
-
-    // Draw:
-
-    ctx.fillStyle = 'black';
-    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    this.particles.render(ctx);
-};
-
-Editor.prototype.getAppearance = function(color) {
-    return Particle.prerenderedCircleAppearance(color, 8);
-};
-
-var frame = function() {
-    editor.update();
-    requestAnimationFrame(frame);
-};
-
-var particleParameters = {
-    'minVelocity': {initial: 10, min: 0, max: 1000},
-    'maxVelocity': {initial: 80, min: 0, max: 1000},
-    'positionSpread': {initial: 10, min: 0, max: 100},
-    'direction': {initial: 0, min: 0, max: 360, step: 10},
-    'directionSpread': {initial: 360, min: 0, max: 360, step: 10},
-    'minLifetime': {initial: 1, min: 0.1, max: 20},
-    'maxLifetime': {initial: 3, min: 0.1, max: 20},
-    'size': {initial: 5, min: 1, max: 100},
-    'opacity': {initial: 1, min: 0, max: 1},
-    'inertia': {initial: 1, min: 0.1, max: 10},
-    'weight': {initial: 1, min: -1, max: 1},
-    'directionMode': {options: ['RELATIVE', 'ABSOLUTE']},
-    'particleInterval': {initial: 1/60, min: 1/240, max: 0.1},
-    'color': {initial: '#fff', color: true}
-};
-
-Editor.parameters = new GameParameters(particleParameters);
-
-var start = function() {
-    editor = new Editor();
-    var canvas = document.createElement('canvas');
-    canvas.width = 600;
-    canvas.height = 600;
-    ctx = canvas.getContext('2d');
-    document.body.appendChild(canvas);
-    Editor.parameters.initGUI(
+    this.parameters = new GameParameters(particleParameters);
+    this.parameters.initGUI(
         {
           "preset": "Trail",
           "remembered": {
@@ -139,6 +87,108 @@ var start = function() {
           "folders": {}
         }
     );
+};
+
+Editor.prototype.update = function() {
+    var deltaTime = 1 / 60; // Assume 60 fps... bad example :P
+    this.time += deltaTime;
+    
+    // Refresh parameters:
+    
+    for (var key in particleParameters) {
+        if (this.emitter.options.hasOwnProperty(key)) {
+            this.emitter.options[key] = this.parameters.get(key);
+        }
+    }
+    this.effect.directionMode = ParticleEffect.DirectionMode[this.parameters.get('directionMode')];
+    this.effect.particleInterval = this.parameters.get('particleInterval');
+    
+    this.updateAppearance();
+
+    // Update:
+
+    this.particles.update(deltaTime);
+    var width = ctx.canvas.width;
+    var height = ctx.canvas.height;
+    var posX = width * 0.5 + Math.sin(this.time * 2.9) * width * 0.4;
+    var posY = height * 0.5 + Math.cos(this.time * 1.9) * height * 0.4;
+    this.effect.setCoords(posX, posY);
+    this.effect.update(deltaTime);
+
+    // Draw:
+
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    this.particles.render(ctx);
+};
+
+Editor.prototype.updateAppearance = function() {
+    if (this._color === this.parameters.get('color') &&
+        this._colorSprite === this.parameters.get('colorSprite') &&
+        this._loadedSpriteURL === this.parameters.get('spriteURL'))
+    {
+        return;
+    }
+    var updatedAppearance;
+    if (this.parameters.get('spriteURL') !== '') {
+        if (this.sprite === null || this.sprite.filename !== this.parameters.get('spriteURL')) {
+            this.sprite = new Sprite(this.parameters.get('spriteURL'));
+        }
+        if (this.sprite.loaded) {
+            this.loadedSprite = this.sprite;
+            if (this.parameters.get('colorSprite')) {
+                var coloredSprite = new Sprite(this.sprite.filename, Sprite.turnSolidColored(this._color));
+                updatedAppearance = Particle.spriteAppearance(coloredSprite, 1 / this.sprite.width);
+            } else {
+                updatedAppearance = Particle.spriteAppearance(this.sprite, 1 / this.sprite.width);
+            }
+        }
+    } else {
+        updatedAppearance = Particle.prerenderedCircleAppearance(this._color, 8);
+    }
+    
+    if (updatedAppearance !== undefined) {
+        this.emitter.options.appearance = updatedAppearance;
+        this._colorSprite = this.parameters.get('colorSprite');
+        this._color = this.parameters.get('color');
+        this._loadedSpriteURL = this.parameters.get('spriteURL');
+    }
+};
+
+var frame = function() {
+    editor.update();
+    requestAnimationFrame(frame);
+};
+
+var particleParameters = {
+    'minVelocity': {initial: 10, min: 0, max: 1000},
+    'maxVelocity': {initial: 80, min: 0, max: 1000},
+    'positionSpread': {initial: 10, min: 0, max: 100},
+    'direction': {initial: 0, min: 0, max: 360, step: 10},
+    'directionSpread': {initial: 360, min: 0, max: 360, step: 10},
+    'minLifetime': {initial: 1, min: 0.1, max: 20},
+    'maxLifetime': {initial: 3, min: 0.1, max: 20},
+    'size': {initial: 5, min: 1, max: 100},
+    'opacity': {initial: 1, min: 0, max: 1},
+    'inertia': {initial: 1, min: 0.1, max: 10},
+    'weight': {initial: 1, min: -1, max: 1},
+    'directionMode': {options: ['RELATIVE', 'ABSOLUTE']},
+    'particleInterval': {initial: 1/60, min: 1/240, max: 0.1},
+    'color': {initial: '#fff', color: true},
+    'colorSprite': {initial: false},
+    'spriteURL': {initial: ''}
+};
+
+var start = function() {
+    editor = new Editor();
+    var canvas = document.createElement('canvas');
+    canvas.width = 600;
+    canvas.height = 600;
+    ctx = canvas.getContext('2d');
+    document.body.appendChild(canvas);
+    var div = document.createElement('div');
+    div.innerHTML = '<input type="file" id="imageFile"></input><input type="button" onclick="loadSpriteFromFileInput()" value="Load sprite"></input>'
+    document.body.appendChild(div);
     frame();
 };
 </script>
