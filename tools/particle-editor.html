@@ -85,7 +85,49 @@ var start = function() {
     canvas.height = 600;
     ctx = canvas.getContext('2d');
     document.body.appendChild(canvas);
-    Editor.parameters.initGUI();
+    Editor.parameters.initGUI(
+        {
+          "preset": "Trail",
+          "remembered": {
+            "Default": {
+              "0": {
+                "minVelocity": 10,
+                "maxVelocity": 80,
+                "positionSpread": 10,
+                "direction": 0,
+                "directionSpread": 360,
+                "minLifetime": 1,
+                "maxLifetime": 3,
+                "size": 5,
+                "opacity": 1,
+                "inertia": 1,
+                "weight": 1,
+                "directionMode": "RELATIVE",
+                "particleInterval": 0.016666666666666666
+              }
+            },
+            "Trail": {
+              "0": {
+                "minVelocity": 10,
+                "maxVelocity": 54.19137793500506,
+                "positionSpread": 10,
+                "direction": 180,
+                "directionSpread": 20,
+                "minLifetime": 1,
+                "maxLifetime": 3,
+                "size": 29.970710644053703,
+                "opacity": 1,
+                "inertia": 1,
+                "weight": -0.6748517323899696,
+                "directionMode": "RELATIVE",
+                "particleInterval": 0.011437343206279846
+              }
+            }
+          },
+          "closed": false,
+          "folders": {}
+        }
+    );
     frame();
 };
 </script>

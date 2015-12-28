@@ -25,10 +25,15 @@ var GameParameters = function(params) {
 
 /**
  * Add dat.gui for changing the parameters.
+ * @param {Object=} preset Preset data for dat.GUI.
  */
-GameParameters.prototype.initGUI = function() {
-    var gui = new dat.GUI();
+GameParameters.prototype.initGUI = function(preset) {
+    if (preset !== undefined) {
+        preset = {load: preset};
+    }
+    var gui = new dat.GUI(preset);
     var params = this._params;
+    gui.remember(this._values);
     for (var key in params) {
         if (params.hasOwnProperty(key)) {
             var param = params[key];
