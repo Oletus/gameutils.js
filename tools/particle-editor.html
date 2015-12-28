@@ -31,9 +31,12 @@ Editor.prototype.update = function() {
     // Refresh parameters:
     
     for (var key in particleParameters) {
-        this.emitter.options[key] = Editor.parameters.get(key);
+        if (this.emitter.options.hasOwnProperty(key)) {
+            this.emitter.options[key] = Editor.parameters.get(key);
+        }
     }
     this.effect.directionMode = ParticleEffect.DirectionMode[Editor.parameters.get('directionMode')];
+    this.effect.particleInterval = Editor.parameters.get('particleInterval');
 
     // Update:
 
@@ -61,12 +64,16 @@ var particleParameters = {
     'minVelocity': {initial: 10, min: 0, max: 1000},
     'maxVelocity': {initial: 80, min: 0, max: 1000},
     'positionSpread': {initial: 10, min: 0, max: 100},
-    'direction': {initial: 0, min: 0, max: 360},
-    'directionSpread': {initial: 360, min: 0, max: 360},
+    'direction': {initial: 0, min: 0, max: 360, step: 10},
+    'directionSpread': {initial: 360, min: 0, max: 360, step: 10},
     'minLifetime': {initial: 1, min: 0.1, max: 20},
     'maxLifetime': {initial: 3, min: 0.1, max: 20},
     'size': {initial: 5, min: 1, max: 100},
-    'directionMode': {options: ['RELATIVE', 'ABSOLUTE']}
+    'opacity': {initial: 1, min: 0, max: 1},
+    'inertia': {initial: 1, min: 0.1, max: 10},
+    'weight': {initial: 1, min: -1, max: 1},
+    'directionMode': {options: ['RELATIVE', 'ABSOLUTE']},
+    'particleInterval': {initial: 1/60, min: 1/240, max: 0.1},
 };
 
 Editor.parameters = new GameParameters(particleParameters);

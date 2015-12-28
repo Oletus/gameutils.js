@@ -35,7 +35,7 @@ ParticleEngine.prototype.addParticle = function(particle) {
 ParticleEngine.prototype.update = function(deltaTime) {
     var i = 0;
     while (i < this.particles.length) {
-        this.particles[i].update(deltaTime, this.gravityX, this.gravityY);
+        this.particles[i].update(deltaTime, this.gravityX * this.particles[i].weight, this.gravityY * this.particles[i].weight);
         if (this.particles[i].dead) {
             this.particles.splice(i, 1);
         } else {
@@ -137,8 +137,11 @@ var ParticleEmitter = function(options) {
         maxLifetime: 3, // seconds
         size: 5,
         sizeFunc: Particle.fadeOutLinear,
+        opacity: 1,
         opacityFunc: Particle.fastAppearSlowDisappear,
         appearance: Particle.Appearance.CIRCLE,
+        inertia: 1,
+        weight: 1,
         color: '#f0f'
     };
     this.options = {};
@@ -195,6 +198,7 @@ var Particle = function(options) {
         velX: 0,
         velY: 0,
         inertia: 1,
+        weight: 1,
         size: 5,
         opacity: 1,
         sizeFunc: Particle.fadeOutLinear,

@@ -32,12 +32,16 @@ GameParameters.prototype.initGUI = function() {
     for (var key in params) {
         if (params.hasOwnProperty(key)) {
             var param = params[key];
+            var added = null;
             if (param.options !== undefined) {
-                gui.add(this._values, key, param.options);
+                added = gui.add(this._values, key, param.options);
             } else if (param.min !== undefined) {
-                gui.add(this._values, key, param.min, param.max);
+                added = gui.add(this._values, key, param.min, param.max);
             } else {
-                gui.add(this._values, key);
+                added = gui.add(this._values, key);
+            }
+            if (param.step !== undefined) {
+                added.step(param.step);
             }
         }
     }
