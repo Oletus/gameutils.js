@@ -14,7 +14,11 @@ var GameParameters = function(params) {
     this._values = {};
     for (var key in params) {
         if (params.hasOwnProperty(key)) {
-            this._values[key] = params[key].initial;
+            if (params[key].options !== undefined) {
+                this._values[key] = params[key].options[0];
+            } else {
+                this._values[key] = params[key].initial;
+            }
         }
     }
 };
@@ -28,7 +32,9 @@ GameParameters.prototype.initGUI = function() {
     for (var key in params) {
         if (params.hasOwnProperty(key)) {
             var param = params[key];
-            if (param.min !== undefined) {
+            if (param.options !== undefined) {
+                gui.add(this._values, key, param.options);
+            } else if (param.min !== undefined) {
                 gui.add(this._values, key, param.min, param.max);
             } else {
                 gui.add(this._values, key);
