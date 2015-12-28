@@ -6,6 +6,9 @@ textarea {
     position: absolute;
     left: 650px;
     top: 55px;
+    white-space: pre;
+    word-wrap: normal;
+    overflow-x: scroll;
 }
 </style>
 <script src="../src/sprite.js"></script><!-- required for Particle.prerenderedCircleAppearance -->
@@ -53,6 +56,8 @@ var Editor = function() {
     this.codeArea.cols = 80;
     this.codeArea.rows = 40;
     this.codeArea.readOnly = true;
+    this._appearanceCodePrefix = '';
+    this._appearanceCode = '';
     
     this.parameters = new GameParameters(particleParameters);
     this.parameters.initGUI(
@@ -102,11 +107,18 @@ var Editor = function() {
 
 Editor.prototype.generateCode = function() {
     var code = [];
+    if (this._appearanceCodePrefix != '') {
+        code.push(this._appearanceCodePrefix);
+    }
     code.push('var emitter = new ParticleEmitter({');
     var specialEmitterKeys = {'x': false, 'y': false, 'appearance': false, 'rotationMode': false, 'sizeFunc': true, 'opacityFunc': true};
     for (var key in this.emitter.options) {
         if (this.emitter.options.hasOwnProperty(key) && !specialEmitterKeys.hasOwnProperty(key)) {
-            code.push('    ' + key + ': ' + this.emitter.options[key] + ',');
+            if (typeof this.emitter.options[key] === 'string') {
+                code.push('    ' + key + ': "' + this.emitter.options[key] + '",');
+            } else {
+                code.push('    ' + key + ': ' + this.emitter.options[key] + ',');
+            }
         }
     }
     code.push('    rotationMode: Particle.RotationMode.' + this.parameters.get('rotationMode') + ',');
@@ -120,6 +132,7 @@ Editor.prototype.generateCode = function() {
             }
         }
     }
+    code.push('    appearance: ' + this._appearanceCode + ',');
     // Remove extra comma
     code[code.length - 1] = code[code.length - 1].substring(0, code[code.length - 1].length - 1);
     code.push('});');
@@ -186,12 +199,18 @@ Editor.prototype.updateAppearance = function() {
             if (this.parameters.get('colorSprite')) {
                 var coloredSprite = new Sprite(this.sprite.filename, Sprite.turnSolidColored(this._color));
                 updatedAppearance = Particle.spriteAppearance(coloredSprite, 1 / this.sprite.width);
+                this._appearanceCodePrefix = 'var sprite = new Sprite("' + this.sprite.filename + '", Sprite.turnSolidColored("' + this._color + '"));';
+                this._appearanceCode = 'Particle.spriteAppearance(sprite, ' + 1 / this.sprite.width + ')';
             } else {
                 updatedAppearance = Particle.spriteAppearance(this.sprite, 1 / this.sprite.width);
+                this._appearanceCodePrefix = 'var sprite = new Sprite("' + this.sprite.filename + '");';
+                this._appearanceCode = 'Particle.spriteAppearance(sprite, ' + 1 / this.sprite.width + ')';
             }
         }
     } else {
         updatedAppearance = Particle.prerenderedCircleAppearance(this._color, 8);
+        this._appearanceCodePrefix = '';
+        this._appearanceCode = 'Particle.prerenderedCircleAppearance("' + this._color + '", 8)';
     }
     
     if (updatedAppearance !== undefined) {
