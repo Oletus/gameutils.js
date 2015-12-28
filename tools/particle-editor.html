@@ -1,7 +1,13 @@
 <html>
 <head>
 <title>Gameutils.js Particle Effect Editor</title>
-<link rel="stylesheet" type="text/css" href="assets/default.css">
+<style>
+textarea {
+    position: absolute;
+    left: 650px;
+    top: 55px;
+}
+</style>
 <script src="../src/sprite.js"></script><!-- required for Particle.prerenderedCircleAppearance -->
 <script src="../src/particle.js"></script>
 <script src="../src/lib/dat.gui.js"></script>
@@ -42,6 +48,11 @@ var Editor = function() {
     this._colorSprite = false;
     this.sprite = null;
     this.loadedSpriteURL = '';
+    
+    this.codeArea = document.createElement('textarea');
+    this.codeArea.cols = 80;
+    this.codeArea.rows = 40;
+    this.codeArea.readOnly = true;
     
     this.parameters = new GameParameters(particleParameters);
     this.parameters.initGUI(
@@ -89,6 +100,39 @@ var Editor = function() {
     );
 };
 
+Editor.prototype.generateCode = function() {
+    var code = [];
+    code.push('var emitter = new Emitter({');
+    var specialEmitterKeys = {'x': false, 'y': false, 'appearance': false, 'rotationMode': false, 'sizeFunc': true, 'opacityFunc': true};
+    for (var key in this.emitter.options) {
+        if (this.emitter.options.hasOwnProperty(key) && !specialEmitterKeys.hasOwnProperty(key)) {
+            code.push('    ' + key + ': ' + this.emitter.options[key] + ',');
+        }
+    }
+    code.push('    rotationMode: Particle.RotationMode.' + this.parameters.get('rotationMode') + ',');
+    var functions = ['Particle.fastAppearSlowDisappear', 'Particle.fadeOutLinear'];
+    for (var key in specialEmitterKeys) {
+        if (specialEmitterKeys.hasOwnProperty(key) && specialEmitterKeys[key]) {
+            for (var i = 0; i < functions.length; ++i) {
+                if (eval(functions[i]) === this.emitter.options[key]) {
+                    code.push('    ' + key + ': ' + functions[i] + ',');
+                }
+            }
+        }
+    }
+    // Remove extra comma
+    code[code.length - 1] = code[code.length - 1].substring(0, code[code.length - 1].length - 1);
+    code.push('});');
+    code.push('var effect = new Effect({');
+    code.push('    emitter: emitter,');
+    code.push('    directionMode: ParticleEffect.DirectionMode.' + this.parameters.get('directionMode') + ',');
+    code.push('    particleInterval: ' + this.parameters.get('particleInterval') + ',');
+    // Remove extra comma
+    code[code.length - 1] = code[code.length - 1].substring(0, code[code.length - 1].length - 1);
+    code.push('});');
+    return code.join('\n');
+};
+
 Editor.prototype.update = function() {
     var deltaTime = 1 / 60; // Assume 60 fps... bad example :P
     this.time += deltaTime;
@@ -103,6 +147,8 @@ Editor.prototype.update = function() {
     this.emitter.options.rotationMode = Particle.RotationMode[this.parameters.get('rotationMode')];
     this.effect.directionMode = ParticleEffect.DirectionMode[this.parameters.get('directionMode')];
     this.effect.particleInterval = this.parameters.get('particleInterval');
+    
+    this.codeArea.textContent = this.generateCode();
     
     this.updateAppearance();
 
@@ -192,6 +238,7 @@ var start = function() {
     var div = document.createElement('div');
     div.innerHTML = '<input type="file" id="imageFile"></input><input type="button" onclick="loadSpriteFromFileInput()" value="Load sprite"></input>'
     document.body.appendChild(div);
+    document.body.appendChild(editor.codeArea);
     frame();
 };
 </script>
