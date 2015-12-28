@@ -102,7 +102,7 @@ var Editor = function() {
 
 Editor.prototype.generateCode = function() {
     var code = [];
-    code.push('var emitter = new Emitter({');
+    code.push('var emitter = new ParticleEmitter({');
     var specialEmitterKeys = {'x': false, 'y': false, 'appearance': false, 'rotationMode': false, 'sizeFunc': true, 'opacityFunc': true};
     for (var key in this.emitter.options) {
         if (this.emitter.options.hasOwnProperty(key) && !specialEmitterKeys.hasOwnProperty(key)) {
@@ -123,7 +123,7 @@ Editor.prototype.generateCode = function() {
     // Remove extra comma
     code[code.length - 1] = code[code.length - 1].substring(0, code[code.length - 1].length - 1);
     code.push('});');
-    code.push('var effect = new Effect({');
+    code.push('var effect = new ParticleEffect({');
     code.push('    emitter: emitter,');
     code.push('    directionMode: ParticleEffect.DirectionMode.' + this.parameters.get('directionMode') + ',');
     code.push('    particleInterval: ' + this.parameters.get('particleInterval') + ',');
