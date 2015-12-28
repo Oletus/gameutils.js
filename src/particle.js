@@ -139,6 +139,8 @@ var ParticleEmitter = function(options) {
         sizeFunc: Particle.fadeOutLinear,
         opacity: 1,
         opacityFunc: Particle.fastAppearSlowDisappear,
+        rotation: 0, // degrees
+        rotationMode: Particle.RotationMode.STATIC,
         appearance: Particle.Appearance.CIRCLE,
         inertia: 1,
         weight: 1,
@@ -203,6 +205,8 @@ var Particle = function(options) {
         opacity: 1,
         sizeFunc: Particle.fadeOutLinear,
         opacityFunc: Particle.fastAppearSlowDisappear,
+        rotation: 0,
+        rotationMode: Particle.RotationMode.STATIC,
         seed: 0,
         appearance: Particle.Appearance.CIRCLE,
         color: '#f0f'
@@ -214,11 +218,21 @@ var Particle = function(options) {
             this[key] = options[key];
         }
     }
+    this.rotation *= Math.PI / 180;
+    if (this.rotationMode === Particle.RotationMode.INITIAL_DIRECTION) {
+        this.rotation += Math.atan2(this.velY, this.velX);
+    }
     this.dead = false;
 };
 
 Particle.Appearance = {
     CIRCLE: 0
+};
+
+Particle.RotationMode = {
+    STATIC: 0,
+    INITIAL_DIRECTION: 1,
+    CURRENT_DIRECTION: 2
 };
 
 /**
@@ -232,9 +246,9 @@ Particle.spriteAppearance = function(sprite, scaleMultiplier) {
     if (scaleMultiplier === undefined) {
         scaleMultiplier = 1.0;
     }
-    return function(ctx, x, y, size, opacity, t) {
+    return function(ctx, x, y, size, opacity, rotation, t) {
         ctx.globalAlpha = opacity;
-        sprite.drawRotated(ctx, x, y, 0, size * scaleMultiplier);
+        sprite.drawRotated(ctx, x, y, rotation, size * scaleMultiplier);
     };
 };
 
@@ -309,8 +323,12 @@ Particle.prototype.draw = function(ctx) {
     var t = this.timeAlive / this.lifetime;
     var size = this.sizeFunc(t, this.seed) * this.size;
     var opacity = this.opacityFunc(t, this.seed) * this.opacity;
+    var rotation = this.rotation;
+    if (this.rotationMode === Particle.RotationMode.CURRENT_DIRECTION) {
+        rotation += Math.atan2(this.velY, this.velX);
+    }
     if (typeof(this.appearance) === 'function') {
-        this.appearance(ctx, this.x, this.y, size, opacity, t);
+        this.appearance(ctx, this.x, this.y, size, opacity, rotation, t);
     } else if (this.appearance === Particle.Appearance.CIRCLE) {
         ctx.fillStyle = this.color;
         ctx.globalAlpha = opacity;
