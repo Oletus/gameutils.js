@@ -73,6 +73,7 @@ var ParticleEffect = function(options) {
         directionMode: ParticleEffect.DirectionMode.RELATIVE,
         particleInterval: 1 / 60, // seconds
         lifetime: -1, // seconds, can be negative for infinite duration
+        waitTime: 0, // seconds, time to wait until first starting
         maxParticleCount: -1 // maximum particle count to emit, negative for infinite particles
     };
     for(var key in defaults) {
@@ -83,9 +84,8 @@ var ParticleEffect = function(options) {
         }
     }
     this._time = 0;
+    this._timeAlive = 0;
     this._emittedTime = 0;
-    this._lastX = this.x;
-    this._lastY = this.y;
     this.dead = false;
     this._emittedCount = 0;
 };
@@ -96,22 +96,31 @@ ParticleEffect.DirectionMode = {
 };
 
 ParticleEffect.prototype.update = function(deltaTime) {
-    if (this._time > this.lifetime && this.lifetime >= 0) {
+    this._time += deltaTime;
+    if (this._time < this.waitTime) {
+        return;
+    }
+    if (this._timeAlive > this.lifetime && this.lifetime >= 0) {
         this.dead = true;
         return;
     }
-    var lastTime = this._time;
-    this._time += deltaTime;
+    var lastTime = this._timeAlive;
+    this._timeAlive += deltaTime;
+    if (this._lastX === undefined) {
+        this._lastX = this.x;
+        this._lastY = this.y;
+    }
     var directionBase = 0;
     if (this.directionMode === ParticleEffect.DirectionMode.RELATIVE) {
         if (this.x != this._lastX || this.y != this._lastY) {
             directionBase = Math.atan2(this.y - this._lastY, this.x - this._lastX) * 180 / Math.PI;
         }
     }
-    while (this._time > this._emittedTime && (this._emittedCount < this.maxParticleCount || this.maxParticleCount < 0))
+    while (this._timeAlive > this._emittedTime &&
+           (this._emittedCount < this.maxParticleCount || this.maxParticleCount < 0))
     {
         this._emittedTime += this.particleInterval;
-        var t = (this._emittedTime - lastTime) / (this._time - lastTime);
+        var t = (this._emittedTime - lastTime) / (this._timeAlive - lastTime);
         var emitter = this.emitter;
         emitter.options.x = this._lastX * (1 - t) + this.x * t;
         emitter.options.y = this._lastY * (1 - t) + this.y * t;
