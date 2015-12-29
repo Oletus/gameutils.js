@@ -40,8 +40,10 @@ var loadSpriteFromFileInput = function() {
 var Editor = function() {
     this.time = 0;
     this.particles = new ParticleEngine({gravityY: 100});
+    this._appearanceOptions = {};
+    this._loadedAppearanceOptions = {};
     this.emitter = new ParticleEmitter({
-        appearance: Particle.prerenderedCircleAppearance('#fff', 8)
+        appearance: Particle.prerenderedCircleAppearance('#fff', 8, this._appearanceOptions)
     });
     this.effect = new ParticleEffect({
         emitter: this.emitter,
@@ -183,13 +185,31 @@ Editor.prototype.update = function() {
 };
 
 Editor.prototype.updateAppearance = function() {
-    if (this._color === this.parameters.get('color') &&
+    this._appearanceOptions.size = this.parameters.get('size');
+    if (this.parameters.get('spriteURL') !== '' && this.sprite && this.sprite.loaded) {
+        this._appearanceOptions.size /= this.sprite.width;
+    }
+    this._appearanceOptions.opacity = this.parameters.get('opacity');
+    var appearanceSame = true;
+    for (var key in this._appearanceOptions) {
+        if (this._appearanceOptions.hasOwnProperty(key)) {
+            if (this._loadedAppearanceOptions[key] !== this._appearanceOptions[key]) {
+                appearanceSame = false;
+            }
+        }
+    }
+    if (appearanceSame &&
+        this._color === this.parameters.get('color') &&
         this._colorSprite === this.parameters.get('colorSprite') &&
         this._loadedSpriteURL === this.parameters.get('spriteURL'))
     {
         return;
     }
     var updatedAppearance;
+    var appearanceOptionsString = '{';
+    appearanceOptionsString += 'size: ' + this._appearanceOptions.size + ', ';
+    appearanceOptionsString += 'opacity: ' + this._appearanceOptions.opacity;
+    appearanceOptionsString += '}';
     if (this.parameters.get('spriteURL') !== '') {
         if (this.sprite === null || this.sprite.filename !== this.parameters.get('spriteURL')) {
             this.sprite = new Sprite(this.parameters.get('spriteURL'));
@@ -198,19 +218,19 @@ Editor.prototype.updateAppearance = function() {
             this.loadedSprite = this.sprite;
             if (this.parameters.get('colorSprite')) {
                 var coloredSprite = new Sprite(this.sprite.filename, Sprite.turnSolidColored(this._color));
-                updatedAppearance = Particle.spriteAppearance(coloredSprite, 1 / this.sprite.width);
+                updatedAppearance = Particle.spriteAppearance(coloredSprite, this._appearanceOptions);
                 this._appearanceCodePrefix = 'var sprite = new Sprite("' + this.sprite.filename + '", Sprite.turnSolidColored("' + this._color + '"));';
-                this._appearanceCode = 'Particle.spriteAppearance(sprite, ' + 1 / this.sprite.width + ')';
+                this._appearanceCode = 'Particle.spriteAppearance(sprite, ' + 1 / this.sprite.width + ', ' + appearanceOptionsString + ')';
             } else {
-                updatedAppearance = Particle.spriteAppearance(this.sprite, 1 / this.sprite.width);
+                updatedAppearance = Particle.spriteAppearance(this.sprite, this._appearanceOptions);
                 this._appearanceCodePrefix = 'var sprite = new Sprite("' + this.sprite.filename + '");';
-                this._appearanceCode = 'Particle.spriteAppearance(sprite, ' + 1 / this.sprite.width + ')';
+                this._appearanceCode = 'Particle.spriteAppearance(sprite, ' + 1 / this.sprite.width + ', ' + appearanceOptionsString + ')';
             }
         }
     } else {
-        updatedAppearance = Particle.prerenderedCircleAppearance(this._color, 8);
+        updatedAppearance = Particle.prerenderedCircleAppearance(this._color, 8, this._appearanceOptions);
         this._appearanceCodePrefix = '';
-        this._appearanceCode = 'Particle.prerenderedCircleAppearance("' + this._color + '", 8)';
+        this._appearanceCode = 'Particle.prerenderedCircleAppearance("' + this._color + '", 8, ' + appearanceOptionsString + ')';
     }
     
     if (updatedAppearance !== undefined) {
@@ -218,6 +238,11 @@ Editor.prototype.updateAppearance = function() {
         this._colorSprite = this.parameters.get('colorSprite');
         this._color = this.parameters.get('color');
         this._loadedSpriteURL = this.parameters.get('spriteURL');
+        for (var key in this._appearanceOptions) {
+            if (this._appearanceOptions.hasOwnProperty(key)) {
+                this._loadedAppearanceOptions[key] = this._appearanceOptions[key];
+            }
+        }
     }
 };
 

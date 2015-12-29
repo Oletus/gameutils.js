@@ -135,16 +135,11 @@ var ParticleEmitter = function(options) {
         maxVelocity: 0,
         minLifetime: 1, // seconds
         maxLifetime: 3, // seconds
-        size: 5,
-        sizeFunc: Particle.fadeOutLinear,
-        opacity: 1,
-        opacityFunc: Particle.fastAppearSlowDisappear,
         rotation: 0, // degrees
         rotationMode: Particle.RotationMode.STATIC,
-        appearance: Particle.Appearance.CIRCLE,
+        appearance: Particle.defaultAppearance,
         inertia: 1,
-        weight: 1,
-        color: '#f0f'
+        weight: 1
     };
     this.options = {};
     for(var key in defaults) {
@@ -201,15 +196,10 @@ var Particle = function(options) {
         velY: 0,
         inertia: 1,
         weight: 1,
-        size: 5,
-        opacity: 1,
-        sizeFunc: Particle.fadeOutLinear,
-        opacityFunc: Particle.fastAppearSlowDisappear,
         rotation: 0,
         rotationMode: Particle.RotationMode.STATIC,
         seed: 0,
-        appearance: Particle.Appearance.CIRCLE,
-        color: '#f0f'
+        appearance: Particle.defaultAppearance
     };
     for(var key in defaults) {
         if (!options.hasOwnProperty(key)) {
@@ -225,10 +215,6 @@ var Particle = function(options) {
     this.dead = false;
 };
 
-Particle.Appearance = {
-    CIRCLE: 0
-};
-
 Particle.RotationMode = {
     STATIC: 0,
     INITIAL_DIRECTION: 1,
@@ -242,13 +228,27 @@ Particle.RotationMode = {
  * engine in a game world's coordinate system which has different scale compared to the canvas.
  * @return {function} An appearance function that draws the sprite centered on the particle position.
  */
-Particle.spriteAppearance = function(sprite, scaleMultiplier) {
-    if (scaleMultiplier === undefined) {
-        scaleMultiplier = 1.0;
+Particle.spriteAppearance = function(sprite, options) {
+    var defaults = {
+        size: 5,
+        sizeFunc: Particle.fadeOutLinear,
+        opacity: 1,
+        opacityFunc: Particle.fastAppearSlowDisappear
+    };
+    var _options = {};
+    for(var key in defaults) {
+        if (defaults.hasOwnProperty(key)) {
+            if (!options.hasOwnProperty(key)) {
+                _options[key] = defaults[key];
+            } else {
+                _options[key] = options[key];
+            }
+        }
     }
-    return function(ctx, x, y, size, opacity, rotation, t) {
-        ctx.globalAlpha = opacity;
-        sprite.drawRotated(ctx, x, y, rotation, size * scaleMultiplier);
+    return function(ctx, x, y, rotation, seed, t) {
+        var sizeNow = _options.sizeFunc(t, seed) * _options.size;
+        ctx.globalAlpha = _options.opacityFunc(t, seed) * _options.opacity;
+        sprite.drawRotated(ctx, x, y, rotation, sizeNow);
     };
 };
 
@@ -258,12 +258,11 @@ Particle.spriteAppearance = function(sprite, scaleMultiplier) {
  * @param {string} color CSS color string for the circle.
  * @param {number} resolution Resolution of the sprite to create in pixels. Will not affect the size of the particle
  * when drawing.
- * @param {number=} scaleMultiplier Scale multiplier for all the sprites. Useful for example if you run the particle
- * engine in a game world's coordinate system which has different scale compared to the canvas.
+ * @param {number=} size Size of the prerendered circle as drawn.
  */
-Particle.prerenderedCircleAppearance = function(color, resolution, scaleMultiplier) {
-    if (scaleMultiplier === undefined) {
-        scaleMultiplier = 1.0;
+Particle.prerenderedCircleAppearance = function(color, resolution, options) {
+    if (color === undefined) {
+        color = '#fff';
     }
     var helperCanvas = document.createElement('canvas');
     helperCanvas.width = resolution;
@@ -274,7 +273,11 @@ Particle.prerenderedCircleAppearance = function(color, resolution, scaleMultipli
     helperCtx.arc(resolution * 0.5, resolution * 0.5, resolution * 0.5, 0, Math.PI * 2);
     helperCtx.fill();
     var sprite = new Sprite(helperCanvas);
-    return Particle.spriteAppearance(sprite, scaleMultiplier / resolution);
+    if (options.size === undefined) {
+        options.size = 5;
+    }
+    options.size /= resolution;
+    return Particle.spriteAppearance(sprite, options);
 };
 
 /**
@@ -321,19 +324,11 @@ Particle.prototype.update = function (deltaTime, forceX, forceY) {
  */
 Particle.prototype.draw = function(ctx) {
     var t = this.timeAlive / this.lifetime;
-    var size = this.sizeFunc(t, this.seed) * this.size;
-    var opacity = this.opacityFunc(t, this.seed) * this.opacity;
     var rotation = this.rotation;
     if (this.rotationMode === Particle.RotationMode.CURRENT_DIRECTION) {
         rotation += Math.atan2(this.velY, this.velX);
     }
-    if (typeof(this.appearance) === 'function') {
-        this.appearance(ctx, this.x, this.y, size, opacity, rotation, t);
-    } else if (this.appearance === Particle.Appearance.CIRCLE) {
-        ctx.fillStyle = this.color;
-        ctx.globalAlpha = opacity;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, size * 0.5, 0, Math.PI * 2);
-        ctx.fill();
-    }
+    this.appearance(ctx, this.x, this.y, rotation, this.seed, t);
 };
+
+Particle.defaultAppearance = Particle.prerenderedCircleAppearance('#fff', 8, {});
