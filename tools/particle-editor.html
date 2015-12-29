@@ -60,6 +60,8 @@ var Editor = function() {
     this._appearanceCodePrefix = '';
     this._appearanceCode = '';
     
+    this.positionMode = Editor.PositionMode.STATIC;
+    
     this.parameters = new GameParameters(particleParameters);
     this.parameters.initGUI(
         {
@@ -105,15 +107,24 @@ var Editor = function() {
         }
     );
 
-    this.restartEffect();
+    this.restartEffect(ctx.canvas.width * 0.5, ctx.canvas.height * 0.5);
 };
 
-Editor.prototype.restartEffect = function() {
+Editor.PositionMode = {
+    FOLLOW: 0,
+    STATIC: 1
+};
+
+Editor.prototype.restartEffect = function(x, y) {
     this.time = 0;
     var width = ctx.canvas.width;
     var height = ctx.canvas.height;
-    var posX = width * 0.5 + Math.sin(this.time * 2.9) * width * 0.4;
-    var posY = height * 0.5 + Math.cos(this.time * 1.9) * height * 0.4;
+    var posX = x;
+    var posY = y;
+    if (this.positionMode === Editor.PositionMode.FOLLOW) {
+        posX = width * 0.5 + Math.sin(this.time * 2.9) * width * 0.4;
+        posY = height * 0.5 + Math.cos(this.time * 1.9) * height * 0.4;
+    }
     this.effect = new ParticleEffect({
         emitter: this.emitter,
         engine: this.particles,
@@ -191,9 +202,11 @@ Editor.prototype.update = function() {
     this.particles.update(deltaTime);
     var width = ctx.canvas.width;
     var height = ctx.canvas.height;
-    var posX = width * 0.5 + Math.sin(this.time * 2.9) * width * 0.4;
-    var posY = height * 0.5 + Math.cos(this.time * 1.9) * height * 0.4;
-    this.effect.setCoords(posX, posY);
+    if (this.positionMode === Editor.PositionMode.FOLLOW) {
+        var posX = width * 0.5 + Math.sin(this.time * 2.9) * width * 0.4;
+        var posY = height * 0.5 + Math.cos(this.time * 1.9) * height * 0.4;
+        this.effect.setCoords(posX, posY);
+    }
     this.effect.update(deltaTime);
 
     // Draw:
@@ -294,12 +307,23 @@ var particleParameters = {
     'effect wait time': {initial: 0, min: 0, max: 4, step: 0.05}
 };
 
+var setPositionMode = function() {
+    if (document.getElementById('posMode').checked) {
+        editor.positionMode = Editor.PositionMode.FOLLOW;
+    } else {
+        editor.positionMode = Editor.PositionMode.STATIC;
+    }
+};
+
 var start = function() {
     var canvas = document.createElement('canvas');
     canvas.width = 600;
     canvas.height = 600;
     canvas.addEventListener('click', function(e) {
-        editor.restartEffect(e.clientX, e.clientY);
+        var rect = canvas.getBoundingClientRect();
+        var x = e.clientX - rect.left;
+        var y = e.clientY - rect.top;
+        editor.restartEffect(x, y);
     });
     ctx = canvas.getContext('2d');
     document.body.appendChild(canvas);
@@ -307,7 +331,9 @@ var start = function() {
     div.id = 'controls';
     div.innerHTML = [
         '<input type="file" id="imageFile"></input>',
-        '<input type="button" onclick="loadSpriteFromFileInput()" value="Load sprite"></input>'
+        '<input type="button" onclick="loadSpriteFromFileInput()" value="Load sprite"></input>',
+        '<br>',
+        '<input type="checkbox" onchange="setPositionMode()" id="posMode"></input><label for="posMode">Move effect</label>'
         ].join('\n');
     document.body.appendChild(div);
     
