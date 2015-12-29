@@ -10,6 +10,10 @@ textarea {
     word-wrap: normal;
     overflow-x: scroll;
 }
+
+#controls {
+    margin: 10px 0;
+}
 </style>
 <script src="../src/sprite.js"></script><!-- required for Particle.prerenderedCircleAppearance -->
 <script src="../src/particle.js"></script>
@@ -38,16 +42,11 @@ var loadSpriteFromFileInput = function() {
 };
 
 var Editor = function() {
-    this.time = 0;
     this.particles = new ParticleEngine({gravityY: 100});
     this._appearanceOptions = {};
     this._loadedAppearanceOptions = {};
     this.emitter = new ParticleEmitter({
         appearance: Particle.prerenderedCircleAppearance('#fff', 8, this._appearanceOptions)
-    });
-    this.effect = new ParticleEffect({
-        emitter: this.emitter,
-        engine: this.particles
     });
     this._color = '#fff';
     this._colorSprite = false;
@@ -105,6 +104,22 @@ var Editor = function() {
           "folders": {}
         }
     );
+
+    this.restartEffect();
+};
+
+Editor.prototype.restartEffect = function() {
+    this.time = 0;
+    var width = ctx.canvas.width;
+    var height = ctx.canvas.height;
+    var posX = width * 0.5 + Math.sin(this.time * 2.9) * width * 0.4;
+    var posY = height * 0.5 + Math.cos(this.time * 1.9) * height * 0.4;
+    this.effect = new ParticleEffect({
+        emitter: this.emitter,
+        engine: this.particles,
+        x: posX,
+        y: posY
+    });
 };
 
 Editor.prototype.generateCode = function() {
@@ -142,6 +157,7 @@ Editor.prototype.generateCode = function() {
     code.push('    emitter: emitter,');
     code.push('    directionMode: ParticleEffect.DirectionMode.' + this.parameters.get('directionMode') + ',');
     code.push('    particleInterval: ' + this.parameters.get('particleInterval') + ',');
+    code.push('    lifetime: ' + this.effect.lifetime + ',');
     // Remove extra comma
     code[code.length - 1] = code[code.length - 1].substring(0, code[code.length - 1].length - 1);
     code.push('});');
@@ -162,6 +178,7 @@ Editor.prototype.update = function() {
     this.emitter.options.rotationMode = Particle.RotationMode[this.parameters.get('rotationMode')];
     this.effect.directionMode = ParticleEffect.DirectionMode[this.parameters.get('directionMode')];
     this.effect.particleInterval = this.parameters.get('particleInterval');
+    this.effect.lifetime = this.parameters.get('effect stops') ? this.parameters.get('effect lifetime') : -1;
     
     this.codeArea.textContent = this.generateCode();
     
@@ -269,19 +286,29 @@ var particleParameters = {
     'particleInterval': {initial: 1/60, min: 1/240, max: 0.1},
     'color': {initial: '#fff', color: true},
     'colorSprite': {initial: false},
-    'spriteURL': {initial: ''}
+    'spriteURL': {initial: ''},
+    'effect stops': {initial: false},
+    'effect lifetime': {initial: 1, min: 0.1, max: 5, step: 0.1}
 };
 
 var start = function() {
-    editor = new Editor();
     var canvas = document.createElement('canvas');
     canvas.width = 600;
     canvas.height = 600;
+    canvas.addEventListener('click', function(e) {
+        editor.restartEffect(e.clientX, e.clientY);
+    });
     ctx = canvas.getContext('2d');
     document.body.appendChild(canvas);
     var div = document.createElement('div');
-    div.innerHTML = '<input type="file" id="imageFile"></input><input type="button" onclick="loadSpriteFromFileInput()" value="Load sprite"></input>'
+    div.id = 'controls';
+    div.innerHTML = [
+        '<input type="file" id="imageFile"></input>',
+        '<input type="button" onclick="loadSpriteFromFileInput()" value="Load sprite"></input>'
+        ].join('\n');
     document.body.appendChild(div);
+    
+    editor = new Editor();
     document.body.appendChild(editor.codeArea);
     frame();
 };

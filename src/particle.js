@@ -71,7 +71,9 @@ var ParticleEffect = function(options) {
         x: 0,
         y: 0,
         directionMode: ParticleEffect.DirectionMode.RELATIVE,
-        particleInterval: 1 / 60 // seconds
+        particleInterval: 1 / 60, // seconds
+        lifetime: -1, // seconds, can be negative for infinite duration
+        maxParticleCount: -1 // maximum particle count to emit, negative for infinite particles
     };
     for(var key in defaults) {
         if (options.hasOwnProperty(key)) {
@@ -84,6 +86,8 @@ var ParticleEffect = function(options) {
     this._emittedTime = 0;
     this._lastX = this.x;
     this._lastY = this.y;
+    this.dead = false;
+    this._emittedCount = 0;
 };
 
 ParticleEffect.DirectionMode = {
@@ -92,6 +96,10 @@ ParticleEffect.DirectionMode = {
 };
 
 ParticleEffect.prototype.update = function(deltaTime) {
+    if (this._time > this.lifetime && this.lifetime >= 0) {
+        this.dead = true;
+        return;
+    }
     var lastTime = this._time;
     this._time += deltaTime;
     var directionBase = 0;
@@ -100,13 +108,15 @@ ParticleEffect.prototype.update = function(deltaTime) {
             directionBase = Math.atan2(this.y - this._lastY, this.x - this._lastX) * 180 / Math.PI;
         }
     }
-    while (this._time > this._emittedTime) {
+    while (this._time > this._emittedTime && (this._emittedCount < this.maxParticleCount || this.maxParticleCount < 0))
+    {
         this._emittedTime += this.particleInterval;
         var t = (this._emittedTime - lastTime) / (this._time - lastTime);
         var emitter = this.emitter;
         emitter.options.x = this._lastX * (1 - t) + this.x * t;
         emitter.options.y = this._lastY * (1 - t) + this.y * t;
         this.engine.addParticle(emitter.emitParticle({direction: emitter.options.direction + directionBase}));
+        ++this._emittedCount;
     }
     this._lastX = this.x;
     this._lastY = this.y;
