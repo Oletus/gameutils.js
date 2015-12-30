@@ -220,6 +220,9 @@ Editor.prototype.editEmitter = function(index) {
         this.parameters.set('effect stops', stops);
         this.parameters.set('effect lifetime', (stops ? te.lifetime : 1));
         this.parameters.set('effect wait time', te.waitTime);
+        var limit = (te.maxParticleCount >= 0);
+        this.parameters.set('limit particle count', limit);
+        this.parameters.set('maxParticleCount', limit ? te.maxParticleCount : 1);
         
         var optionSet = this.appearanceOptions[index];
         if (optionSet.sprite) {
@@ -230,7 +233,11 @@ Editor.prototype.editEmitter = function(index) {
         this.parameters.set('color', optionSet.color);
         this.parameters.set('colorSprite', optionSet.colorSprite);
         this.parameters.set('size', optionSet.options.size);
+        this.parameters.set('sizeFunc', Editor.functionCode(optionSet.options.sizeFunc));
+        this.parameters.set('sizeFuncInverse', optionSet.options.sizeFuncInverse);
         this.parameters.set('opacity', optionSet.options.opacity);
+        this.parameters.set('opacityFunc', Editor.functionCode(optionSet.options.opacityFunc));
+        this.parameters.set('opacityFuncInverse', optionSet.options.opacityFuncInverse);
     }
 };
 
@@ -385,24 +392,21 @@ Editor.prototype.updateAppearanceFromUI = function(index) {
             }
         }
     }
+    var color = this.parameters.get('color');
+    var colorSprite = this.parameters.get('colorSprite');
     if (appearanceSame &&
-        optionSet.color === this.parameters.get('color') &&
-        optionSet.colorSprite === this.parameters.get('colorSprite') &&
+        optionSet.color === color &&
+        optionSet.colorSprite === colorSprite &&
         optionSet.loadedSpriteURL === this.parameters.get('spriteURL'))
     {
         return;
     }
     var updatedAppearance;
     var appearanceOptionsString = '{';
-    var functions = Editor.easingFunctions();
     var functionKeys = ['sizeFunc', 'opacityFunc'];
     for (var i = 0; i < functionKeys.length; ++i) {
         if (optionSet.options.hasOwnProperty(functionKeys[i])) {
-            for (var j = 0; j < functions.length; ++j) {
-                if (eval(functions[j]) === optionSet.options[functionKeys[i]]) {
-                    appearanceOptionsString += (functionKeys[i] + ': ' + functions[j] + ', ');
-                }
-            }
+            appearanceOptionsString += functionKeys[i] + ': ' + Editor.functionCode(optionSet.options[functionKeys[i]]) + ', ';
         }
     }
     appearanceOptionsString += 'size: ' + optionSet.options.size + ', ';
@@ -413,10 +417,10 @@ Editor.prototype.updateAppearanceFromUI = function(index) {
             optionSet.sprite = new Sprite(this.parameters.get('spriteURL'));
         }
         if (optionSet.sprite.loaded) {
-            if (this.parameters.get('colorSprite')) {
-                var coloredSprite = new Sprite(optionSet.sprite.filename, Sprite.turnSolidColored(optionSet.color));
+            if (colorSprite) {
+                var coloredSprite = new Sprite(optionSet.sprite.filename, Sprite.turnSolidColored(color));
                 updatedAppearance = Particle.spriteAppearance(coloredSprite, optionSet.options);
-                optionSet.codePrefix = 'var sprite' + index + ' = new Sprite("' + optionSet.sprite.filename + '", Sprite.turnSolidColored("' + optionSet.color + '"));';
+                optionSet.codePrefix = 'var sprite' + index + ' = new Sprite("' + optionSet.sprite.filename + '", Sprite.turnSolidColored("' + color + '"));';
                 optionSet.code = 'Particle.spriteAppearance(sprite' + index + ', ' + appearanceOptionsString + ')';
             } else {
                 updatedAppearance = Particle.spriteAppearance(optionSet.sprite, optionSet.options);
@@ -425,14 +429,14 @@ Editor.prototype.updateAppearanceFromUI = function(index) {
             }
         }
     } else {
-        updatedAppearance = Particle.prerenderedCircleAppearance(optionSet.color, 8, optionSet.options);
-        optionSet.code = 'Particle.prerenderedCircleAppearance("' + optionSet.color + '", 8, ' + appearanceOptionsString + ')';
+        updatedAppearance = Particle.prerenderedCircleAppearance(color, 8, optionSet.options);
+        optionSet.code = 'Particle.prerenderedCircleAppearance("' + color + '", 8, ' + appearanceOptionsString + ')';
     }
 
     if (updatedAppearance !== undefined) {
         this.emitters[index].options.appearance = updatedAppearance;
-        optionSet.colorSprite = this.parameters.get('colorSprite');
-        optionSet.color = this.parameters.get('color');
+        optionSet.colorSprite = colorSprite;
+        optionSet.color = color;
         optionSet.loadedSpriteURL = this.parameters.get('spriteURL');
         for (var key in optionSet.options) {
             if (optionSet.options.hasOwnProperty(key)) {
@@ -440,6 +444,16 @@ Editor.prototype.updateAppearanceFromUI = function(index) {
             }
         }
     }
+};
+
+Editor.functionCode = function(func) {
+    var functions = Editor.easingFunctions();
+    for (var j = 0; j < functions.length; ++j) {
+        if (eval(functions[j]) === func) {
+            return functions[j];
+        }
+    }
+    return '';
 };
 
 Editor.easingFunctions = function() {
