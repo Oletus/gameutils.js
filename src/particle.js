@@ -93,12 +93,11 @@ ParticleTimedEmitter.DirectionMode = {
 };
 
 ParticleTimedEmitter.prototype.update = function(deltaTime) {
-    this._time += deltaTime;
-    if (this._time < this.waitTime) {
+    if (this.dead) {
         return;
     }
-    if (this._timeAlive > this.lifetime && this.lifetime >= 0) {
-        this.dead = true;
+    this._time += deltaTime;
+    if (this._time < this.waitTime) {
         return;
     }
     var lastTime = this._timeAlive;
@@ -113,8 +112,7 @@ ParticleTimedEmitter.prototype.update = function(deltaTime) {
             directionBase = Math.atan2(this.y - this._lastY, this.x - this._lastX) * 180 / Math.PI;
         }
     }
-    while (this._timeAlive > this._emittedTime &&
-           (this._emittedCount < this.maxParticleCount || this.maxParticleCount < 0))
+    while (this._timeAlive > this._emittedTime && !this.dead)
     {
         this._emittedTime += this.particleInterval;
         var t = (this._emittedTime - lastTime) / (this._timeAlive - lastTime);
@@ -123,6 +121,12 @@ ParticleTimedEmitter.prototype.update = function(deltaTime) {
         emitter.options.y = this._lastY * (1 - t) + this.y * t;
         this.engine.addParticle(emitter.emitParticle({direction: emitter.options.direction + directionBase}));
         ++this._emittedCount;
+        if (this._emittedCount >= this.maxParticleCount && this.maxParticleCount >= 0) {
+            this.dead = true;
+        }
+    }
+    if (this._timeAlive > this.lifetime && this.lifetime >= 0) {
+        this.dead = true;
     }
     this._lastX = this.x;
     this._lastY = this.y;

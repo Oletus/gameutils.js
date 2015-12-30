@@ -112,8 +112,6 @@ var Editor = function() {
     );
 
     this.addEmitter(ctx.canvas.width * 0.5, ctx.canvas.height * 0.5);
-    
-    this._sinceDead = 0;
 };
 
 Editor.PositionMode = {
@@ -141,6 +139,7 @@ Editor.prototype.restartEffect = function() {
         this.timedEmitters[i].restart();
         this.effect.emitters.push(this.timedEmitters[i]);
     }
+    this._sinceDead = 0;
 };
 
 Editor.prototype.setEffectCoords = function(x, y) {
@@ -307,7 +306,6 @@ Editor.prototype.update = function() {
         this._sinceDead += deltaTime;
         if (this._sinceDead > 2) {
             this.restartEffect();
-            this._sinceDead = 0;
         }
     }
 };
@@ -321,6 +319,10 @@ Editor.prototype.updateEmitterFromUI = function(index) {
     this.emitters[index].options.rotationMode = Particle.RotationMode[this.parameters.get('rotationMode')];
     this.timedEmitters[index].directionMode = ParticleTimedEmitter.DirectionMode[this.parameters.get('directionMode')];
     this.timedEmitters[index].particleInterval = this.parameters.get('particleInterval');
+    this.timedEmitters[index].maxParticleCount = this.parameters.get('limit particle count') ? this.parameters.get('maxParticleCount') : -1;
+    if (this.timedEmitters[index].maxParticleCount < 0 && this.timedEmitters[index].particleInterval === 0) {
+        this.timedEmitters[index].particleInterval = particleParameters.particleInterval.step;
+    }
     this.timedEmitters[index].lifetime = this.parameters.get('effect stops') ? this.parameters.get('effect lifetime') : -1;
     this.timedEmitters[index].waitTime = this.parameters.get('effect wait time');
 };
@@ -407,7 +409,9 @@ var particleParameters = {
     'rotation': {initial: 360, min: 0, max: 360, step: 10},
     'rotationMode': {options: ['STATIC', 'CURRENT_DIRECTION', 'INITIAL_DIRECTION']},
     'directionMode': {options: ['RELATIVE', 'ABSOLUTE']},
-    'particleInterval': {initial: 1/60, min: 1/240, max: 0.1},
+    'particleInterval': {initial: 1/60, min: 0, max: 0.1, step: 1/240},
+    'limit particle count': {initial: false},
+    'maxParticleCount': {initial: 1, min: 1, max: 300, step: 1},
     'color': {initial: '#fff', color: true},
     'colorSprite': {initial: false},
     'spriteURL': {initial: ''},
