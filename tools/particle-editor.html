@@ -407,15 +407,17 @@ Editor.prototype.updateAppearanceFromUI = function(index) {
     }
     var updatedAppearance;
     var appearanceOptionsString = '{';
-    var functionKeys = ['sizeFunc', 'opacityFunc'];
-    for (var i = 0; i < functionKeys.length; ++i) {
-        if (optionSet.options.hasOwnProperty(functionKeys[i])) {
-            appearanceOptionsString += functionKeys[i] + ': ' + Editor.functionCode(optionSet.options[functionKeys[i]]) + ', ';
+    for (var key in optionSet.options) {
+        if (optionSet.options.hasOwnProperty(key)) {
+            if (typeof optionSet.options[key] === 'function') {
+                appearanceOptionsString += key + ': ' + Editor.functionCode(optionSet.options[key]) + ', ';
+            } else {
+                appearanceOptionsString += key + ': ' + optionSet.options[key] + ', ';
+            }
         }
     }
-    appearanceOptionsString += 'size: ' + optionSet.options.size + ', ';
-    appearanceOptionsString += 'opacity: ' + optionSet.options.opacity + ', ';
-    appearanceOptionsString += 'additive: ' + optionSet.options.additive;
+    // Remove last comma
+    appearanceOptionsString = appearanceOptionsString.substring(0, appearanceOptionsString.length - 2);
     appearanceOptionsString += '}';
     if (this.parameters.get('spriteURL') !== '') {
         if (optionSet.sprite === null || optionSet.sprite.filename !== this.parameters.get('spriteURL')) {
