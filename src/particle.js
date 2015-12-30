@@ -63,6 +63,7 @@ ParticleEngine.prototype.render = function(ctx) {
 
 /**
  * WIP: Particle effect class to control emitting particles with respect to time.
+ * @constructor
  */
 var ParticleTimedEmitter = function(options) {
     var defaults = {
@@ -148,11 +149,16 @@ ParticleTimedEmitter.prototype.restart = function() {
  */
 var ParticleEffect = function() {
     this.emitters = [];
+    this.dead = false;
 };
 
 ParticleEffect.prototype.update = function(deltaTime) {
+    this.dead = true;
     for (var i = 0; i < this.emitters.length; ++i) {
         this.emitters[i].update(deltaTime);
+        if (!this.emitters[i].dead) {
+            this.dead = false;
+        }
     }
 };
 

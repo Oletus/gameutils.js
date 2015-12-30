@@ -113,6 +113,8 @@ var Editor = function() {
 
     this.addEmitter(ctx.canvas.width * 0.5, ctx.canvas.height * 0.5);
     this.restartEffect();
+    
+    this._sinceDead = 0;
 };
 
 Editor.PositionMode = {
@@ -299,6 +301,14 @@ Editor.prototype.update = function() {
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     this.particles.render(ctx);
+    
+    if (this.effect.dead) {
+        this._sinceDead += deltaTime;
+        if (this._sinceDead > 2) {
+            this.restartEffect();
+            this._sinceDead = 0;
+        }
+    }
 };
 
 Editor.prototype.updateEmitterFromUI = function(index) {
