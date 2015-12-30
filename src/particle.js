@@ -244,7 +244,16 @@ ParticleEmitter.prototype.emitParticle = function(options) {
         spawnOptions.x += Math.cos(spreadAngle) * spreadDistance;
         spawnOptions.y += Math.sin(spreadAngle) * spreadDistance;
     }
-    return new Particle(spawnOptions);
+    var part = new Particle(spawnOptions);
+    if (part.rotationMode === Particle.RotationMode.INITIAL_DIRECTION) {
+        // Determine rotation also if velocity is zero.
+        if (spawnOptions.rotation !== undefined) {
+            part.rotation = spawnOptions.rotation + direction;
+        } else {
+            part.rotation = direction;
+        }
+    }
+    return part;
 };
 
 /**
