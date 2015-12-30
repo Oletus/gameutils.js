@@ -385,16 +385,18 @@ Editor.prototype.updateAppearanceFromUI = function(index) {
     optionSet.options.sizeFuncInverse = this.parameters.get('sizeFuncInverse');
     optionSet.options.size = this.parameters.get('size');
     optionSet.options.additive = this.parameters.get('additive');
-    if (this.parameters.get('spriteURL') !== '' && optionSet.sprite && optionSet.sprite.loaded) {
-        optionSet.options.size /= optionSet.sprite.width;
-    }
+    var optionsCopy = {};
     var appearanceSame = true;
     for (var key in optionSet.options) {
         if (optionSet.options.hasOwnProperty(key)) {
+            optionsCopy[key] = optionSet.options[key];
             if (optionSet.loadedOptions[key] !== optionSet.options[key]) {
                 appearanceSame = false;
             }
         }
+    }
+    if (this.parameters.get('spriteURL') !== '' && optionSet.sprite && optionSet.sprite.loaded) {
+        optionsCopy.size /= optionSet.sprite.width;
     }
     var color = this.parameters.get('color');
     var colorSprite = this.parameters.get('colorSprite');
@@ -407,12 +409,12 @@ Editor.prototype.updateAppearanceFromUI = function(index) {
     }
     var updatedAppearance;
     var appearanceOptionsString = '{';
-    for (var key in optionSet.options) {
-        if (optionSet.options.hasOwnProperty(key)) {
-            if (typeof optionSet.options[key] === 'function') {
-                appearanceOptionsString += key + ': ' + Editor.functionCode(optionSet.options[key]) + ', ';
+    for (var key in optionsCopy) {
+        if (optionsCopy.hasOwnProperty(key)) {
+            if (typeof optionsCopy[key] === 'function') {
+                appearanceOptionsString += key + ': ' + Editor.functionCode(optionsCopy[key]) + ', ';
             } else {
-                appearanceOptionsString += key + ': ' + optionSet.options[key] + ', ';
+                appearanceOptionsString += key + ': ' + optionsCopy[key] + ', ';
             }
         }
     }
@@ -426,11 +428,11 @@ Editor.prototype.updateAppearanceFromUI = function(index) {
         if (optionSet.sprite.loaded) {
             if (colorSprite) {
                 var coloredSprite = new Sprite(optionSet.sprite.filename, Sprite.turnSolidColored(color));
-                updatedAppearance = Particle.spriteAppearance(coloredSprite, optionSet.options);
+                updatedAppearance = Particle.spriteAppearance(coloredSprite, optionsCopy);
                 optionSet.codePrefix = 'var sprite' + index + ' = new Sprite("' + optionSet.sprite.filename + '", Sprite.turnSolidColored("' + color + '"));';
                 optionSet.code = 'Particle.spriteAppearance(sprite' + index + ', ' + appearanceOptionsString + ')';
             } else {
-                updatedAppearance = Particle.spriteAppearance(optionSet.sprite, optionSet.options);
+                updatedAppearance = Particle.spriteAppearance(optionSet.sprite, optionsCopy);
                 optionSet.codePrefix = 'var sprite' + index + ' = new Sprite("' + optionSet.sprite.filename + '");';
                 optionSet.code = 'Particle.spriteAppearance(sprite' + index + ', ' + appearanceOptionsString + ')';
             }
