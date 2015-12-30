@@ -18,6 +18,7 @@ var ParticleEngine = function(options) {
         }
     }
     this.particles = [];
+    this.effects = [];
 };
 
 /**
@@ -34,6 +35,15 @@ ParticleEngine.prototype.addParticle = function(particle) {
  */
 ParticleEngine.prototype.update = function(deltaTime) {
     var i = 0;
+    while (i < this.effects.length) {
+        this.effects[i].update(deltaTime);
+        if (this.effects[i].dead) {
+            this.effects.splice(i, 1);
+        } else {
+            ++i;
+        }
+    }
+    i = 0;
     while (i < this.particles.length) {
         this.particles[i].update(deltaTime, this.gravityX * this.particles[i].weight, this.gravityY * this.particles[i].weight);
         if (this.particles[i].dead) {

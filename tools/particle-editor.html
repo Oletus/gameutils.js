@@ -253,7 +253,7 @@ Editor.prototype.generateCode = function() {
         setIndent(indent);
     };
 
-    code.push('var create' + this.parameters.get('effect name') + 'FX = (function() {');
+    code.push('(function() {');
     pushIndent();
     
     var specialEmitterKeys = {'x': false, 'y': false, 'appearance': false};
@@ -279,13 +279,14 @@ Editor.prototype.generateCode = function() {
         popIndent();
         code.push('});');
     }
-    code.push('return function() {');
+    code.push('return function(engine) {');
     pushIndent();
     code.push('var effect = new ParticleEffect();');
     for (var i = 0; i < this.emitters.length; ++i) {
         code.push('var timedEmitter' + i + ' = new ParticleTimedEmitter({');
         pushIndent();
         code.push('emitter: emitter' + i + ',');
+        code.push('engine: engine,');
         code.push('directionMode: ' + this.timedEmitters[i].directionMode + ',');
         code.push('particleInterval: ' + this.timedEmitters[i].particleInterval + ',');
         code.push('lifetime: ' + this.timedEmitters[i].lifetime + ',');
@@ -304,6 +305,13 @@ Editor.prototype.generateCode = function() {
     return code.join('\n');
 };
 
+Editor.prototype.testCode = function() {
+    var createFunc = eval(this.generateCode());
+    var effect = eval(createFunc(this.particles));
+    effect.setCoords(ctx.canvas.width * 0.5, ctx.canvas.height * 0.5);
+    this.particles.effects.push(effect);
+};
+
 Editor.prototype.update = function() {
     var deltaTime = 1 / 60; // Assume 60 fps... bad example :P
     this.time += deltaTime;
@@ -312,7 +320,7 @@ Editor.prototype.update = function() {
     this.updateEmitterFromUI(this.editEmitterIndex);
     this.updateAppearanceFromUI(this.editEmitterIndex);
 
-    this.codeArea.textContent = this.generateCode();
+    this.codeArea.textContent = 'var create' + this.parameters.get('effect name') + 'FX = ' + this.generateCode();
 
     // Update:
 
