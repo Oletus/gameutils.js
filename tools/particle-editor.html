@@ -58,7 +58,6 @@ var Editor = function() {
     this.emitters = [];
     this.timedEmitters = [];
     this.appearanceOptions = [];
-    this.addEmitter(ctx.canvas.width * 0.5, ctx.canvas.height * 0.5);
     
     this.codeArea = document.createElement('textarea');
     this.codeArea.cols = 80;
@@ -112,6 +111,7 @@ var Editor = function() {
         }
     );
 
+    this.addEmitter(ctx.canvas.width * 0.5, ctx.canvas.height * 0.5);
     this.restartEffect();
 };
 
@@ -146,6 +146,9 @@ Editor.prototype.setEffectCoords = function(x, y) {
     this.effect.setCoords(x, y);
 };
 
+/**
+ * Add an emitter using parameters currently set in the UI.
+ */
 Editor.prototype.addEmitter = function(x, y) {
     if (x === undefined && this.timedEmitters.length > 0) {
         x = this.timedEmitters[0].x;
@@ -154,9 +157,7 @@ Editor.prototype.addEmitter = function(x, y) {
     var index = this.emitters.length;
 
     this.appearanceOptions.push(new AppearanceOptionSet());
-    this.emitters.push(new ParticleEmitter({
-        appearance: Particle.prerenderedCircleAppearance('#fff', 8, this.appearanceOptions[index].options)
-    }));
+    this.emitters.push(new ParticleEmitter({}));
     var posX = x;
     var posY = y;
     if (this.positionMode === Editor.PositionMode.FOLLOW) {
@@ -174,19 +175,26 @@ Editor.prototype.addEmitter = function(x, y) {
             y: posY
         })
     );
-    
+
+    // Update the parameters of the new emitter from whatever is in the UI.
+    this.updateEmitterFromUI(index);
+    this.updateAppearanceFromUI(index);
+
     var emitterChoice = [];
     for (var i = 0; i < index + 1; ++i) {
         emitterChoice.push('<input type="radio" name="emitter" onclick="editor.editEmitter(' + i + ')" id="emitter' + i + '"></input>');
         emitterChoice.push('<label for="emitter' + i + '">Edit emitter ' + i + '</label>');
         emitterChoice.push('<br>');
     }
-    
     document.getElementById('emitterChoice').innerHTML = emitterChoice.join('\n');
     
     this.editEmitter(index);
 };
 
+/**
+ * Choose an emitter for editing, setting UI values to the values stored in that emitter.
+ * @param {number} index Index of the emitter to edit.
+ */
 Editor.prototype.editEmitter = function(index) {
     if (this.editEmitterIndex !== index) {
         this.editEmitterIndex = index;
@@ -269,21 +277,10 @@ Editor.prototype.update = function() {
     this.time += deltaTime;
     
     // Refresh parameters:
-    
-    for (var key in particleParameters) {
-        if (this.emitters[this.editEmitterIndex].options.hasOwnProperty(key)) {
-            this.emitters[this.editEmitterIndex].options[key] = this.parameters.get(key);
-        }
-    }
-    this.emitters[this.editEmitterIndex].options.rotationMode = Particle.RotationMode[this.parameters.get('rotationMode')];
-    this.timedEmitters[this.editEmitterIndex].directionMode = ParticleTimedEmitter.DirectionMode[this.parameters.get('directionMode')];
-    this.timedEmitters[this.editEmitterIndex].particleInterval = this.parameters.get('particleInterval');
-    this.timedEmitters[this.editEmitterIndex].lifetime = this.parameters.get('effect stops') ? this.parameters.get('effect lifetime') : -1;
-    this.timedEmitters[this.editEmitterIndex].waitTime = this.parameters.get('effect wait time');
-    
+    this.updateEmitterFromUI(this.editEmitterIndex);
+    this.updateAppearanceFromUI(this.editEmitterIndex);
+
     this.codeArea.textContent = this.generateCode();
-    
-    this.updateAppearance();
 
     // Update:
 
@@ -304,8 +301,21 @@ Editor.prototype.update = function() {
     this.particles.render(ctx);
 };
 
-Editor.prototype.updateAppearance = function() {
-    var optionSet = this.appearanceOptions[this.editEmitterIndex];
+Editor.prototype.updateEmitterFromUI = function(index) {
+    for (var key in particleParameters) {
+        if (this.emitters[index].options.hasOwnProperty(key)) {
+            this.emitters[index].options[key] = this.parameters.get(key);
+        }
+    }
+    this.emitters[index].options.rotationMode = Particle.RotationMode[this.parameters.get('rotationMode')];
+    this.timedEmitters[index].directionMode = ParticleTimedEmitter.DirectionMode[this.parameters.get('directionMode')];
+    this.timedEmitters[index].particleInterval = this.parameters.get('particleInterval');
+    this.timedEmitters[index].lifetime = this.parameters.get('effect stops') ? this.parameters.get('effect lifetime') : -1;
+    this.timedEmitters[index].waitTime = this.parameters.get('effect wait time');
+};
+
+Editor.prototype.updateAppearanceFromUI = function(index) {
+    var optionSet = this.appearanceOptions[index];
     optionSet.options.size = this.parameters.get('size');
     if (this.parameters.get('spriteURL') !== '' && optionSet.sprite && optionSet.sprite.loaded) {
         optionSet.options.size /= optionSet.sprite.width;
@@ -354,7 +364,7 @@ Editor.prototype.updateAppearance = function() {
     }
     
     if (updatedAppearance !== undefined) {
-        this.emitters[this.editEmitterIndex].options.appearance = updatedAppearance;
+        this.emitters[index].options.appearance = updatedAppearance;
         optionSet.colorSprite = this.parameters.get('colorSprite');
         optionSet.color = this.parameters.get('color');
         optionSet.loadedSpriteURL = this.parameters.get('spriteURL');
