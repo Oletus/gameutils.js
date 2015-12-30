@@ -297,8 +297,10 @@ Particle.spriteAppearance = function(sprite, options) {
     var defaults = {
         size: 5,
         sizeFunc: Particle.fadeOutLinear,
+        sizeFuncInverse: false,
         opacity: 1,
-        opacityFunc: Particle.fastAppearSlowDisappear
+        opacityFunc: Particle.fastAppearSlowDisappear,
+        opacityFuncInverse: false
     };
     var _options = {};
     for(var key in defaults) {
@@ -311,8 +313,16 @@ Particle.spriteAppearance = function(sprite, options) {
         }
     }
     return function(ctx, x, y, rotation, seed, t) {
-        var sizeNow = _options.sizeFunc(t, seed) * _options.size;
-        ctx.globalAlpha = _options.opacityFunc(t, seed) * _options.opacity;
+        if (_options.sizeFuncInverse) {
+            var sizeNow = Math.max(0, _options.sizeFunc(1.0 - t, seed)) * _options.size;
+        } else {
+            var sizeNow = Math.max(0, _options.sizeFunc(t, seed)) * _options.size;
+        }
+        if (_options.opacityFuncInverse) {
+            ctx.globalAlpha = Math.max(0, _options.opacityFunc(1.0 - t, seed)) * _options.opacity;
+        } else {
+            ctx.globalAlpha = Math.max(0, _options.opacityFunc(t, seed)) * _options.opacity;
+        }
         sprite.drawRotated(ctx, x, y, rotation, sizeNow);
     };
 };
@@ -367,6 +377,15 @@ Particle.fastAppearSlowDisappear = function(t, seed) {
  */
 Particle.fadeOutLinear = function(t, seed) {
     return 1.0 - t;
+};
+
+/**
+ * A function for a constant value.
+ * @param {number} t Time.
+ * @param {number} seed Random seed.
+ */
+Particle.constant = function(t, seed) {
+    return 1.0;
 };
 
 /** 

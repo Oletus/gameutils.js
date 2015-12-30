@@ -18,6 +18,7 @@ textarea {
 <script src="../src/sprite.js"></script><!-- required for Particle.prerenderedCircleAppearance -->
 <script src="../src/particle.js"></script>
 <script src="../src/lib/dat.gui.js"></script>
+<script src="../src/lib/tween.min.js"></script>
 <script src="../src/gameparameters.js"></script>
 <script>
 'use strict';
@@ -367,11 +368,15 @@ Editor.prototype.updateEmitterFromUI = function(index) {
 
 Editor.prototype.updateAppearanceFromUI = function(index) {
     var optionSet = this.appearanceOptions[index];
+    optionSet.options.opacityFunc = eval(this.parameters.get('opacityFunc'));
+    optionSet.options.opacityFuncInverse = this.parameters.get('opacityFuncInverse');
+    optionSet.options.opacity = this.parameters.get('opacity');
+    optionSet.options.sizeFunc = eval(this.parameters.get('sizeFunc'));
+    optionSet.options.sizeFuncInverse = this.parameters.get('sizeFuncInverse');
     optionSet.options.size = this.parameters.get('size');
     if (this.parameters.get('spriteURL') !== '' && optionSet.sprite && optionSet.sprite.loaded) {
         optionSet.options.size /= optionSet.sprite.width;
     }
-    optionSet.options.opacity = this.parameters.get('opacity');
     var appearanceSame = true;
     for (var key in optionSet.options) {
         if (optionSet.options.hasOwnProperty(key)) {
@@ -389,7 +394,7 @@ Editor.prototype.updateAppearanceFromUI = function(index) {
     }
     var updatedAppearance;
     var appearanceOptionsString = '{';
-    var functions = ['Particle.fastAppearSlowDisappear', 'Particle.fadeOutLinear'];
+    var functions = Editor.easingFunctions();
     var functionKeys = ['sizeFunc', 'opacityFunc'];
     for (var i = 0; i < functionKeys.length; ++i) {
         if (optionSet.options.hasOwnProperty(functionKeys[i])) {
@@ -437,6 +442,27 @@ Editor.prototype.updateAppearanceFromUI = function(index) {
     }
 };
 
+Editor.easingFunctions = function() {
+    var functions = ['Particle.fastAppearSlowDisappear'];
+    for (var key in TWEEN.Easing) {
+        if (TWEEN.Easing.hasOwnProperty(key)) {
+            if (TWEEN.Easing[key].hasOwnProperty('None')) {
+                functions.push('TWEEN.Easing.' + key + '.None');
+            }
+            if (TWEEN.Easing[key].hasOwnProperty('In')) {
+                functions.push('TWEEN.Easing.' + key + '.In');
+            }
+            if (TWEEN.Easing[key].hasOwnProperty('Out')) {
+                functions.push('TWEEN.Easing.' + key + '.Out');
+            }
+            if (TWEEN.Easing[key].hasOwnProperty('InOut')) {
+                functions.push('TWEEN.Easing.' + key + '.InOut');
+            }
+        }
+    }
+    return functions;
+};
+
 var frame = function() {
     editor.update();
     requestAnimationFrame(frame);
@@ -452,7 +478,11 @@ var particleParameters = {
     'minLifetime': {initial: 1, min: 0.1, max: 20},
     'maxLifetime': {initial: 3, min: 0.1, max: 20},
     'size': {initial: 5, min: 1, max: 100},
+    'sizeFunc': {options: Editor.easingFunctions()},
+    'sizeFuncInverse': {initial: false},
     'opacity': {initial: 1, min: 0, max: 1},
+    'opacityFunc': {options: Editor.easingFunctions()},
+    'opacityFuncInverse': {initial: false},
     'inertia': {initial: 1, min: 0.1, max: 10},
     'weight': {initial: 1, min: -1, max: 1},
     'rotation': {initial: 360, min: 0, max: 360, step: 10},
