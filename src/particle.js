@@ -64,13 +64,13 @@ ParticleEngine.prototype.render = function(ctx) {
 /**
  * WIP: Particle effect class to control emitting particles with respect to time.
  */
-var ParticleEffect = function(options) {
+var ParticleTimedEmitter = function(options) {
     var defaults = {
         emitter: null,
         engine: null,
         x: 0,
         y: 0,
-        directionMode: ParticleEffect.DirectionMode.RELATIVE,
+        directionMode: ParticleTimedEmitter.DirectionMode.RELATIVE,
         particleInterval: 1 / 60, // seconds
         lifetime: -1, // seconds, can be negative for infinite duration
         waitTime: 0, // seconds, time to wait until first starting
@@ -90,12 +90,12 @@ var ParticleEffect = function(options) {
     this._emittedCount = 0;
 };
 
-ParticleEffect.DirectionMode = {
+ParticleTimedEmitter.DirectionMode = {
     RELATIVE: 0,
     ABSOLUTE: 1
 };
 
-ParticleEffect.prototype.update = function(deltaTime) {
+ParticleTimedEmitter.prototype.update = function(deltaTime) {
     this._time += deltaTime;
     if (this._time < this.waitTime) {
         return;
@@ -111,7 +111,7 @@ ParticleEffect.prototype.update = function(deltaTime) {
         this._lastY = this.y;
     }
     var directionBase = 0;
-    if (this.directionMode === ParticleEffect.DirectionMode.RELATIVE) {
+    if (this.directionMode === ParticleTimedEmitter.DirectionMode.RELATIVE) {
         if (this.x != this._lastX || this.y != this._lastY) {
             directionBase = Math.atan2(this.y - this._lastY, this.x - this._lastX) * 180 / Math.PI;
         }
@@ -131,7 +131,7 @@ ParticleEffect.prototype.update = function(deltaTime) {
     this._lastY = this.y;
 };
 
-ParticleEffect.prototype.setCoords = function(x, y) {
+ParticleTimedEmitter.prototype.setCoords = function(x, y) {
     this.x = x;
     this.y = y;
 };

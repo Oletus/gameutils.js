@@ -125,7 +125,7 @@ Editor.prototype.restartEffect = function(x, y) {
         posX = width * 0.5 + Math.sin(this.time * 2.9) * width * 0.4;
         posY = height * 0.5 + Math.cos(this.time * 1.9) * height * 0.4;
     }
-    this.effect = new ParticleEffect({
+    this.timedEmitter = new ParticleTimedEmitter({
         emitter: this.emitter,
         engine: this.particles,
         x: posX,
@@ -164,12 +164,12 @@ Editor.prototype.generateCode = function() {
     // Remove extra comma
     code[code.length - 1] = code[code.length - 1].substring(0, code[code.length - 1].length - 1);
     code.push('});');
-    code.push('var effect = new ParticleEffect({');
+    code.push('var effect = new ParticleTimedEmitter({');
     code.push('    emitter: emitter,');
-    code.push('    directionMode: ParticleEffect.DirectionMode.' + this.parameters.get('directionMode') + ',');
+    code.push('    directionMode: ParticleTimedEmitter.DirectionMode.' + this.parameters.get('directionMode') + ',');
     code.push('    particleInterval: ' + this.parameters.get('particleInterval') + ',');
-    code.push('    lifetime: ' + this.effect.lifetime + ',');
-    code.push('    waitTime: ' + this.effect.waitTime + ',');
+    code.push('    lifetime: ' + this.timedEmitter.lifetime + ',');
+    code.push('    waitTime: ' + this.timedEmitter.waitTime + ',');
     // Remove extra comma
     code[code.length - 1] = code[code.length - 1].substring(0, code[code.length - 1].length - 1);
     code.push('});');
@@ -188,10 +188,10 @@ Editor.prototype.update = function() {
         }
     }
     this.emitter.options.rotationMode = Particle.RotationMode[this.parameters.get('rotationMode')];
-    this.effect.directionMode = ParticleEffect.DirectionMode[this.parameters.get('directionMode')];
-    this.effect.particleInterval = this.parameters.get('particleInterval');
-    this.effect.lifetime = this.parameters.get('effect stops') ? this.parameters.get('effect lifetime') : -1;
-    this.effect.waitTime = this.parameters.get('effect wait time');
+    this.timedEmitter.directionMode = ParticleTimedEmitter.DirectionMode[this.parameters.get('directionMode')];
+    this.timedEmitter.particleInterval = this.parameters.get('particleInterval');
+    this.timedEmitter.lifetime = this.parameters.get('effect stops') ? this.parameters.get('effect lifetime') : -1;
+    this.timedEmitter.waitTime = this.parameters.get('effect wait time');
     
     this.codeArea.textContent = this.generateCode();
     
@@ -205,9 +205,9 @@ Editor.prototype.update = function() {
     if (this.positionMode === Editor.PositionMode.FOLLOW) {
         var posX = width * 0.5 + Math.sin(this.time * 2.9) * width * 0.4;
         var posY = height * 0.5 + Math.cos(this.time * 1.9) * height * 0.4;
-        this.effect.setCoords(posX, posY);
+        this.timedEmitter.setCoords(posX, posY);
     }
-    this.effect.update(deltaTime);
+    this.timedEmitter.update(deltaTime);
 
     // Draw:
 
