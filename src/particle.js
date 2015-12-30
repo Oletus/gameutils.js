@@ -309,7 +309,8 @@ Particle.spriteAppearance = function(sprite, options) {
         sizeFuncInverse: false,
         opacity: 1,
         opacityFunc: Particle.fastAppearSlowDisappear,
-        opacityFuncInverse: false
+        opacityFuncInverse: false,
+        additive: false
     };
     var _options = {};
     for(var key in defaults) {
@@ -331,6 +332,11 @@ Particle.spriteAppearance = function(sprite, options) {
             ctx.globalAlpha = Math.max(0, _options.opacityFunc(1.0 - t, seed)) * _options.opacity;
         } else {
             ctx.globalAlpha = Math.max(0, _options.opacityFunc(t, seed)) * _options.opacity;
+        }
+        if (_options.additive) {
+            ctx.globalCompositeOperation = 'lighter';
+        } else {
+            ctx.globalCompositeOperation = 'source-over';
         }
         sprite.drawRotated(ctx, x, y, rotation, sizeNow);
     };
