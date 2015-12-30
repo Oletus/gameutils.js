@@ -230,47 +230,56 @@ Editor.prototype.editEmitter = function(index) {
 
 Editor.prototype.generateCode = function() {
     var code = [];
-    code.push('var effect = new ParticleEffect();');
+    
+    var setIndent = function(n) {
+        code.push = function(str) {
+            var prefix = Array(n + 1).join('    ');
+            Array.prototype.push.call(code, prefix + str);
+        };
+    }
+    
+    var specialEmitterKeys = {'x': false, 'y': false, 'appearance': false};
     for (var i = 0; i < this.emitters.length; ++i) {
         if (this.appearanceOptions[i].codePrefix != '') {
             code.push(this.appearanceOptions[i].codePrefix);
         }
         code.push('var emitter' + i + ' = new ParticleEmitter({');
-        var specialEmitterKeys = {'x': false, 'y': false, 'appearance': false, 'sizeFunc': true, 'opacityFunc': true};
+        setIndent(1);
         for (var key in this.emitters[i].options) {
             if (this.emitters[i].options.hasOwnProperty(key) && !specialEmitterKeys.hasOwnProperty(key)) {
                 if (typeof this.emitters[i].options[key] === 'string') {
-                    code.push('    ' + key + ': "' + this.emitters[i].options[key] + '",');
+                    code.push(key + ': "' + this.emitters[i].options[key] + '",');
                 } else {
-                    code.push('    ' + key + ': ' + this.emitters[i].options[key] + ',');
+                    code.push(key + ': ' + this.emitters[i].options[key] + ',');
                 }
             }
         }
-        var functions = ['Particle.fastAppearSlowDisappear', 'Particle.fadeOutLinear'];
-        for (var key in specialEmitterKeys) {
-            if (specialEmitterKeys.hasOwnProperty(key) && specialEmitterKeys[key]) {
-                for (var j = 0; j < functions.length; ++j) {
-                    if (eval(functions[j]) === this.emitters[i].options[key]) {
-                        code.push('    ' + key + ': ' + functions[j] + ',');
-                    }
-                }
-            }
-        }
-        code.push('    appearance: ' + this.appearanceOptions[i].code + ',');
+        code.push('appearance: ' + this.appearanceOptions[i].code + ',');
         // Remove extra comma
         code[code.length - 1] = code[code.length - 1].substring(0, code[code.length - 1].length - 1);
+        setIndent(0);
         code.push('});');
+    }
+    code.push('var createEffect = function() {');
+    setIndent(1);
+    code.push('var effect = new ParticleEffect();');
+    for (var i = 0; i < this.emitters.length; ++i) {
         code.push('var timedEmitter' + i + ' = new ParticleTimedEmitter({');
-        code.push('    emitter: emitter' + i + ',');
-        code.push('    directionMode: ' + this.timedEmitters[i].directionMode + ',');
-        code.push('    particleInterval: ' + this.timedEmitters[i].particleInterval + ',');
-        code.push('    lifetime: ' + this.timedEmitters[i].lifetime + ',');
-        code.push('    waitTime: ' + this.timedEmitters[i].waitTime + ',');
+        setIndent(2);
+        code.push('emitter: emitter' + i + ',');
+        code.push('directionMode: ' + this.timedEmitters[i].directionMode + ',');
+        code.push('particleInterval: ' + this.timedEmitters[i].particleInterval + ',');
+        code.push('lifetime: ' + this.timedEmitters[i].lifetime + ',');
+        code.push('waitTime: ' + this.timedEmitters[i].waitTime + ',');
         // Remove extra comma
         code[code.length - 1] = code[code.length - 1].substring(0, code[code.length - 1].length - 1);
+        setIndent(1);
         code.push('});');
         code.push('effect.emitters.push(timedEmitter' + i + ');');
     }
+    code.push('return effect;');
+    setIndent(0);
+    code.push('};');
     return code.join('\n');
 };
 
@@ -362,18 +371,18 @@ Editor.prototype.updateAppearanceFromUI = function(index) {
             if (this.parameters.get('colorSprite')) {
                 var coloredSprite = new Sprite(optionSet.sprite.filename, Sprite.turnSolidColored(optionSet.color));
                 updatedAppearance = Particle.spriteAppearance(coloredSprite, optionSet.options);
-                optionSet.codePrefix = 'var sprite = new Sprite("' + optionSet.sprite.filename + '", Sprite.turnSolidColored("' + optionSet.color + '"));';
-                optionSet.code = 'Particle.spriteAppearance(sprite, ' + appearanceOptionsString + ')';
+                optionSet.codePrefix = 'var sprite' + index + ' = new Sprite("' + optionSet.sprite.filename + '", Sprite.turnSolidColored("' + optionSet.color + '"));';
+                optionSet.code = 'Particle.spriteAppearance(sprite' + index + ', ' + appearanceOptionsString + ')';
             } else {
                 updatedAppearance = Particle.spriteAppearance(optionSet.sprite, optionSet.options);
-                optionSet.codePrefix = 'var sprite = new Sprite("' + optionSet.sprite.filename + '");';
-                optionSet.code = 'Particle.spriteAppearance(sprite, ' + appearanceOptionsString + ')';
+                optionSet.codePrefix = 'var sprite' + index + ' = new Sprite("' + optionSet.sprite.filename + '");';
+                optionSet.code = 'Particle.spriteAppearance(sprite' + index + ', ' + appearanceOptionsString + ')';
             }
         }
     } else {
         updatedAppearance = Particle.prerenderedCircleAppearance(optionSet.color, 8, optionSet.options);
-        optionSet.codePrefix = '';
-        optionSet.code = 'Particle.prerenderedCircleAppearance("' + optionSet.color + '", 8, ' + appearanceOptionsString + ')';
+        optionSet.codePrefix = 'var appearance' + index + ' = Particle.prerenderedCircleAppearance("' + optionSet.color + '", 8, ' + appearanceOptionsString + ');';
+        optionSet.code = 'appearance' + index;
     }
     
     if (updatedAppearance !== undefined) {
