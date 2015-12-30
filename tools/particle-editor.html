@@ -47,7 +47,12 @@ var AppearanceOptionSet = function() {
     this.colorSprite = false;
     this.codePrefix = '';
     this.code = '';
-    this.options = {size: 10, opacity: 1};
+    this.options = {
+        size: 10,
+        opacity: 1,
+        sizeFunc: Particle.fadeOutLinear,
+        opacityFunc: Particle.fastAppearSlowDisappear
+    };
     this.loadedOptions = {};
     this.loadedSpriteURL = '';
 };
@@ -360,6 +365,17 @@ Editor.prototype.updateAppearanceFromUI = function(index) {
     }
     var updatedAppearance;
     var appearanceOptionsString = '{';
+    var functions = ['Particle.fastAppearSlowDisappear', 'Particle.fadeOutLinear'];
+    var functionKeys = ['sizeFunc', 'opacityFunc'];
+    for (var i = 0; i < functionKeys.length; ++i) {
+        if (optionSet.options.hasOwnProperty(functionKeys[i])) {
+            for (var j = 0; j < functions.length; ++j) {
+                if (eval(functions[j]) === optionSet.options[functionKeys[i]]) {
+                    appearanceOptionsString += (functionKeys[i] + ': ' + functions[j] + ', ');
+                }
+            }
+        }
+    }
     appearanceOptionsString += 'size: ' + optionSet.options.size + ', ';
     appearanceOptionsString += 'opacity: ' + optionSet.options.opacity;
     appearanceOptionsString += '}';
