@@ -340,11 +340,11 @@ Editor.prototype.updateAppearance = function() {
                 var coloredSprite = new Sprite(optionSet.sprite.filename, Sprite.turnSolidColored(optionSet.color));
                 updatedAppearance = Particle.spriteAppearance(coloredSprite, optionSet.options);
                 optionSet.codePrefix = 'var sprite = new Sprite("' + optionSet.sprite.filename + '", Sprite.turnSolidColored("' + optionSet.color + '"));';
-                optionSet.code = 'Particle.spriteAppearance(sprite, ' + 1 / optionSet.sprite.width + ', ' + appearanceOptionsString + ')';
+                optionSet.code = 'Particle.spriteAppearance(sprite, ' + appearanceOptionsString + ')';
             } else {
                 updatedAppearance = Particle.spriteAppearance(optionSet.sprite, optionSet.options);
                 optionSet.codePrefix = 'var sprite = new Sprite("' + optionSet.sprite.filename + '");';
-                optionSet.code = 'Particle.spriteAppearance(sprite, ' + 1 / optionSet.sprite.width + ', ' + appearanceOptionsString + ')';
+                optionSet.code = 'Particle.spriteAppearance(sprite, ' + appearanceOptionsString + ')';
             }
         }
     } else {
