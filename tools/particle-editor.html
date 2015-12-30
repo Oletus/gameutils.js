@@ -112,7 +112,6 @@ var Editor = function() {
     );
 
     this.addEmitter(ctx.canvas.width * 0.5, ctx.canvas.height * 0.5);
-    this.restartEffect();
     
     this._sinceDead = 0;
 };
@@ -184,13 +183,15 @@ Editor.prototype.addEmitter = function(x, y) {
 
     var emitterChoice = [];
     for (var i = 0; i < index + 1; ++i) {
-        emitterChoice.push('<input type="radio" name="emitter" onclick="editor.editEmitter(' + i + ')" id="emitter' + i + '"></input>');
+        var checked = (i === index ? ' checked' : '');
+        emitterChoice.push('<input type="radio" name="emitter" onclick="editor.editEmitter(' + i + ')" id="emitter' + i + '"' + checked + '></input>');
         emitterChoice.push('<label for="emitter' + i + '">Edit emitter ' + i + '</label>');
         emitterChoice.push('<br>');
     }
     document.getElementById('emitterChoice').innerHTML = emitterChoice.join('\n');
     
     this.editEmitter(index);
+    this.restartEffect();
 };
 
 /**
