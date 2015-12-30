@@ -41,25 +41,29 @@ var loadSpriteFromFileInput = function() {
     });
 };
 
+var AppearanceOptionSet = function() {
+    this.sprite = null;
+    this.color = '#fff';
+    this.colorSprite = false;
+    this.codePrefix = '';
+    this.code = '';
+    this.options = {size: 10, opacity: 1};
+    this.loadedOptions = {};
+    this.loadedSpriteURL = '';
+};
+
 var Editor = function() {
     this.particles = new ParticleEngine({gravityY: 100});
-    this._appearanceOptions = {};
-    this._loadedAppearanceOptions = {};
     this.editEmitterIndex = 0;
     this.emitters = [];
     this.timedEmitters = [];
+    this.appearanceOptions = [];
     this.addEmitter(ctx.canvas.width * 0.5, ctx.canvas.height * 0.5);
-    this._color = '#fff';
-    this._colorSprite = false;
-    this.sprite = null;
-    this.loadedSpriteURL = '';
     
     this.codeArea = document.createElement('textarea');
     this.codeArea.cols = 80;
     this.codeArea.rows = 40;
     this.codeArea.readOnly = true;
-    this._appearanceCodePrefix = '';
-    this._appearanceCode = '';
     
     this.positionMode = Editor.PositionMode.STATIC;
     
@@ -116,10 +120,21 @@ Editor.PositionMode = {
     STATIC: 1
 };
 
+var reverseEnum = function(enumr) {
+    var arr = [];
+    for (var key in enumr) {
+        if (enumr.hasOwnProperty(key)) {
+            arr[enumr[key]] = key;
+        }
+    }
+    return arr;
+};
+
+Editor.ReverseRotationMode = reverseEnum(Particle.RotationMode);
+Editor.ReverseDirectionMode = reverseEnum(ParticleTimedEmitter.DirectionMode);
+
 Editor.prototype.restartEffect = function() {
     this.time = 0;
-    var width = ctx.canvas.width;
-    var height = ctx.canvas.height;
     this.effect = new ParticleEffect();
     for (var i = 0; i < this.timedEmitters.length; ++i) {
         this.timedEmitters[i].restart();
@@ -136,33 +151,70 @@ Editor.prototype.addEmitter = function(x, y) {
         x = this.timedEmitters[0].x;
         y = this.timedEmitters[0].y;
     }
+    var index = this.emitters.length;
 
+    this.appearanceOptions.push(new AppearanceOptionSet());
     this.emitters.push(new ParticleEmitter({
-        appearance: Particle.prerenderedCircleAppearance('#fff', 8, this._appearanceOptions)
+        appearance: Particle.prerenderedCircleAppearance('#fff', 8, this.appearanceOptions[index].options)
     }));
-
     var posX = x;
     var posY = y;
     if (this.positionMode === Editor.PositionMode.FOLLOW) {
+        var width = ctx.canvas.width;
+        var height = ctx.canvas.height;
         posX = width * 0.5 + Math.sin(this.time * 2.9) * width * 0.4;
         posY = height * 0.5 + Math.cos(this.time * 1.9) * height * 0.4;
     }
 
     this.timedEmitters.push(
         new ParticleTimedEmitter({
-            emitter: this.emitters[this.emitters.length - 1],
+            emitter: this.emitters[index],
             engine: this.particles,
             x: posX,
             y: posY
         })
     );
-    this.editEmitter(this.emitters.length - 1);
+    
+    var emitterChoice = [];
+    for (var i = 0; i < index + 1; ++i) {
+        emitterChoice.push('<input type="radio" name="emitter" onclick="editor.editEmitter(' + i + ')" id="emitter' + i + '"></input>');
+        emitterChoice.push('<label for="emitter' + i + '">Edit emitter ' + i + '</label>');
+        emitterChoice.push('<br>');
+    }
+    
+    document.getElementById('emitterChoice').innerHTML = emitterChoice.join('\n');
+    
+    this.editEmitter(index);
 };
 
 Editor.prototype.editEmitter = function(index) {
     if (this.editEmitterIndex !== index) {
-        //this.editEmitterIndex = index;
-        // TODO: Load parameters from the given emitter.
+        this.editEmitterIndex = index;
+        var emitter = this.emitters[index];
+        for (var key in emitter.options) {
+            if (emitter.options.hasOwnProperty(key)) {
+                this.parameters.set(key, emitter.options[key]);
+            }
+        }
+        this.parameters.set('rotationMode', Editor.ReverseRotationMode[emitter.options.rotationMode]);
+        var te = this.timedEmitters[index];
+        this.parameters.set('directionMode', Editor.ReverseDirectionMode[te.directionMode]);
+        this.parameters.set('particleInterval', te.particleInterval);
+        var stops = te.lifetime >= 0;
+        this.parameters.set('effect stops', stops);
+        this.parameters.set('effect lifetime', (stops ? te.lifetime : 1));
+        this.parameters.set('effect wait time', te.waitTime);
+        
+        var optionSet = this.appearanceOptions[index];
+        if (optionSet.sprite) {
+            this.parameters.set('spriteURL', optionSet.sprite.filename);
+        } else {
+            this.parameters.set('spriteURL', '');
+        }
+        this.parameters.set('color', optionSet.color);
+        this.parameters.set('colorSprite', optionSet.colorSprite);
+        this.parameters.set('size', optionSet.options.size);
+        this.parameters.set('opacity', optionSet.options.opacity);
     }
 };
 
@@ -170,8 +222,8 @@ Editor.prototype.generateCode = function() {
     var code = [];
     code.push('var effect = new ParticleEffect();');
     for (var i = 0; i < this.emitters.length; ++i) {
-        if (this._appearanceCodePrefix != '') {
-            code.push(this._appearanceCodePrefix);
+        if (this.appearanceOptions[i].codePrefix != '') {
+            code.push(this.appearanceOptions[i].codePrefix);
         }
         code.push('var emitter' + i + ' = new ParticleEmitter({');
         var specialEmitterKeys = {'x': false, 'y': false, 'appearance': false, 'sizeFunc': true, 'opacityFunc': true};
@@ -194,7 +246,7 @@ Editor.prototype.generateCode = function() {
                 }
             }
         }
-        code.push('    appearance: ' + this._appearanceCode + ',');
+        code.push('    appearance: ' + this.appearanceOptions[i].code + ',');
         // Remove extra comma
         code[code.length - 1] = code[code.length - 1].substring(0, code[code.length - 1].length - 1);
         code.push('});');
@@ -253,62 +305,62 @@ Editor.prototype.update = function() {
 };
 
 Editor.prototype.updateAppearance = function() {
-    this._appearanceOptions.size = this.parameters.get('size');
-    if (this.parameters.get('spriteURL') !== '' && this.sprite && this.sprite.loaded) {
-        this._appearanceOptions.size /= this.sprite.width;
+    var optionSet = this.appearanceOptions[this.editEmitterIndex];
+    optionSet.options.size = this.parameters.get('size');
+    if (this.parameters.get('spriteURL') !== '' && optionSet.sprite && optionSet.sprite.loaded) {
+        optionSet.options.size /= optionSet.sprite.width;
     }
-    this._appearanceOptions.opacity = this.parameters.get('opacity');
+    optionSet.options.opacity = this.parameters.get('opacity');
     var appearanceSame = true;
-    for (var key in this._appearanceOptions) {
-        if (this._appearanceOptions.hasOwnProperty(key)) {
-            if (this._loadedAppearanceOptions[key] !== this._appearanceOptions[key]) {
+    for (var key in optionSet.options) {
+        if (optionSet.options.hasOwnProperty(key)) {
+            if (optionSet.loadedOptions[key] !== optionSet.options[key]) {
                 appearanceSame = false;
             }
         }
     }
     if (appearanceSame &&
-        this._color === this.parameters.get('color') &&
-        this._colorSprite === this.parameters.get('colorSprite') &&
-        this._loadedSpriteURL === this.parameters.get('spriteURL'))
+        optionSet.color === this.parameters.get('color') &&
+        optionSet.colorSprite === this.parameters.get('colorSprite') &&
+        optionSet.loadedSpriteURL === this.parameters.get('spriteURL'))
     {
         return;
     }
     var updatedAppearance;
     var appearanceOptionsString = '{';
-    appearanceOptionsString += 'size: ' + this._appearanceOptions.size + ', ';
-    appearanceOptionsString += 'opacity: ' + this._appearanceOptions.opacity;
+    appearanceOptionsString += 'size: ' + optionSet.options.size + ', ';
+    appearanceOptionsString += 'opacity: ' + optionSet.options.opacity;
     appearanceOptionsString += '}';
     if (this.parameters.get('spriteURL') !== '') {
-        if (this.sprite === null || this.sprite.filename !== this.parameters.get('spriteURL')) {
-            this.sprite = new Sprite(this.parameters.get('spriteURL'));
+        if (optionSet.sprite === null || optionSet.sprite.filename !== this.parameters.get('spriteURL')) {
+            optionSet.sprite = new Sprite(this.parameters.get('spriteURL'));
         }
-        if (this.sprite.loaded) {
-            this.loadedSprite = this.sprite;
+        if (optionSet.sprite.loaded) {
             if (this.parameters.get('colorSprite')) {
-                var coloredSprite = new Sprite(this.sprite.filename, Sprite.turnSolidColored(this._color));
-                updatedAppearance = Particle.spriteAppearance(coloredSprite, this._appearanceOptions);
-                this._appearanceCodePrefix = 'var sprite = new Sprite("' + this.sprite.filename + '", Sprite.turnSolidColored("' + this._color + '"));';
-                this._appearanceCode = 'Particle.spriteAppearance(sprite, ' + 1 / this.sprite.width + ', ' + appearanceOptionsString + ')';
+                var coloredSprite = new Sprite(optionSet.sprite.filename, Sprite.turnSolidColored(optionSet.color));
+                updatedAppearance = Particle.spriteAppearance(coloredSprite, optionSet.options);
+                optionSet.codePrefix = 'var sprite = new Sprite("' + optionSet.sprite.filename + '", Sprite.turnSolidColored("' + optionSet.color + '"));';
+                optionSet.code = 'Particle.spriteAppearance(sprite, ' + 1 / optionSet.sprite.width + ', ' + appearanceOptionsString + ')';
             } else {
-                updatedAppearance = Particle.spriteAppearance(this.sprite, this._appearanceOptions);
-                this._appearanceCodePrefix = 'var sprite = new Sprite("' + this.sprite.filename + '");';
-                this._appearanceCode = 'Particle.spriteAppearance(sprite, ' + 1 / this.sprite.width + ', ' + appearanceOptionsString + ')';
+                updatedAppearance = Particle.spriteAppearance(optionSet.sprite, optionSet.options);
+                optionSet.codePrefix = 'var sprite = new Sprite("' + optionSet.sprite.filename + '");';
+                optionSet.code = 'Particle.spriteAppearance(sprite, ' + 1 / optionSet.sprite.width + ', ' + appearanceOptionsString + ')';
             }
         }
     } else {
-        updatedAppearance = Particle.prerenderedCircleAppearance(this._color, 8, this._appearanceOptions);
-        this._appearanceCodePrefix = '';
-        this._appearanceCode = 'Particle.prerenderedCircleAppearance("' + this._color + '", 8, ' + appearanceOptionsString + ')';
+        updatedAppearance = Particle.prerenderedCircleAppearance(optionSet.color, 8, optionSet.options);
+        optionSet.codePrefix = '';
+        optionSet.code = 'Particle.prerenderedCircleAppearance("' + optionSet.color + '", 8, ' + appearanceOptionsString + ')';
     }
     
     if (updatedAppearance !== undefined) {
         this.emitters[this.editEmitterIndex].options.appearance = updatedAppearance;
-        this._colorSprite = this.parameters.get('colorSprite');
-        this._color = this.parameters.get('color');
-        this._loadedSpriteURL = this.parameters.get('spriteURL');
-        for (var key in this._appearanceOptions) {
-            if (this._appearanceOptions.hasOwnProperty(key)) {
-                this._loadedAppearanceOptions[key] = this._appearanceOptions[key];
+        optionSet.colorSprite = this.parameters.get('colorSprite');
+        optionSet.color = this.parameters.get('color');
+        optionSet.loadedSpriteURL = this.parameters.get('spriteURL');
+        for (var key in optionSet.options) {
+            if (optionSet.options.hasOwnProperty(key)) {
+                optionSet.loadedOptions[key] = optionSet.options[key];
             }
         }
     }
@@ -368,6 +420,9 @@ var start = function() {
     div.id = 'controls';
     div.innerHTML = [
         '<input type="button" onclick="editor.addEmitter()" value="Add emitter"></input>',
+        '<br>',
+        '<div id="emitterChoice">',
+        '</div>',
         '<br>',
         '<input type="file" id="imageFile"></input>',
         '<input type="button" onclick="loadSpriteFromFileInput()" value="Load sprite"></input>',

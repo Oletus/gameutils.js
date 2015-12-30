@@ -318,11 +318,17 @@ Particle.prerenderedCircleAppearance = function(color, resolution, options) {
     helperCtx.arc(resolution * 0.5, resolution * 0.5, resolution * 0.5, 0, Math.PI * 2);
     helperCtx.fill();
     var sprite = new Sprite(helperCanvas);
-    if (options.size === undefined) {
-        options.size = 5;
+    var spriteOptions = {};
+    for (var key in options) {
+        if (options.hasOwnProperty(key)) {
+            spriteOptions[key] = options[key];
+        }
     }
-    options.size /= resolution;
-    return Particle.spriteAppearance(sprite, options);
+    if (spriteOptions.size === undefined) {
+        spriteOptions.size = 5;
+    }
+    spriteOptions.size /= resolution;
+    return Particle.spriteAppearance(sprite, spriteOptions);
 };
 
 /**
