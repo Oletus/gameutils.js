@@ -83,11 +83,7 @@ var ParticleTimedEmitter = function(options) {
             this[key] = defaults[key];
         }
     }
-    this._time = 0;
-    this._timeAlive = 0;
-    this._emittedTime = 0;
-    this.dead = false;
-    this._emittedCount = 0;
+    this.restart();
 };
 
 ParticleTimedEmitter.DirectionMode = {
@@ -134,6 +130,16 @@ ParticleTimedEmitter.prototype.update = function(deltaTime) {
 ParticleTimedEmitter.prototype.setCoords = function(x, y) {
     this.x = x;
     this.y = y;
+};
+
+ParticleTimedEmitter.prototype.restart = function() {
+    this._lastX = undefined;
+    this._lastY = undefined;
+    this._time = 0;
+    this._timeAlive = 0;
+    this._emittedTime = 0;
+    this.dead = false;
+    this._emittedCount = 0;
 };
 
 /**

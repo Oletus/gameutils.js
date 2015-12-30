@@ -45,12 +45,10 @@ var Editor = function() {
     this.particles = new ParticleEngine({gravityY: 100});
     this._appearanceOptions = {};
     this._loadedAppearanceOptions = {};
-    this.emitters = [
-        new ParticleEmitter({
-            appearance: Particle.prerenderedCircleAppearance('#fff', 8, this._appearanceOptions)
-        })
-    ];
     this.editEmitterIndex = 0;
+    this.emitters = [];
+    this.timedEmitters = [];
+    this.addEmitter(ctx.canvas.width * 0.5, ctx.canvas.height * 0.5);
     this._color = '#fff';
     this._colorSprite = false;
     this.sprite = null;
@@ -110,7 +108,7 @@ var Editor = function() {
         }
     );
 
-    this.restartEffect(ctx.canvas.width * 0.5, ctx.canvas.height * 0.5);
+    this.restartEffect();
 };
 
 Editor.PositionMode = {
@@ -118,26 +116,54 @@ Editor.PositionMode = {
     STATIC: 1
 };
 
-Editor.prototype.restartEffect = function(x, y) {
+Editor.prototype.restartEffect = function() {
     this.time = 0;
     var width = ctx.canvas.width;
     var height = ctx.canvas.height;
+    this.effect = new ParticleEffect();
+    for (var i = 0; i < this.timedEmitters.length; ++i) {
+        this.timedEmitters[i].restart();
+        this.effect.emitters.push(this.timedEmitters[i]);
+    }
+};
+
+Editor.prototype.setEffectCoords = function(x, y) {
+    this.effect.setCoords(x, y);
+};
+
+Editor.prototype.addEmitter = function(x, y) {
+    if (x === undefined && this.timedEmitters.length > 0) {
+        x = this.timedEmitters[0].x;
+        y = this.timedEmitters[0].y;
+    }
+
+    this.emitters.push(new ParticleEmitter({
+        appearance: Particle.prerenderedCircleAppearance('#fff', 8, this._appearanceOptions)
+    }));
+
     var posX = x;
     var posY = y;
     if (this.positionMode === Editor.PositionMode.FOLLOW) {
         posX = width * 0.5 + Math.sin(this.time * 2.9) * width * 0.4;
         posY = height * 0.5 + Math.cos(this.time * 1.9) * height * 0.4;
     }
-    this.effect = new ParticleEffect();
-    this.timedEmitters = [
+
+    this.timedEmitters.push(
         new ParticleTimedEmitter({
-            emitter: this.emitters[0],
+            emitter: this.emitters[this.emitters.length - 1],
             engine: this.particles,
             x: posX,
             y: posY
-        }),
-    ];
-    this.effect.emitters.push(this.timedEmitters[0]);
+        })
+    );
+    this.editEmitter(this.emitters.length - 1);
+};
+
+Editor.prototype.editEmitter = function(index) {
+    if (this.editEmitterIndex !== index) {
+        //this.editEmitterIndex = index;
+        // TODO: Load parameters from the given emitter.
+    }
 };
 
 Editor.prototype.generateCode = function() {
@@ -333,13 +359,16 @@ var start = function() {
         var rect = canvas.getBoundingClientRect();
         var x = e.clientX - rect.left;
         var y = e.clientY - rect.top;
-        editor.restartEffect(x, y);
+        editor.restartEffect();
+        editor.setEffectCoords(x, y);
     });
     ctx = canvas.getContext('2d');
     document.body.appendChild(canvas);
     var div = document.createElement('div');
     div.id = 'controls';
     div.innerHTML = [
+        '<input type="button" onclick="editor.addEmitter()" value="Add emitter"></input>',
+        '<br>',
         '<input type="file" id="imageFile"></input>',
         '<input type="button" onclick="loadSpriteFromFileInput()" value="Load sprite"></input>',
         '<br>',
