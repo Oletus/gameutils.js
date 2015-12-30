@@ -45,9 +45,12 @@ var Editor = function() {
     this.particles = new ParticleEngine({gravityY: 100});
     this._appearanceOptions = {};
     this._loadedAppearanceOptions = {};
-    this.emitter = new ParticleEmitter({
-        appearance: Particle.prerenderedCircleAppearance('#fff', 8, this._appearanceOptions)
-    });
+    this.emitters = [
+        new ParticleEmitter({
+            appearance: Particle.prerenderedCircleAppearance('#fff', 8, this._appearanceOptions)
+        })
+    ];
+    this.editEmitterIndex = 0;
     this._color = '#fff';
     this._colorSprite = false;
     this.sprite = null;
@@ -125,54 +128,61 @@ Editor.prototype.restartEffect = function(x, y) {
         posX = width * 0.5 + Math.sin(this.time * 2.9) * width * 0.4;
         posY = height * 0.5 + Math.cos(this.time * 1.9) * height * 0.4;
     }
-    this.timedEmitter = new ParticleTimedEmitter({
-        emitter: this.emitter,
-        engine: this.particles,
-        x: posX,
-        y: posY
-    });
+    this.effect = new ParticleEffect();
+    this.timedEmitters = [
+        new ParticleTimedEmitter({
+            emitter: this.emitters[0],
+            engine: this.particles,
+            x: posX,
+            y: posY
+        }),
+    ];
+    this.effect.emitters.push(this.timedEmitters[0]);
 };
 
 Editor.prototype.generateCode = function() {
     var code = [];
-    if (this._appearanceCodePrefix != '') {
-        code.push(this._appearanceCodePrefix);
-    }
-    code.push('var emitter = new ParticleEmitter({');
-    var specialEmitterKeys = {'x': false, 'y': false, 'appearance': false, 'rotationMode': false, 'sizeFunc': true, 'opacityFunc': true};
-    for (var key in this.emitter.options) {
-        if (this.emitter.options.hasOwnProperty(key) && !specialEmitterKeys.hasOwnProperty(key)) {
-            if (typeof this.emitter.options[key] === 'string') {
-                code.push('    ' + key + ': "' + this.emitter.options[key] + '",');
-            } else {
-                code.push('    ' + key + ': ' + this.emitter.options[key] + ',');
-            }
+    code.push('var effect = new ParticleEffect();');
+    for (var i = 0; i < this.emitters.length; ++i) {
+        if (this._appearanceCodePrefix != '') {
+            code.push(this._appearanceCodePrefix);
         }
-    }
-    code.push('    rotationMode: Particle.RotationMode.' + this.parameters.get('rotationMode') + ',');
-    var functions = ['Particle.fastAppearSlowDisappear', 'Particle.fadeOutLinear'];
-    for (var key in specialEmitterKeys) {
-        if (specialEmitterKeys.hasOwnProperty(key) && specialEmitterKeys[key]) {
-            for (var i = 0; i < functions.length; ++i) {
-                if (eval(functions[i]) === this.emitter.options[key]) {
-                    code.push('    ' + key + ': ' + functions[i] + ',');
+        code.push('var emitter' + i + ' = new ParticleEmitter({');
+        var specialEmitterKeys = {'x': false, 'y': false, 'appearance': false, 'sizeFunc': true, 'opacityFunc': true};
+        for (var key in this.emitters[i].options) {
+            if (this.emitters[i].options.hasOwnProperty(key) && !specialEmitterKeys.hasOwnProperty(key)) {
+                if (typeof this.emitters[i].options[key] === 'string') {
+                    code.push('    ' + key + ': "' + this.emitters[i].options[key] + '",');
+                } else {
+                    code.push('    ' + key + ': ' + this.emitters[i].options[key] + ',');
                 }
             }
         }
+        var functions = ['Particle.fastAppearSlowDisappear', 'Particle.fadeOutLinear'];
+        for (var key in specialEmitterKeys) {
+            if (specialEmitterKeys.hasOwnProperty(key) && specialEmitterKeys[key]) {
+                for (var j = 0; j < functions.length; ++j) {
+                    if (eval(functions[j]) === this.emitters[i].options[key]) {
+                        code.push('    ' + key + ': ' + functions[j] + ',');
+                    }
+                }
+            }
+        }
+        code.push('    appearance: ' + this._appearanceCode + ',');
+        // Remove extra comma
+        code[code.length - 1] = code[code.length - 1].substring(0, code[code.length - 1].length - 1);
+        code.push('});');
+        code.push('var timedEmitter' + i + ' = new ParticleTimedEmitter({');
+        code.push('    emitter: emitter' + i + ',');
+        code.push('    directionMode: ' + this.timedEmitters[i].directionMode + ',');
+        code.push('    particleInterval: ' + this.timedEmitters[i].particleInterval + ',');
+        code.push('    lifetime: ' + this.timedEmitters[i].lifetime + ',');
+        code.push('    waitTime: ' + this.timedEmitters[i].waitTime + ',');
+        // Remove extra comma
+        code[code.length - 1] = code[code.length - 1].substring(0, code[code.length - 1].length - 1);
+        code.push('});');
+        code.push('effect.emitters.push(timedEmitter' + i + ');');
     }
-    code.push('    appearance: ' + this._appearanceCode + ',');
-    // Remove extra comma
-    code[code.length - 1] = code[code.length - 1].substring(0, code[code.length - 1].length - 1);
-    code.push('});');
-    code.push('var effect = new ParticleTimedEmitter({');
-    code.push('    emitter: emitter,');
-    code.push('    directionMode: ParticleTimedEmitter.DirectionMode.' + this.parameters.get('directionMode') + ',');
-    code.push('    particleInterval: ' + this.parameters.get('particleInterval') + ',');
-    code.push('    lifetime: ' + this.timedEmitter.lifetime + ',');
-    code.push('    waitTime: ' + this.timedEmitter.waitTime + ',');
-    // Remove extra comma
-    code[code.length - 1] = code[code.length - 1].substring(0, code[code.length - 1].length - 1);
-    code.push('});');
     return code.join('\n');
 };
 
@@ -183,15 +193,15 @@ Editor.prototype.update = function() {
     // Refresh parameters:
     
     for (var key in particleParameters) {
-        if (this.emitter.options.hasOwnProperty(key)) {
-            this.emitter.options[key] = this.parameters.get(key);
+        if (this.emitters[this.editEmitterIndex].options.hasOwnProperty(key)) {
+            this.emitters[this.editEmitterIndex].options[key] = this.parameters.get(key);
         }
     }
-    this.emitter.options.rotationMode = Particle.RotationMode[this.parameters.get('rotationMode')];
-    this.timedEmitter.directionMode = ParticleTimedEmitter.DirectionMode[this.parameters.get('directionMode')];
-    this.timedEmitter.particleInterval = this.parameters.get('particleInterval');
-    this.timedEmitter.lifetime = this.parameters.get('effect stops') ? this.parameters.get('effect lifetime') : -1;
-    this.timedEmitter.waitTime = this.parameters.get('effect wait time');
+    this.emitters[this.editEmitterIndex].options.rotationMode = Particle.RotationMode[this.parameters.get('rotationMode')];
+    this.timedEmitters[this.editEmitterIndex].directionMode = ParticleTimedEmitter.DirectionMode[this.parameters.get('directionMode')];
+    this.timedEmitters[this.editEmitterIndex].particleInterval = this.parameters.get('particleInterval');
+    this.timedEmitters[this.editEmitterIndex].lifetime = this.parameters.get('effect stops') ? this.parameters.get('effect lifetime') : -1;
+    this.timedEmitters[this.editEmitterIndex].waitTime = this.parameters.get('effect wait time');
     
     this.codeArea.textContent = this.generateCode();
     
@@ -205,9 +215,9 @@ Editor.prototype.update = function() {
     if (this.positionMode === Editor.PositionMode.FOLLOW) {
         var posX = width * 0.5 + Math.sin(this.time * 2.9) * width * 0.4;
         var posY = height * 0.5 + Math.cos(this.time * 1.9) * height * 0.4;
-        this.timedEmitter.setCoords(posX, posY);
+        this.effect.setCoords(posX, posY);
     }
-    this.timedEmitter.update(deltaTime);
+    this.effect.update(deltaTime);
 
     // Draw:
 
@@ -266,7 +276,7 @@ Editor.prototype.updateAppearance = function() {
     }
     
     if (updatedAppearance !== undefined) {
-        this.emitter.options.appearance = updatedAppearance;
+        this.emitters[this.editEmitterIndex].options.appearance = updatedAppearance;
         this._colorSprite = this.parameters.get('colorSprite');
         this._color = this.parameters.get('color');
         this._loadedSpriteURL = this.parameters.get('spriteURL');

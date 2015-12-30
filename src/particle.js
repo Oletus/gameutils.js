@@ -137,6 +137,26 @@ ParticleTimedEmitter.prototype.setCoords = function(x, y) {
 };
 
 /**
+ * WIP: Complex particle effect composed of multiple timed emitters.
+ * @constructor
+ */
+var ParticleEffect = function() {
+    this.emitters = [];
+};
+
+ParticleEffect.prototype.update = function(deltaTime) {
+    for (var i = 0; i < this.emitters.length; ++i) {
+        this.emitters[i].update(deltaTime);
+    }
+};
+
+ParticleEffect.prototype.setCoords = function(x, y) {
+    for (var i = 0; i < this.emitters.length; ++i) {
+        this.emitters[i].setCoords(x, y);
+    }
+};
+
+/**
  * A class that can generate particles based on a distribution of angles/velocities.
  * The class only has parameters for generating particles - you need to call emitParticle
  * when you actually want to create a particle based on the parameters.
