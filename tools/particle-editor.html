@@ -241,15 +241,29 @@ Editor.prototype.generateCode = function() {
             var prefix = Array(n + 1).join('    ');
             Array.prototype.push.call(code, prefix + str);
         };
-    }
+    };
+    
+    var indent = 0;
+    var pushIndent = function() {
+        ++indent;
+        setIndent(indent);
+    };
+    var popIndent = function() {
+        --indent;
+        setIndent(indent);
+    };
+
+    code.push('var create' + this.parameters.get('effect name') + 'FX = (function() {');
+    pushIndent();
     
     var specialEmitterKeys = {'x': false, 'y': false, 'appearance': false};
     for (var i = 0; i < this.emitters.length; ++i) {
         if (this.appearanceOptions[i].codePrefix != '') {
             code.push(this.appearanceOptions[i].codePrefix);
         }
+        code.push('var appearance' + i + ' = ' + this.appearanceOptions[i].code + ';');
         code.push('var emitter' + i + ' = new ParticleEmitter({');
-        setIndent(1);
+        pushIndent();
         for (var key in this.emitters[i].options) {
             if (this.emitters[i].options.hasOwnProperty(key) && !specialEmitterKeys.hasOwnProperty(key)) {
                 if (typeof this.emitters[i].options[key] === 'string') {
@@ -259,18 +273,18 @@ Editor.prototype.generateCode = function() {
                 }
             }
         }
-        code.push('appearance: ' + this.appearanceOptions[i].code + ',');
+        code.push('appearance: appearance' + i + ',');
         // Remove extra comma
         code[code.length - 1] = code[code.length - 1].substring(0, code[code.length - 1].length - 1);
-        setIndent(0);
+        popIndent();
         code.push('});');
     }
-    code.push('var createEffect = function() {');
-    setIndent(1);
+    code.push('return function() {');
+    pushIndent();
     code.push('var effect = new ParticleEffect();');
     for (var i = 0; i < this.emitters.length; ++i) {
         code.push('var timedEmitter' + i + ' = new ParticleTimedEmitter({');
-        setIndent(2);
+        pushIndent();
         code.push('emitter: emitter' + i + ',');
         code.push('directionMode: ' + this.timedEmitters[i].directionMode + ',');
         code.push('particleInterval: ' + this.timedEmitters[i].particleInterval + ',');
@@ -278,13 +292,15 @@ Editor.prototype.generateCode = function() {
         code.push('waitTime: ' + this.timedEmitters[i].waitTime + ',');
         // Remove extra comma
         code[code.length - 1] = code[code.length - 1].substring(0, code[code.length - 1].length - 1);
-        setIndent(1);
+        popIndent();
         code.push('});');
         code.push('effect.emitters.push(timedEmitter' + i + ');');
     }
     code.push('return effect;');
-    setIndent(0);
+    popIndent();
     code.push('};');
+    popIndent();
+    code.push('})();');
     return code.join('\n');
 };
 
@@ -397,10 +413,9 @@ Editor.prototype.updateAppearanceFromUI = function(index) {
         }
     } else {
         updatedAppearance = Particle.prerenderedCircleAppearance(optionSet.color, 8, optionSet.options);
-        optionSet.codePrefix = 'var appearance' + index + ' = Particle.prerenderedCircleAppearance("' + optionSet.color + '", 8, ' + appearanceOptionsString + ');';
-        optionSet.code = 'appearance' + index;
+        optionSet.code = 'Particle.prerenderedCircleAppearance("' + optionSet.color + '", 8, ' + appearanceOptionsString + ')';
     }
-    
+
     if (updatedAppearance !== undefined) {
         this.emitters[index].options.appearance = updatedAppearance;
         optionSet.colorSprite = this.parameters.get('colorSprite');
@@ -420,6 +435,7 @@ var frame = function() {
 };
 
 var particleParameters = {
+    'effect name': {initial: 'Smoke'},
     'minVelocity': {initial: 10, min: 0, max: 1000},
     'maxVelocity': {initial: 80, min: 0, max: 1000},
     'positionSpread': {initial: 10, min: 0, max: 100},
