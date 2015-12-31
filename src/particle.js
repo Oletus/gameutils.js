@@ -202,6 +202,18 @@ ParticleEffect.prototype.update = function(deltaTime) {
 };
 
 /**
+ * @return {boolean} True if the effect never stops.
+ */
+ParticleEffect.prototype.isInfinite = function() {
+    for (var i = 0; i < this.emitters.length; ++i) {
+        if (this.emitters[i].lifetime < 0) {
+            return true;
+        }
+    }
+    return false;
+};
+
+/**
  * Set the coordinates where this effect is emitting particles.
  * @param {number} x Horizontal coordinate
  * @param {number} y Vertical coordinate

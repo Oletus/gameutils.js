@@ -176,7 +176,25 @@ Editor.ReverseDirectionMode = reverseEnum(ParticleTimedEmitter.DirectionMode);
 
 Editor.prototype.restartEffect = function() {
     this.time = 0;
-    this.effect = new ParticleEffect();
+    if (this.effect && !this.effect.isInfinite()) {
+        // Play the previous effect to its end.
+        var x = this.effect.emitters[0].x;
+        var y = this.effect.emitters[0].y;
+        this.particles.addEffect(this.effect);
+        this.effect = new ParticleEffect();
+        for (var i = 0; i < this.emitters.length; ++i) {
+            this.timedEmitters[i] = new ParticleTimedEmitter({
+                emitter: this.emitters[i],
+                engine: this.particles,
+                x: x,
+                y: y
+            });
+            this.updateEmitterFromUI(i);
+            this.updateAppearanceFromUI(i);
+        }
+    } else {
+        this.effect = new ParticleEffect();
+    }
     for (var i = 0; i < this.timedEmitters.length; ++i) {
         this.timedEmitters[i].restart();
         this.effect.emitters.push(this.timedEmitters[i]);
