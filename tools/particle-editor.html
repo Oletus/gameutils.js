@@ -63,6 +63,13 @@ var loadSpriteFromFileInput = function() {
     });
 };
 
+var loadBGFromFileInput = function() {
+    var fileInput = document.getElementById('bgFile');
+    loadFileInput(fileInput, function(fileSrc) {
+        editor.bg = new Sprite(fileSrc);
+    });
+};
+
 var AppearanceOptionSet = function() {
     this.sprite = null;
     this.color = '#fff';
@@ -85,6 +92,7 @@ var Editor = function() {
     this.emitters = [];
     this.timedEmitters = [];
     this.appearanceOptions = [];
+    this.bg = null;
     
     this.codeArea = document.createElement('textarea');
     this.codeArea.cols = 70;
@@ -394,6 +402,9 @@ Editor.prototype.update = function() {
 
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    if (this.bg !== null) {
+        this.bg.draw(ctx, 0, 0);
+    }
     this.particles.render(ctx);
     
     if (this.effect.dead) {
@@ -601,7 +612,10 @@ var start = function() {
         '<input type="button" onclick="editor.deleteEmitter()" value="Delete emitter"></input>',
         '<br><br>',
         '<input type="file" id="imageFile"></input>',
-        '<input type="button" onclick="loadSpriteFromFileInput()" value="Load sprite"></input>'
+        '<input type="button" onclick="loadSpriteFromFileInput()" value="Load sprite"></input>',
+        '<br><br>',
+        '<input type="file" id="bgFile"></input>',
+        '<input type="button" onclick="loadBGFromFileInput()" value="Load test background"></input>'
         ].join('\n');
     document.getElementById('ui').appendChild(div);
     
@@ -612,9 +626,10 @@ var start = function() {
     instructions.innerHTML = [
         '<h2>Instructions</h2>',
         '<p>A particle effect is made up of one or more emitters, which create particles either continuously or in bursts.',
-        'The parameters for the currently chosen emitter can be edited from the menu on the right.',
-        'When you are happy with an effect, copy and save the output code so it can be integrated to a game engine.</p>',
-        '<p>Note that using more particles or bigger images can cost performance.</p>'
+        'The parameters for the currently chosen emitter can be edited from the menu on the right, and the sprite image that',
+        'the emitter uses can be uploaded using the "Load sprite" function on the left.</p>',
+        '<p>When you are happy with an effect, copy and save the output code so it can be integrated with the game.</p>',
+        '<p>Note that using more particles or bigger sprite images can cost performance.</p>'
     ].join('\n');
     document.getElementById('ui').appendChild(instructions);
     frame();
