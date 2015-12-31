@@ -30,6 +30,14 @@ ParticleEngine.prototype.addParticle = function(particle) {
 };
 
 /**
+ * Add an effect to update and draw with this engine.
+ * @param {ParticleEffect} effect Particle effect to add.
+ */
+ParticleEngine.prototype.addEffect = function(effect) {
+    this.effects.push(effect);
+};
+
+/**
  * Update the particle effects.
  * @param {number} deltaTime Time since the last update in seconds.
  */
@@ -72,8 +80,9 @@ ParticleEngine.prototype.render = function(ctx) {
 };
 
 /**
- * WIP: Particle effect class to control emitting particles with respect to time.
+ * Particle emitter class to control emitting particles with respect to time.
  * @constructor
+ * @param {Object} options Options for the emitter.
  */
 var ParticleTimedEmitter = function(options) {
     var defaults = {
@@ -102,6 +111,10 @@ ParticleTimedEmitter.DirectionMode = {
     ABSOLUTE: 1
 };
 
+/** 
+ * Update the emitter. This is called by ParticleEffect.
+ * @param {number} deltaTime Time since the last update in seconds.
+ */
 ParticleTimedEmitter.prototype.update = function(deltaTime) {
     if (this.dead) {
         return;
@@ -142,11 +155,19 @@ ParticleTimedEmitter.prototype.update = function(deltaTime) {
     this._lastY = this.y;
 };
 
+/**
+ * Set the coordinates where this emitter is emitting particles.
+ * @param {number} x Horizontal coordinate
+ * @param {number} y Vertical coordinate
+ */
 ParticleTimedEmitter.prototype.setCoords = function(x, y) {
     this.x = x;
     this.y = y;
 };
 
+/**
+ * Restart this emitter.
+ */
 ParticleTimedEmitter.prototype.restart = function() {
     this._lastX = undefined;
     this._lastY = undefined;
@@ -158,7 +179,7 @@ ParticleTimedEmitter.prototype.restart = function() {
 };
 
 /**
- * WIP: Complex particle effect composed of multiple timed emitters.
+ * Complex particle effect composed of multiple timed emitters.
  * @constructor
  */
 var ParticleEffect = function() {
@@ -166,6 +187,10 @@ var ParticleEffect = function() {
     this.dead = false;
 };
 
+/** 
+ * Update the effect. This is called by ParticleEngine for effects that have been added to the engine.
+ * @param {number} deltaTime Time since the last update in seconds.
+ */
 ParticleEffect.prototype.update = function(deltaTime) {
     this.dead = true;
     for (var i = 0; i < this.emitters.length; ++i) {
@@ -176,6 +201,11 @@ ParticleEffect.prototype.update = function(deltaTime) {
     }
 };
 
+/**
+ * Set the coordinates where this effect is emitting particles.
+ * @param {number} x Horizontal coordinate
+ * @param {number} y Vertical coordinate
+ */
 ParticleEffect.prototype.setCoords = function(x, y) {
     for (var i = 0; i < this.emitters.length; ++i) {
         this.emitters[i].setCoords(x, y);

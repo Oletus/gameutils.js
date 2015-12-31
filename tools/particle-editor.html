@@ -365,7 +365,7 @@ Editor.prototype.testCode = function() {
     var createFunc = eval(this.generateCode());
     var effect = eval(createFunc(this.particles));
     effect.setCoords(ctx.canvas.width * 0.5, ctx.canvas.height * 0.5);
-    this.particles.effects.push(effect);
+    this.particles.addEffect(effect);
 };
 
 Editor.prototype.update = function() {
