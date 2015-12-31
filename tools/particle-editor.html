@@ -14,6 +14,10 @@ textarea {
 #controls {
     margin: 10px 0;
 }
+
+#emitterChoice {
+    margin: 5px 0;
+}
 </style>
 <script src="../src/sprite.js"></script><!-- required for Particle.prerenderedCircleAppearance -->
 <script src="../src/particle.js"></script>
@@ -548,15 +552,14 @@ var start = function() {
     var div = document.createElement('div');
     div.id = 'controls';
     div.innerHTML = [
-        '<input type="button" onclick="editor.addEmitter()" value="Add emitter"></input>',
+        '<input type="checkbox" onchange="setPositionMode()" id="posMode"></input><label for="posMode">Move effect</label>',
         '<br>',
         '<div id="emitterChoice">',
         '</div>',
-        '<br>',
+        '<input type="button" onclick="editor.addEmitter()" value="Add emitter"></input>',
+        '<br><br>',
         '<input type="file" id="imageFile"></input>',
-        '<input type="button" onclick="loadSpriteFromFileInput()" value="Load sprite"></input>',
-        '<br>',
-        '<input type="checkbox" onchange="setPositionMode()" id="posMode"></input><label for="posMode">Move effect</label>'
+        '<input type="button" onclick="loadSpriteFromFileInput()" value="Load sprite"></input>'
         ].join('\n');
     document.body.appendChild(div);
     
