@@ -178,8 +178,8 @@ Editor.prototype.restartEffect = function() {
     this.time = 0;
     if (this.effect && !this.effect.isInfinite()) {
         // Play the previous effect to its end.
-        var x = this.effect.emitters[0].x;
-        var y = this.effect.emitters[0].y;
+        var x = this.effect.timedEmitters[0].x;
+        var y = this.effect.timedEmitters[0].y;
         this.particles.addEffect(this.effect);
         this.effect = new ParticleEffect();
         for (var i = 0; i < this.emitters.length; ++i) {
@@ -187,10 +187,13 @@ Editor.prototype.restartEffect = function() {
                 emitter: this.emitters[i],
                 engine: this.particles,
                 x: x,
-                y: y
+                y: y,
+                directionMode: this.timedEmitters[i].directionMode,
+                particleInterval: this.timedEmitters[i].particleInterval,
+                lifetime: this.timedEmitters[i].lifetime,
+                waitTime: this.timedEmitters[i].waitTime,
+                maxParticleCount: this.timedEmitters[i].maxParticleCount
             });
-            this.updateEmitterFromUI(i);
-            this.updateAppearanceFromUI(i);
         }
     } else {
         this.effect = new ParticleEffect();
