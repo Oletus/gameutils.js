@@ -210,17 +210,34 @@ Editor.prototype.addEmitter = function(x, y) {
     this.updateEmitterFromUI(index);
     this.updateAppearanceFromUI(index);
 
+    this.updateEmitterChoice(index);
+
+    this.editEmitter(index);
+    this.restartEffect();
+};
+
+Editor.prototype.deleteEmitter = function() {
+    if (this.emitters.length === 0) {
+        return;
+    }
+    this.appearanceOptions.splice(this.editEmitterIndex, 1);
+    this.emitters.splice(this.editEmitterIndex, 1);
+    this.timedEmitters.splice(this.editEmitterIndex, 1);
+    this.editEmitterIndex = -1;
+    this.editEmitter(0);
+    this.updateEmitterChoice(0);
+    this.restartEffect();
+};
+
+Editor.prototype.updateEmitterChoice = function(chosenIndex) {
     var emitterChoice = [];
-    for (var i = 0; i < index + 1; ++i) {
-        var checked = (i === index ? ' checked' : '');
+    for (var i = 0; i < this.emitters.length; ++i) {
+        var checked = (i === chosenIndex ? ' checked' : '');
         emitterChoice.push('<input type="radio" name="emitter" onclick="editor.editEmitter(' + i + ')" id="emitter' + i + '"' + checked + '></input>');
         emitterChoice.push('<label for="emitter' + i + '">Edit emitter ' + i + '</label>');
         emitterChoice.push('<br>');
     }
     document.getElementById('emitterChoice').innerHTML = emitterChoice.join('\n');
-    
-    this.editEmitter(index);
-    this.restartEffect();
 };
 
 /**
@@ -577,6 +594,7 @@ var start = function() {
         '<div id="emitterChoice">',
         '</div>',
         '<input type="button" onclick="editor.addEmitter()" value="Add emitter"></input>',
+        '<input type="button" onclick="editor.deleteEmitter()" value="Delete emitter"></input>',
         '<br><br>',
         '<input type="file" id="imageFile"></input>',
         '<input type="button" onclick="loadSpriteFromFileInput()" value="Load sprite"></input>'
