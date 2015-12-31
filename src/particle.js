@@ -248,7 +248,7 @@ ParticleEmitter.prototype.emitParticle = function(options) {
     if (part.rotationMode === Particle.RotationMode.INITIAL_DIRECTION) {
         // Determine rotation also if velocity is zero.
         if (spawnOptions.rotation !== undefined) {
-            part.rotation = spawnOptions.rotation + direction;
+            part.rotation = spawnOptions.rotation * Math.PI / 180 + direction;
         } else {
             part.rotation = direction;
         }
@@ -270,7 +270,7 @@ var Particle = function(options) {
         velY: 0,
         inertia: 1,
         weight: 1,
-        rotation: 0,
+        rotation: 0, // degrees
         rotationMode: Particle.RotationMode.STATIC,
         seed: 0,
         appearance: Particle.defaultAppearance
