@@ -438,8 +438,9 @@ Editor.prototype.updateAppearanceFromUI = function(index) {
             }
         }
     } else {
-        updatedAppearance = Particle.prerenderedCircleAppearance(color, 8, optionSet.options);
-        optionSet.code = 'Particle.prerenderedCircleAppearance("' + color + '", 8, ' + appearanceOptionsString + ')';
+        var resolution = Math.max(1, Math.pow(2, Math.floor(Math.log(optionSet.options.size) / Math.LN2 + 0.2)));
+        updatedAppearance = Particle.prerenderedCircleAppearance(color, resolution, optionSet.options);
+        optionSet.code = 'Particle.prerenderedCircleAppearance("' + color + '", ' + resolution + ', ' + appearanceOptionsString + ')';
     }
 
     if (updatedAppearance !== undefined) {
