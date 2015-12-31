@@ -28,6 +28,10 @@
     margin: 10px 0;
 }
 
+#instructions {
+    width: 600px;
+}
+
 #emitterChoice {
     margin: 5px 0;
 }
@@ -603,6 +607,16 @@ var start = function() {
     
     editor = new Editor();
     document.getElementById('ui').appendChild(editor.codeDiv);
+    var instructions = document.createElement('div');
+    instructions.id = 'instructions';
+    instructions.innerHTML = [
+        '<h2>Instructions</h2>',
+        '<p>A particle effect is made up of one or more emitters, which create particles either continuously or in bursts.',
+        'The parameters for the currently chosen emitter can be edited from the menu on the right.',
+        'When you are happy with an effect, copy and save the output code so it can be integrated to a game engine.</p>',
+        '<p>Note that using more particles or bigger images can cost performance.</p>'
+    ].join('\n');
+    document.getElementById('ui').appendChild(instructions);
     frame();
 };
 </script>
