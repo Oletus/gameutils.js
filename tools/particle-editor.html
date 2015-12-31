@@ -2,10 +2,23 @@
 <head>
 <title>Gameutils.js Particle Effect Editor</title>
 <style>
-textarea {
+#ui {
+    position: relative;
+    left: 0;
+    top: 0;
+}
+
+#codeContainer {
     position: absolute;
-    left: 650px;
-    top: 55px;
+    left: 640px;
+    top: 0;
+}
+
+#codeContainer h2 {
+    margin-top: 0;
+}
+
+#codeContainer textarea {
     white-space: pre;
     word-wrap: normal;
     overflow-x: scroll;
@@ -70,9 +83,16 @@ var Editor = function() {
     this.appearanceOptions = [];
     
     this.codeArea = document.createElement('textarea');
-    this.codeArea.cols = 80;
-    this.codeArea.rows = 40;
+    this.codeArea.cols = 70;
+    this.codeArea.rows = 35;
     this.codeArea.readOnly = true;
+
+    this.codeDiv = document.createElement('div');
+    this.codeDiv.id = 'codeContainer';
+    var codeHeader = document.createElement('h2');
+    codeHeader.textContent = 'Code output';
+    this.codeDiv.appendChild(codeHeader);
+    this.codeDiv.appendChild(this.codeArea);
     
     this.positionMode = Editor.PositionMode.STATIC;
     
@@ -548,7 +568,7 @@ var start = function() {
         editor.setEffectCoords(x, y);
     });
     ctx = canvas.getContext('2d');
-    document.body.appendChild(canvas);
+    document.getElementById('ui').appendChild(canvas);
     var div = document.createElement('div');
     div.id = 'controls';
     div.innerHTML = [
@@ -561,15 +581,17 @@ var start = function() {
         '<input type="file" id="imageFile"></input>',
         '<input type="button" onclick="loadSpriteFromFileInput()" value="Load sprite"></input>'
         ].join('\n');
-    document.body.appendChild(div);
+    document.getElementById('ui').appendChild(div);
     
     editor = new Editor();
-    document.body.appendChild(editor.codeArea);
+    document.getElementById('ui').appendChild(editor.codeDiv);
     frame();
 };
 </script>
 </head>
 <body onload="start()">
-<h2>Gameutils.js Particle Effect Editor</h2>
+<h1>Gameutils.js Particle Effect Editor</h1>
+<div id="ui">
+</div>
 </body>
 </html>
