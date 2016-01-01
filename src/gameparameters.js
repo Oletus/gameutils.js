@@ -39,7 +39,7 @@ GameParameters.prototype.initGUI = function(preset) {
             var param = params[key];
             var added = null;
             if (param.color !== undefined) {
-                gui.addColor(this._values, key);
+                added = gui.addColor(this._values, key);
             } else if (param.options !== undefined) {
                 added = gui.add(this._values, key, param.options);
             } else if (param.min !== undefined) {
