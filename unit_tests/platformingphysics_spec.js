@@ -37,6 +37,44 @@ describe('PlatformingPhysics', function() {
             expect(rect.bottom).toBe(4);
         });
     });
+    
+    describe('PlatformingLevel', function() {
+        it('initializes', function() {
+            var level = new PlatformingLevel();
+            expect(level._objects.length).toEqual(0);
+            expect(level._tileMapObjects.length).toEqual(0);
+            expect(level._colliders['all'].length).toEqual(0);
+        });
+        
+        it('updates when empty', function() {
+            var level = new PlatformingLevel();
+            var deltaTime = 1 / 60;
+            level.update(deltaTime);
+        });
+
+        it('adds objects to the "all" collision group', function() {
+            var level = new PlatformingLevel();
+            var c = testCollider(1, 12, 3);
+            level.pushObject(c, []);
+            expect(level._objects[0]).toBe(c);
+            expect(level._colliders['all'][0]).toBe(c);
+        });
+
+        /*it('adds tilemap objects to the "all" collision group', function() {
+            var level = new PlatformingLevel();
+            var c = testCollider(1, 12, 3);
+            level.pushTileMapObject(c, []);
+            expect(level._tileMapObjects[0]).toBe(c);
+            expect(level._colliders['all'][0]).toBe(c);
+        });*/
+
+        it('updates when it has one object', function() {
+            var level = new PlatformingLevel();
+            level.pushObject(testCollider(1, 12, 3), []);
+            var deltaTime = 1 / 60;
+            level.update(deltaTime);
+        });
+    });
 
     it('handles collisions between objects', function() {
         var tilemap = new TileMap(testInitParams);

@@ -36,16 +36,21 @@ PlatformingCharacter.prototype.init = function(options) {
     this._collisionGroup = 'all';
 };
 
+PlatformingCharacter.prototype.decideDx = function(deltaTime) {
+};
+
 PlatformingCharacter.prototype.updateX = function(deltaTime, colliders) {
     this.lastDeltaTime = deltaTime;
     var stayOnGround = this.onGround;
-    this.lastX = this.x;
     PlatformingPhysics.moveAndCollide(this, deltaTime, 'x', colliders, stayOnGround);
+};
+
+PlatformingCharacter.prototype.decideDy = function(deltaTime) {
+    this.dy += 1.0 * deltaTime;
 };
 
 PlatformingCharacter.prototype.updateY = function(deltaTime, colliders) {
     this.onGround = false;
-    this.lastY = this.y;
     PlatformingPhysics.moveAndCollide(this, deltaTime, 'y', colliders, stayOnGround);
     if (this.onGround) {
         this.airTime = 0.0;
@@ -72,36 +77,97 @@ PlatformingCharacter.prototype.render = function(ctx) {
 PlatformingCharacter.prototype.getRect = function() {
     var width = 1.0;
     var height = 2.0;
-    return new Rect(this.x - width * 0.5, this.x + width * 0.5, this.y - height * 0.5, this.y + height * 0.5);
+    return new Rect(this.x - width * 0.5, this.x + width * 0.5,
+                    this.y - height * 0.5, this.y + height * 0.5);
+};
+
+PlatformingCharacter.prototype.getLastRect = function() {
+    var width = 1.0;
+    var height = 2.0;
+    return new Rect(this.lastX - width * 0.5, this.lastX + width * 0.5,
+                    this.lastY - height * 0.5, this.lastY + height * 0.5);
 };
 
 /**
- * A platforming level.
+ * A platforming level composed of tilemaps and objects that collide against them (or against each other).
  * @constructor
  */
 var PlatformingLevel = function() {
-    this._tileMaps = [];
     this._objects = [];
-    this._colliders = {'all': []};
+    this._tileMapObjects = [];
+    this._colliders = {'all': []}; // All is a special collision group that includes all objects.
 };
 
+PlatformingLevel.prototype.pushObject = function(object, collisionGroups) {
+    this._objects.push(object);
+    for (var i = 0; i < collisionGroups.length; ++i) {
+        if (collisionGroups[i] !== 'all') {
+            this._colliders[collisionGroups[i]].push(object);
+        }
+    }
+    this._colliders['all'].push(object);
+};
 
+PlatformingLevel.prototype.pushTileMapObject = function(object, collisionGroups) {
+    this._tileMapObjects.push(object);
+    for (var i = 0; i < collisionGroups.length; ++i) {
+        if (collisionGroups[i] !== 'all') {
+            this._colliders[collisionGroups[i]].push(object);
+        }
+    }    
+    this._colliders['all'].push(object);
+};
 
+/**
+ * Tilemap objects may move. Their movement only affects the movement of other objects via collisions (so for example
+ * logic for player movement matching moving platforms must be implemented in the decideDx function).
+ * When the movement of the tilemap objects themselves is evaluated, the tilemap doesn't affect possible collisions,
+ * only the object's bounding geometry does.
+ */
 PlatformingLevel.prototype.update = function(deltaTime) {
+    for (var i = 0; i < this._tileMapObjects.length; ++i) {
+        var object = this._tileMapObjects[i];
+        object.lastX = object.x;
+        object.lastY = object.y;
+        object.decideDx(deltaTime);
+    }
+    for (var i = 0; i < this._tileMapObjects.length; ++i) {
+        var object = this._tileMapObjects[i];
+        object.updateX(deltaTime, this._colliders[object._collisionGroup]);
+        // Save the real x movement of the tilemap this frame, so that other objects can take it into account
+        // when colliding against it.
+        object.frameDeltaX = object.x - object.lastX;
+    }
+    for (var i = 0; i < this._objects.length; ++i) {
+        var object = this._objects[i];
+        object.lastX = object.x;
+        object.lastY = object.y;
+        object.decideDx(deltaTime);
+    }
     for (var i = 0; i < this._objects.length; ++i) {
         var object = this._objects[i];
         object.updateX(deltaTime, this._colliders[object._collisionGroup]);
     }
-    /*for (var i = 0; i < this._tileMaps.length; ++i) {
-        this._tileMaps[i].updateX(deltaTime);
-    }*/
+
+    for (var i = 0; i < this._tileMapObjects.length; ++i) {
+        var object = this._tileMapObjects[i];
+        object.decideDy(deltaTime);
+    }
+    for (var i = 0; i < this._tileMapObjects.length; ++i) {
+        var object = this._tileMapObjects[i];
+        object.updateY(deltaTime, this._colliders[object._collisionGroup]);
+        // Save the real y movement of the tilemap this frame, so that other objects can take it into account
+        // when colliding against it.
+        object.frameDeltaY = object.y - object.lastY;
+    }
+    for (var i = 0; i < this._objects.length; ++i) {
+        var object = this._objects[i];
+        object.decideDy(deltaTime);
+    }
     for (var i = 0; i < this._objects.length; ++i) {
         var object = this._objects[i];
         object.updateX(deltaTime, this._colliders[object._collisionGroup]);
     }
-    /*for (var i = 0; i < this._tileMaps.length; ++i) {
-        this._tileMaps[i].updateY(deltaTime);
-    }*/
 };
 
  
