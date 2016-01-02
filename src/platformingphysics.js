@@ -115,7 +115,7 @@ PlatformingTileMap.prototype.init = function(options) {
 };
 
 PlatformingTileMap.prototype.getRect = function() {
-    return new Rect(this.x, this.y + this.tileMap.width,
+    return new Rect(this.x, this.x + this.tileMap.width,
                     this.y, this.y + this.tileMap.height);    
 };
 
@@ -458,14 +458,15 @@ PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, collider
                     var slopeEndX = wallX;
                     for (var i = 0; i < xColliders.length; ++i) {
                         if (xColliders[i] instanceof PlatformingTileMap) {
-                            var fromWorldToTileMap = new Vec2(-xColliders[i].x, -xColliders[i].y);
+                            var fromWorldToTileMap = new Vec2(-xColliders[i].lastX, -xColliders[i].lastY);
+                            var relativeDelta = delta - xColliders[i].frameDeltaX;
                             var relativeRect = new Rect(rect.left, rect.right, rect.top, rect.bottom);
                             relativeRect.translate(fromWorldToTileMap);
-                            var wallTileX = xColliders[i].tileMap.nearestTileRightFromRect(relativeRect, isWallUp, Math.abs(delta));
+                            var wallTileX = xColliders[i].tileMap.nearestTileRightFromRect(relativeRect, isWallUp, Math.abs(relativeDelta));
                             if (wallTileX != -1 && wallX > wallTileX + xColliders[i].x) {
                                 wallX = wallTileX + xColliders[i].x;
                             }
-                            var slopeTiles = xColliders[i].tileMap.getNearestTilesRightFromRect(relativeRect, isFloorSlope, Math.abs(delta));
+                            var slopeTiles = xColliders[i].tileMap.getNearestTilesRightFromRect(relativeRect, isFloorSlope, Math.abs(relativeDelta));
                             if (slopeTiles.length != 0) {
                                 var possibleWallX = slopeTiles[0]._x + xColliders[i].x;
                                 for (var j = 0; j < slopeTiles.length; ++j) {
@@ -518,14 +519,15 @@ PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, collider
                     var slopeEndX = wallX;
                     for (var i = 0; i < xColliders.length; ++i) {
                         if (xColliders[i] instanceof PlatformingTileMap) {
-                            var fromWorldToTileMap = new Vec2(-xColliders[i].x, -xColliders[i].y);
+                            var fromWorldToTileMap = new Vec2(-xColliders[i].lastX, -xColliders[i].lastY);
+                            var relativeDelta = delta - xColliders[i].frameDeltaX;
                             var relativeRect = new Rect(rect.left, rect.right, rect.top, rect.bottom);
                             relativeRect.translate(fromWorldToTileMap);
-                            var wallTileX = xColliders[i].tileMap.nearestTileLeftFromRect(relativeRect, isWallUp, Math.abs(delta));
+                            var wallTileX = xColliders[i].tileMap.nearestTileLeftFromRect(relativeRect, isWallUp, Math.abs(relativeDelta));
                             if (wallTileX != -1 && wallX < wallTileX + 1 + xColliders[i].x) {
                                 wallX = wallTileX + 1 + xColliders[i].x;
                             }
-                            var slopeTiles = xColliders[i].tileMap.getNearestTilesLeftFromRect(relativeRect, isFloorSlope, Math.abs(delta));
+                            var slopeTiles = xColliders[i].tileMap.getNearestTilesLeftFromRect(relativeRect, isFloorSlope, Math.abs(relativeDelta));
                             if (slopeTiles.length != 0) {
                                 var possibleWallX = slopeTiles[0]._x + 1 + xColliders[i].x;
                                 for (var j = 0; j < slopeTiles.length; ++j) {
@@ -607,19 +609,21 @@ PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, collider
                     var hitSlope = false;
                     for (var i = 0; i < yColliders.length; ++i) {
                         if (yColliders[i] instanceof PlatformingTileMap) {
-                            var fromWorldToTileMap = new Vec2(-yColliders[i].x, -yColliders[i].y);
+                            // X movement has already been fully evaluated
+                            var fromWorldToTileMap = new Vec2(-yColliders[i].x, -yColliders[i].lastY);
+                            var relativeDelta = delta - yColliders[i].frameDeltaY;
                             var relativeRect = new Rect(rect.left, rect.right, rect.top, rect.bottom);
                             relativeRect.translate(fromWorldToTileMap);
                             var origBottom = relativeRect.bottom;
                             relativeRect.bottom += 1;
-                            var wallTileY = yColliders[i].tileMap.nearestTileDownFromRect(relativeRect, isWall, Math.abs(delta));
+                            var wallTileY = yColliders[i].tileMap.nearestTileDownFromRect(relativeRect, isWall, Math.abs(relativeDelta));
                             if (wallTileY != -1 && wallY > wallTileY + yColliders[i].y) {
                                 wallY = wallTileY + yColliders[i].y;
                                 hitSlope = false;
                             }
                             relativeRect.bottom = origBottom;
                             var slopeTiles = yColliders[i].tileMap.getNearestTilesDownFromRect(relativeRect, isFloorSlope,
-                                                                                       Math.max(Math.abs(delta), 1));
+                                                                                       Math.max(Math.abs(relativeDelta), 1));
                             if (slopeTiles.length != 0 && wallY > slopeTiles[0]._y + yColliders[i].y) {
                                 for (var j = 0; j < slopeTiles.length; ++j) {
                                     var slopeTile = slopeTiles[j];
@@ -659,10 +663,12 @@ PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, collider
                     var wallY = movingObj.y - rectTopHalfHeight - TileMap.epsilon * 2;
                     for (var i = 0; i < yColliders.length; ++i) {
                         if (yColliders[i] instanceof PlatformingTileMap) {
-                            var fromWorldToTileMap = new Vec2(-yColliders[i].x, -yColliders[i].y);
+                            // X movement has already been fully evaluated
+                            var fromWorldToTileMap = new Vec2(-yColliders[i].x, -yColliders[i].lastY);
+                            var relativeDelta = delta - yColliders[i].frameDeltaY;
                             var relativeRect = new Rect(rect.left, rect.right, rect.top, rect.bottom);
                             relativeRect.translate(fromWorldToTileMap);
-                            var wallTileY = yColliders[i].tileMap.nearestTileUpFromRect(relativeRect, isWallUp, Math.abs(delta));
+                            var wallTileY = yColliders[i].tileMap.nearestTileUpFromRect(relativeRect, isWallUp, Math.abs(relativeDelta));
                             if (wallTileY != -1 && wallY < wallTileY + 1 + yColliders[i].y) {
                                 wallY = wallTileY + 1 + yColliders[i].y;
                             }
