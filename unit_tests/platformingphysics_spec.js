@@ -1,26 +1,15 @@
 'use strict';
 
 describe('PlatformingPhysics', function() {
-    var TestCollider = function(width) {
-        this.x = 0;
-        this.y = 0;
-        this.width = width;
-        this.height = width;
-        this.dx = 0;
-        this.dy = 0;
-    };
-    
-    TestCollider.prototype.getRect = function() {
-        return new Rect(this.x - this.width * 0.5,
-                        this.x + this.width * 0.5,
-                        this.y - this.height * 0.5,
-                        this.y + this.height * 0.5);
-    };
-    
-    TestCollider.prototype.touchGround = function() {
-    };
-    
-    TestCollider.prototype.touchCeiling = function() {
+    var testCollider = function(width) {
+        var c = new PlatformingCharacter();
+        c.getRect = function() {
+            return new Rect(this.x - width * 0.5,
+                            this.x + width * 0.5,
+                            this.y - width * 0.5,
+                            this.y + width * 0.5);        
+        }
+        return c;
     };
     
     var testInitParams = {
@@ -33,8 +22,8 @@ describe('PlatformingPhysics', function() {
         var tilemap = new TileMap(testInitParams);
         var colliders = [];
         var colliderWidth = 0.2;
-        colliders.push(new TestCollider(colliderWidth));
-        colliders.push(new TestCollider(colliderWidth));
+        colliders.push(testCollider(colliderWidth));
+        colliders.push(testCollider(colliderWidth));
         colliders.push(tilemap);
 
         var origY = 1.0;

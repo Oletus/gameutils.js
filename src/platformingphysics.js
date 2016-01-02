@@ -5,6 +5,88 @@
  * Using the platforming physics classes requires TileMap.
  */
 var PlatformingPhysics = {};
+
+/**
+ * A character that moves in the platforming level, colliding into other objects and tile maps.
+ * @constructor
+ */
+var PlatformingCharacter = function() {
+};
+
+PlatformingCharacter.prototype.init = function() {
+    this.x = 0;
+    this.y = 0;
+    this.dx = 0;
+    this.dy = 0;
+    this.color = '#f00';
+    this.onGround = true;
+    this.airTime = 0;
+    this.lastDeltaTime = 0;
+};
+
+PlatformingCharacter.prototype.updateX = function(deltaTime, colliders) {
+    this.lastDeltaTime = deltaTime;
+    var stayOnGround = this.onGround;
+    this.lastX = this.x;
+    PlatformingPhysics.moveAndCollide(this, deltaTime, 'x', colliders, stayOnGround);
+};
+
+PlatformingCharacter.prototype.updateY = function(deltaTime, colliders) {
+    this.onGround = false;
+    this.lastY = this.y;
+    PlatformingPhysics.moveAndCollide(this, deltaTime, 'y', colliders, stayOnGround);
+    if (this.onGround) {
+        this.airTime = 0.0;
+    } else {
+        this.airTime += deltaTime;
+    }
+};
+
+PlatformingCharacter.prototype.touchGround = function() {
+    this.onGround = true;
+    this.dy = Math.max((this.y - this.lastY) / this.lastDeltaTime, 0);
+};
+
+PlatformingCharacter.prototype.touchCeiling = function() {
+    this.dy = 0;
+};
+
+PlatformingCharacter.prototype.render = function(ctx) {
+    ctx.fillStyle = this.color;
+    var rect = this.getRect();
+    ctx.fillRect(rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top);
+};
+
+PlatformingCharacter.prototype.getRect = function() {
+    var width = 1.0;
+    var height = 2.0;
+    return new Rect(this.x - width * 0.5, this.x + width * 0.5, this.y - height * 0.5, this.y + height * 0.5);
+};
+
+/**
+ * A platforming level.
+ * @constructor
+ */
+var PlatformingLevel = function() {
+    this._tileMaps = [];
+    this._objects = [];
+};
+
+PlatformingLevel.prototype.update = function() {
+    for (var i = 0; i < this._objects.length; ++i) {
+        this._objects[i].updateX();
+    }
+    for (var i = 0; i < this._tileMaps.length; ++i) {
+        this._tileMaps[i].updateX();
+    }
+    for (var i = 0; i < this._objects.length; ++i) {
+        this._objects[i].updateY();
+    }
+    for (var i = 0; i < this._tileMaps.length; ++i) {
+        this._tileMaps[i].updateY();
+    }
+};
+
  
 /**
  * A platforming tile.
