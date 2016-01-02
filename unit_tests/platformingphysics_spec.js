@@ -566,6 +566,36 @@ describe('PlatformingPhysics', function() {
                 expect(obj1._testTouchGroundCounter).toBe(1);
                 expect(obj1._testTouchCeilingCounter).toBe(0);
             });
+            
+            it ('handles both x and y collisions on the same frame with an object approaching diagonally', function() {
+                var level = new PlatformingLevel();
+                level.init();
+
+                // A bit of a twist: the tilemap origin is not positioned in the world origin.
+                var pTileMap = testPlatformingTileMapWithDiagonalWall({x: 12.0, y: 34.0, dx: -1, dy: -1});
+                level.pushObject(pTileMap, []);
+
+                // The object starts from outside the tilemap and moves downwards and to the right.
+                // Object is outside the tilemap in the beginning only in the x direction.
+                // If it was above or below the object, since x direction gets fully processed first then the
+                // collision would not happen. This is by design - the tilemaps are not expected to move so fast that
+                // this would create noticeable glitches.
+                var colliderWidth = 1.0;
+                var origY = pTileMap.y + 1.0;
+                var origX = pTileMap.x - 1.0;
+                var testDx = 1.0;
+                var testDy = 0.5;
+                var obj1 = testCollider({width: colliderWidth, x: origX, y: origY, dx: testDx, dy: testDy});
+                level.pushObject(obj1, []);
+
+                // Move way past the edge of the tilemap. All collisions in between should be detected.
+                var deltaTime = pTileMap.getRect().width() * 2;
+                level.update(deltaTime);
+                expect(obj1.x).toBeCloseTo(pTileMap.x + 1 - colliderWidth * 0.5, 3);
+                expect(obj1.y).toBeCloseTo(pTileMap.y + pTileMap.getRect().height() - 1 - colliderWidth * 0.5, 3);
+                expect(obj1._testTouchGroundCounter).toBe(1);
+                expect(obj1._testTouchCeilingCounter).toBe(0);
+            });
         }); // moving tilemap
     }); // PlatformingLevel
 });
