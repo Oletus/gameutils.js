@@ -93,6 +93,9 @@ PlatformingCharacter.prototype.getLastRect = function() {
  * @constructor
  */
 var PlatformingLevel = function() {
+};
+
+PlatformingLevel.prototype.init = function() {
     this._objects = [];
     this._tileMapObjects = [];
     this._colliders = {'all': []}; // All is a special collision group that includes all objects.
