@@ -52,6 +52,18 @@ describe('PlatformingPhysics', function() {
         if (options.hasOwnProperty('y')) {
             y = options.y;
         }
+        if (options.hasOwnProperty('dx')) {
+            var dx = options.dx;
+            c.decideDx = function() {
+                this.dx = dx;
+            };
+        }
+        if (options.hasOwnProperty('dy')) {
+            var dy = options.dy;
+            c.decideDy = function() {
+                this.dy = dy;
+            };
+        }
         c.init({
             x: x,
             y: y,
@@ -192,6 +204,19 @@ describe('PlatformingPhysics', function() {
             level.update(deltaTime);
             expect(obj.lastX).toBe(12);
             expect(obj.x).toBe(14);
+        });
+        
+        it('updates tilemap x and y when it is moving', function() {
+            var level = new PlatformingLevel();
+            level.init();
+            var obj = testPlatformingTileMapWithFloor({x: 12, y: 34, dx: 2, dy: 5});
+            level.pushObject(obj, []);
+            var deltaTime = 1;
+            level.update(deltaTime);
+            expect(obj.lastX).toBe(12);
+            expect(obj.x).toBe(14);
+            expect(obj.lastY).toBe(34);
+            expect(obj.y).toBe(39);
         });
         
         it('handles a simple collision between two objects', function() {
