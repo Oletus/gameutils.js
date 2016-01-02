@@ -42,7 +42,7 @@ describe('PlatformingPhysics', function() {
         return c;
     };
     
-    var testPlatformingTileMapWithFloor = function() {
+    var testPlatformingTileMapWithFloor = function(options) {
         var testTileMapInitParamsWithFloor = {
             width: 4,
             height: 3,
@@ -54,9 +54,17 @@ describe('PlatformingPhysics', function() {
                 ], false)
         };
         var c = new PlatformingTileMap();
+        var x = 0;
+        if (options.hasOwnProperty('x')) {
+            x = options.x;
+        }
+        var y = 0;
+        if (options.hasOwnProperty('y')) {
+            y = options.y;
+        }
         c.init({
-            x: 0,
-            y: 0,
+            x: x,
+            y: y,
             tileMap: new TileMap(testTileMapInitParamsWithFloor)
         });
         return c;
@@ -78,6 +86,14 @@ describe('PlatformingPhysics', function() {
             expect(rect.right).toBe(12.5);
             expect(rect.top).toBe(2);
             expect(rect.bottom).toBe(4);
+        });
+    });
+    
+    describe('PlatformingTileMap', function() {
+        it('initializes', function() {
+            var c = testPlatformingTileMapWithFloor({x: 12, y: 34});
+            expect(c.x).toBe(12);
+            expect(c.y).toBe(34);
         });
     });
     
@@ -109,7 +125,7 @@ describe('PlatformingPhysics', function() {
         it('adds tilemap objects to the "_all" collision group', function() {
             var level = new PlatformingLevel();
             level.init();
-            var c = testPlatformingTileMapWithFloor();
+            var c = testPlatformingTileMapWithFloor({});
             level.pushObject(c, []);
             expect(level._tileMapObjects[0]).toBe(c);
             expect(level._colliders['_all'][0]).toBe(c);
@@ -174,7 +190,7 @@ describe('PlatformingPhysics', function() {
             var level = new PlatformingLevel();
             level.init();
 
-            var pTileMap = testPlatformingTileMapWithFloor();
+            var pTileMap = testPlatformingTileMapWithFloor({});
             level.pushObject(pTileMap, []);
 
             // The object starts from inside the tilemap and moves downwards.
@@ -198,7 +214,7 @@ describe('PlatformingPhysics', function() {
             var level = new PlatformingLevel();
             level.init();
 
-            var pTileMap = testPlatformingTileMapWithFloor();
+            var pTileMap = testPlatformingTileMapWithFloor({});
             level.pushObject(pTileMap, []);
 
             // The object starts from outside the tilemap and moves towards it from below.
@@ -217,6 +233,30 @@ describe('PlatformingPhysics', function() {
             expect(obj1.y).toBeCloseTo(pTileMap.getRect().height() + colliderWidth * 0.5, 3);
             expect(obj1._testTouchGroundCounter).toBe(0);
             expect(obj1._testTouchCeilingCounter).toBe(1);
+        });
+        
+        it ('takes tilemap position into account when determining vertical collisions', function() {
+            var level = new PlatformingLevel();
+            level.init();
+
+            var pTileMap = testPlatformingTileMapWithFloor({x: 10});
+            level.pushObject(pTileMap, []);
+
+            // The object starts from outside the tilemap and moves towards it from below.
+            var colliderWidth = 1.0;
+            var origY = pTileMap.getRect().height() + 2;
+            var origX1 = 1.0; 
+            var testDy = -1.0;
+            var obj1 = testCollider({width: colliderWidth, x: origX1, y: origY, dx: 0, dy: testDy});
+            level.pushObject(obj1, []);
+
+            // Move way past the edge of the tilemap.
+            var deltaTime = pTileMap.getRect().height() * 2;
+            level.update(deltaTime);
+            expect(obj1.x).toBeCloseTo(origX1, 4);
+            expect(obj1.y).toBeCloseTo(origY + deltaTime * testDy, 3);
+            expect(obj1._testTouchGroundCounter).toBe(0);
+            expect(obj1._testTouchCeilingCounter).toBe(0);
         });
     });
 });
