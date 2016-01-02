@@ -517,7 +517,7 @@ PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, collider
                     var wallX = movingObj.x - rectLeftHalfWidth - TileMap.epsilon * 2;
                     var slopeEndX = wallX;
                     for (var i = 0; i < xColliders.length; ++i) {
-                        if (xColliders[i] instanceof TileMap) {
+                        if (xColliders[i] instanceof PlatformingTileMap) {
                             var fromWorldToTileMap = new Vec2(-xColliders[i].x, -xColliders[i].y);
                             var relativeRect = new Rect(rect.left, rect.right, rect.top, rect.bottom);
                             relativeRect.translate(fromWorldToTileMap);
