@@ -90,6 +90,20 @@ describe('PlatformingPhysics', function() {
             expect(obj.lastY).toBe(3);
             expect(obj.y).toBe(4);
         });
+
+        it('updates object x in free fall', function() {
+            var level = new PlatformingLevel();
+            level.init();
+            var obj = testCollider(1, 12, 3);
+            obj.decideDx = function() {
+                this.dx = 2.0;
+            };
+            level.pushObject(obj, []);
+            var deltaTime = 1;
+            level.update(deltaTime);
+            expect(obj.lastX).toBe(12);
+            expect(obj.x).toBe(14);
+        });
     });
 
     it('handles collisions between objects', function() {
