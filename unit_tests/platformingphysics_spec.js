@@ -1,22 +1,52 @@
 'use strict';
 
 describe('PlatformingPhysics', function() {
-    var testCollider = function(width, x, y) {
+    var testCollider = function(options) {
         var c = new PlatformingCharacter();
-        c.init({x: x, y: y});
-        c.getRect = function() {
-            return new Rect(this.x - width * 0.5,
-                            this.x + width * 0.5,
-                            this.y - width * 0.5,
-                            this.y + width * 0.5);        
+        c.init(options);
+        if (options.hasOwnProperty('dx')) {
+            var dx = options.dx;
+            c.decideDx = function() {
+                this.dx = dx;
+            };
+        }
+        if (options.hasOwnProperty('dy')) {
+            var dy = options.dy;
+            c.decideDy = function() {
+                this.dy = dy;
+            };
+        }
+        if (options.hasOwnProperty('width')) {
+            var width = options.width;
+            c.getRect = function() {
+                return new Rect(this.x - width * 0.5,
+                                this.x + width * 0.5,
+                                this.y - width * 0.5,
+                                this.y + width * 0.5);        
+            };
         }
         return c;
     };
     
-    var testInitParams = {
+    var testTileMapInitParams = {
         width: 4,
         height: 3,
-        initTile: PlatformingPhysics.initFromData(['    ', '    ', '    '], false)
+        initTile: PlatformingPhysics.initFromData(
+            [
+                '    ',
+                '    ',
+                '    '
+            ], false)
+    };
+    
+    var testPlatformingTileMap = function() {
+        var c = new PlatformingTileMap();
+        c.init({
+            x: 0,
+            y: 0,
+            tileMap: new TileMap(testTileMapInitParams)
+        });
+        return c;
     };
     
     describe('PlatformingCharacter', function() {
@@ -83,21 +113,18 @@ describe('PlatformingPhysics', function() {
         it('updates object y in free fall', function() {
             var level = new PlatformingLevel();
             level.init();
-            var obj = testCollider(1, 12, 3);
+            var obj = testCollider({width: 1, x: 12, y: 3, dy: 4});
             level.pushObject(obj, []);
             var deltaTime = 1;
             level.update(deltaTime);
             expect(obj.lastY).toBe(3);
-            expect(obj.y).toBe(4);
+            expect(obj.y).toBe(7);
         });
 
         it('updates object x in free fall', function() {
             var level = new PlatformingLevel();
             level.init();
-            var obj = testCollider(1, 12, 3);
-            obj.decideDx = function() {
-                this.dx = 2.0;
-            };
+            var obj = testCollider({width: 1, x: 12, y: 3, dx: 2});
             level.pushObject(obj, []);
             var deltaTime = 1;
             level.update(deltaTime);
@@ -116,22 +143,9 @@ describe('PlatformingPhysics', function() {
             var origX2 = origX1 + colliderWidth + 0.0001;
             var testDy = 0.1;
             
-            var obj1 = testCollider(colliderWidth, origX1, origY);
-            obj1.decideDx = function() {
-                this.dx = 0;
-            };
-            obj1.decideDy = function() {
-                this.dy = testDy;
-            };
+            var obj1 = testCollider({width: colliderWidth, x: origX1, y: origY, dx: 0, dy: testDy});
             level.pushObject(obj1, []);
-
-            var obj2 = testCollider(colliderWidth, origX2, origY);
-            obj2.decideDx = function() {
-                this.dx = -0.1;
-            };
-            obj2.decideDy = function() {
-                this.dy = testDy;
-            };
+            var obj2 = testCollider({width: colliderWidth, x: origX2, y: origY, dx: -0.1, dy: testDy});
             level.pushObject(obj2, []);
             
             var deltaTime = 0.01;
