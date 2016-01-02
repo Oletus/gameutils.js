@@ -104,45 +104,43 @@ describe('PlatformingPhysics', function() {
             expect(obj.lastX).toBe(12);
             expect(obj.x).toBe(14);
         });
-    });
-
-    it('handles collisions between objects', function() {
-        var tilemap = new TileMap(testInitParams);
-        var colliders = [];
-        var colliderWidth = 0.2;
         
-        var origY = 1.0;
-        var origX1 = 1.0; 
-        var origX2 = origX1 + colliderWidth + 0.0001;
-
-        colliders.push(testCollider(colliderWidth, origX1, origY));
-        colliders.push(testCollider(colliderWidth, origX2, origY));
-        colliders.push(tilemap);
-        
-        // Move in y direction
-        colliders[0].dy = 0.1;
-        colliders[1].dy = 0.1;
-        
-        // Collide with each other in x direction
-        colliders[0].dx = 0;
-        colliders[1].dx = -0.1;
-        
-        var deltaTime = 0.01;
-        for (var i = 0; i < colliders.length; ++i) {
-            if (!(colliders[i] instanceof TileMap)) {
-                PlatformingPhysics.moveAndCollide(colliders[i], deltaTime, 'x', colliders);
-                PlatformingPhysics.moveAndCollide(colliders[i], deltaTime, 'y', colliders);
-            }
-        }
-        expect(colliders[0].x).toBeCloseTo(origX1, 4);
-        expect(colliders[0].y).toBeCloseTo(origY + colliders[0].dy * deltaTime, 4);
-        expect(colliders[1].x).toBeCloseTo(origX1 + colliderWidth, 3);
-        expect(colliders[1].y).toBeCloseTo(origY + colliders[1].dy * deltaTime, 4);
-    });
-    
-    describe('PlatformingLevel', function() {
-        it('initializes', function() {
+        it('handles a simple collision between two objects', function() {
             var level = new PlatformingLevel();
+            level.init();
+            
+            var colliderWidth = 1.0;
+            
+            var origY = 1.0;
+            var origX1 = 1.0; 
+            var origX2 = origX1 + colliderWidth + 0.0001;
+            var testDy = 0.1;
+            
+            var obj1 = testCollider(colliderWidth, origX1, origY);
+            obj1.decideDx = function() {
+                this.dx = 0;
+            };
+            obj1.decideDy = function() {
+                this.dy = testDy;
+            };
+            level.pushObject(obj1, []);
+
+            var obj2 = testCollider(colliderWidth, origX2, origY);
+            obj2.decideDx = function() {
+                this.dx = -0.1;
+            };
+            obj2.decideDy = function() {
+                this.dy = testDy;
+            };
+            level.pushObject(obj2, []);
+            
+            var deltaTime = 0.01;
+            level.update(deltaTime);
+            expect(obj1.x).toBeCloseTo(origX1, 4);
+            expect(obj1.y).toBeCloseTo(origY + testDy * deltaTime, 4);
+            expect(obj2.x).toBeCloseTo(origX1 + colliderWidth, 3);
+            expect(obj2.y).toBeCloseTo(origY + testDy * deltaTime, 4);
+            
         });
     });
 });
