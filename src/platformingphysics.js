@@ -41,8 +41,8 @@ PlatformingCharacter.prototype.decideDx = function(deltaTime) {
 
 PlatformingCharacter.prototype.updateX = function(deltaTime, colliders) {
     this.lastDeltaTime = deltaTime;
-    var stayOnGround = this.onGround;
-    PlatformingPhysics.moveAndCollide(this, deltaTime, 'x', colliders, stayOnGround);
+    this.stayOnGround = this.onGround;
+    PlatformingPhysics.moveAndCollide(this, deltaTime, 'x', colliders, this.stayOnGround);
 };
 
 PlatformingCharacter.prototype.decideDy = function(deltaTime) {
@@ -51,7 +51,7 @@ PlatformingCharacter.prototype.decideDy = function(deltaTime) {
 
 PlatformingCharacter.prototype.updateY = function(deltaTime, colliders) {
     this.onGround = false;
-    PlatformingPhysics.moveAndCollide(this, deltaTime, 'y', colliders, stayOnGround);
+    PlatformingPhysics.moveAndCollide(this, deltaTime, 'y', colliders, this.stayOnGround);
     if (this.onGround) {
         this.airTime = 0.0;
     } else {
@@ -169,7 +169,7 @@ PlatformingLevel.prototype.update = function(deltaTime) {
     }
     for (var i = 0; i < this._objects.length; ++i) {
         var object = this._objects[i];
-        object.updateX(deltaTime, this._colliders[object._collisionGroup]);
+        object.updateY(deltaTime, this._colliders[object._collisionGroup]);
     }
 };
 
