@@ -1,8 +1,9 @@
 'use strict';
 
 describe('PlatformingPhysics', function() {
-    var testCollider = function(width) {
+    var testCollider = function(width, x, y) {
         var c = new PlatformingCharacter();
+        c.init({x: x, y: y});
         c.getRect = function() {
             return new Rect(this.x - width * 0.5,
                             this.x + width * 0.5,
@@ -17,24 +18,38 @@ describe('PlatformingPhysics', function() {
         height: 3,
         initTile: PlatformingPhysics.initFromData(['    ', '    ', '    '], false)
     };
+    
+    describe('PlatformingCharacter', function() {
+        it('initializes', function() {
+            var c = new PlatformingCharacter();
+            c.init({x: 12, y: 3});
+            expect(c.x).toBe(12);
+            expect(c.y).toBe(3);
+        });
+
+        it('has a default collision rectangle', function() {
+            var c = new PlatformingCharacter();
+            c.init({x: 12, y: 3});
+            var rect = c.getRect();
+            expect(rect.left).toBe(11.5);
+            expect(rect.right).toBe(12.5);
+            expect(rect.top).toBe(2);
+            expect(rect.bottom).toBe(4);
+        });
+    });
 
     it('handles collisions between objects', function() {
         var tilemap = new TileMap(testInitParams);
         var colliders = [];
         var colliderWidth = 0.2;
-        colliders.push(testCollider(colliderWidth));
-        colliders.push(testCollider(colliderWidth));
-        colliders.push(tilemap);
-
+        
         var origY = 1.0;
         var origX1 = 1.0; 
         var origX2 = origX1 + colliderWidth + 0.0001;
 
-        colliders[0].x = origX1;
-        colliders[0].y = origY;
-
-        colliders[1].x = origX2;
-        colliders[1].y = origY;
+        colliders.push(testCollider(colliderWidth, origX1, origY));
+        colliders.push(testCollider(colliderWidth, origX2, origY));
+        colliders.push(tilemap);
         
         // Move in y direction
         colliders[0].dy = 0.1;
@@ -55,5 +70,11 @@ describe('PlatformingPhysics', function() {
         expect(colliders[0].y).toBeCloseTo(origY + colliders[0].dy * deltaTime, 4);
         expect(colliders[1].x).toBeCloseTo(origX1 + colliderWidth, 3);
         expect(colliders[1].y).toBeCloseTo(origY + colliders[1].dy * deltaTime, 4);
+    });
+    
+    describe('PlatformingLevel', function() {
+        it('initializes', function() {
+            var level = new PlatformingLevel();
+        });
     });
 });

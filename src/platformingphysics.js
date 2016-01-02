@@ -13,15 +13,27 @@ var PlatformingPhysics = {};
 var PlatformingCharacter = function() {
 };
 
-PlatformingCharacter.prototype.init = function() {
-    this.x = 0;
-    this.y = 0;
+PlatformingCharacter.prototype.init = function(options) {
+    var defaults = {
+        x: 0,
+        y: 0
+    };
+    for(var key in defaults) {
+        if (!options.hasOwnProperty(key)) {
+            this[key] = defaults[key];
+        } else {
+            this[key] = options[key];
+        }
+    }
+    this.lastX = this.x;
+    this.lastY = this.y;
     this.dx = 0;
     this.dy = 0;
     this.color = '#f00';
     this.onGround = true;
     this.airTime = 0;
     this.lastDeltaTime = 0;
+    this._collisionGroup = 'all';
 };
 
 PlatformingCharacter.prototype.updateX = function(deltaTime, colliders) {
@@ -70,21 +82,26 @@ PlatformingCharacter.prototype.getRect = function() {
 var PlatformingLevel = function() {
     this._tileMaps = [];
     this._objects = [];
+    this._colliders = {'all': []};
 };
 
-PlatformingLevel.prototype.update = function() {
+
+
+PlatformingLevel.prototype.update = function(deltaTime) {
     for (var i = 0; i < this._objects.length; ++i) {
-        this._objects[i].updateX();
+        var object = this._objects[i];
+        object.updateX(deltaTime, this._colliders[object._collisionGroup]);
     }
-    for (var i = 0; i < this._tileMaps.length; ++i) {
-        this._tileMaps[i].updateX();
-    }
+    /*for (var i = 0; i < this._tileMaps.length; ++i) {
+        this._tileMaps[i].updateX(deltaTime);
+    }*/
     for (var i = 0; i < this._objects.length; ++i) {
-        this._objects[i].updateY();
+        var object = this._objects[i];
+        object.updateX(deltaTime, this._colliders[object._collisionGroup]);
     }
-    for (var i = 0; i < this._tileMaps.length; ++i) {
-        this._tileMaps[i].updateY();
-    }
+    /*for (var i = 0; i < this._tileMaps.length; ++i) {
+        this._tileMaps[i].updateY(deltaTime);
+    }*/
 };
 
  
