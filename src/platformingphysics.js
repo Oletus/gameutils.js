@@ -161,7 +161,8 @@ PlatformingTileMap.prototype = new PlatformingCharacter();
 PlatformingTileMap.prototype.init = function(options) {
     PlatformingCharacter.prototype.init.call(this, options);
     var defaults = {
-        tileMap: null
+        tileMap: null,
+        tilesAffectMovingTilemaps: false
     };
     for(var key in defaults) {
         if (!options.hasOwnProperty(key)) {
@@ -173,7 +174,6 @@ PlatformingTileMap.prototype.init = function(options) {
     this.frameDeltaX = 0;
     this.frameDeltaY = 0;
     this.collisionGroup = '_none';
-    this.tilesAffectMovingTilemaps = false;
 };
 
 /**
@@ -231,9 +231,14 @@ PlatformingLevel.prototype.pushObject = function(object, collisionGroups) {
     } else {
         this._objects.push(object);
     }
-    for (var i = 0; i < collisionGroups.length; ++i) {
-        if (collisionGroups[i] !== '_all' && collisionGroups[i] !== '_none') {
-            this._colliders[collisionGroups[i]].push(object);
+    if (collisionGroups !== undefined) {
+        for (var i = 0; i < collisionGroups.length; ++i) {
+            if (collisionGroups[i] !== '_all' && collisionGroups[i] !== '_none') {
+                if (!this._colliders.hasOwnProperty(collisionGroups[i])) {
+                    this._colliders[collisionGroups[i]] = [];
+                }
+                this._colliders[collisionGroups[i]].push(object);
+            }
         }
     }
     this._colliders['_all'].push(object);
