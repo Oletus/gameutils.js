@@ -63,6 +63,12 @@ describe('PlatformingPhysics', function() {
             y: y,
             tileMap: new TileMap(initParams)
         });
+        if (options.hasOwnProperty('collisionGroup')) {
+            c.collisionGroup = options.collisionGroup;
+        }
+        if (options.hasOwnProperty('tilesAffectMovingTilemaps')) {
+            c.tilesAffectMovingTilemaps = options.tilesAffectMovingTilemaps;
+        }
         return c;
     };
     
@@ -409,6 +415,38 @@ describe('PlatformingPhysics', function() {
                 expect(obj1.y).toBeCloseTo(pTileMap.y + pTileMap.getRect().height() - 1 - colliderWidth * 0.5, 3);
                 expect(obj1._testTouchGroundCounter).toBe(1);
                 expect(obj1._testTouchCeilingCounter).toBe(0);
+            });
+            
+            it ('affects the movement of a moving tilemap inside', function() {
+                var level = new PlatformingLevel();
+                level.init();
+
+                var pTileMap = testPlatformingTileMapWithFloor({tilesAffectMovingTilemaps: true});
+                level.pushObject(pTileMap, []);
+
+                var movingTileMap = testPlatformingTileMapWithFloor({collisionGroup: '_all', y: -5, dy: 15});
+                level.pushObject(movingTileMap, []);
+
+                var deltaTime = 1.0;
+                level.update(deltaTime);
+                expect(movingTileMap.x).toBeCloseTo(0, 4);
+                expect(movingTileMap.y).toBeCloseTo(pTileMap.y + pTileMap.getRect().height() - 1 - movingTileMap.getRect().height(), 3);
+            });
+            
+            it ('does not take the tilemap into account when evaluating collision with a moving tilemap and tilesAffectMovingTilemaps is false', function() {
+                var level = new PlatformingLevel();
+                level.init();
+
+                var pTileMap = testPlatformingTileMapWithFloor({tilesAffectMovingTilemaps: false});
+                level.pushObject(pTileMap, []);
+
+                var movingTileMap = testPlatformingTileMapWithFloor({collisionGroup: '_all', y: -5, dy: 15});
+                level.pushObject(movingTileMap, []);
+
+                var deltaTime = 1.0;
+                level.update(deltaTime);
+                expect(movingTileMap.x).toBeCloseTo(0, 4);
+                expect(movingTileMap.y).toBeCloseTo(pTileMap.y - movingTileMap.getRect().height(), 3);
             });
         }); // stationary tilemap
         

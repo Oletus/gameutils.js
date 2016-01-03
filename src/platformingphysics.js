@@ -39,7 +39,7 @@ PlatformingCharacter.prototype.init = function(options) {
     this.onGround = true;
     this.airTime = 0;
     this.lastDeltaTime = 0;
-    this._collisionGroup = '_all';
+    this.collisionGroup = '_all';
 };
 
 /**
@@ -172,7 +172,8 @@ PlatformingTileMap.prototype.init = function(options) {
     }
     this.frameDeltaX = 0;
     this.frameDeltaY = 0;
-    this._collisionGroup = '_none';
+    this.collisionGroup = '_none';
+    this.tilesAffectMovingTilemaps = false;
 };
 
 /**
@@ -260,10 +261,13 @@ PlatformingLevel.prototype.update = function(deltaTime) {
     }
     for (var i = 0; i < this._tileMapObjects.length; ++i) {
         var object = this._tileMapObjects[i];
-        object.updateX(deltaTime, this._colliders[object._collisionGroup]);
-        // Save the real x movement of the tilemap this frame, so that other objects can take it into account
-        // when colliding against it.
-        object.frameDeltaX = object.x - object.lastX;
+        // tilemaps which affect moving tilemaps may not move.
+        if (!object.tilesAffectMovingTilemaps) {
+            object.updateX(deltaTime, this._colliders[object.collisionGroup]);
+            // Save the real x movement of the tilemap this frame, so that other objects can take it into account
+            // when colliding against it.
+            object.frameDeltaX = object.x - object.lastX;
+        }
     }
     for (var i = 0; i < this._objects.length; ++i) {
         var object = this._objects[i];
@@ -271,7 +275,7 @@ PlatformingLevel.prototype.update = function(deltaTime) {
     }
     for (var i = 0; i < this._objects.length; ++i) {
         var object = this._objects[i];
-        object.updateX(deltaTime, this._colliders[object._collisionGroup]);
+        object.updateX(deltaTime, this._colliders[object.collisionGroup]);
     }
 
     for (var i = 0; i < this._tileMapObjects.length; ++i) {
@@ -280,10 +284,13 @@ PlatformingLevel.prototype.update = function(deltaTime) {
     }
     for (var i = 0; i < this._tileMapObjects.length; ++i) {
         var object = this._tileMapObjects[i];
-        object.updateY(deltaTime, this._colliders[object._collisionGroup]);
-        // Save the real y movement of the tilemap this frame, so that other objects can take it into account
-        // when colliding against it.
-        object.frameDeltaY = object.y - object.lastY;
+        // tilemaps which affect moving tilemaps may not move.
+        if (!object.tilesAffectMovingTilemaps) {
+            object.updateY(deltaTime, this._colliders[object.collisionGroup]);
+            // Save the real y movement of the tilemap this frame, so that other objects can take it into account
+            // when colliding against it.
+            object.frameDeltaY = object.y - object.lastY;
+        }
     }
     for (var i = 0; i < this._objects.length; ++i) {
         var object = this._objects[i];
@@ -291,7 +298,7 @@ PlatformingLevel.prototype.update = function(deltaTime) {
     }
     for (var i = 0; i < this._objects.length; ++i) {
         var object = this._objects[i];
-        object.updateY(deltaTime, this._colliders[object._collisionGroup]);
+        object.updateY(deltaTime, this._colliders[object.collisionGroup]);
     }
 };
 
@@ -510,6 +517,7 @@ PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, collider
         delta = movingObj.dy * deltaTime;
     }
     var lastDelta = delta;
+    var isMovingObjTileMap = (movingObj instanceof PlatformingTileMap);
     while (!done) {
         var rect = movingObj.getRect();
         done = true;
@@ -530,7 +538,7 @@ PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, collider
                     // anything can update their positions in a single update function.
                     var collider = colliders[i].getPositionedRect(colliders[i].x, colliders[i].lastY);
                     if (rect.top < collider.bottom && collider.top < rect.bottom) {
-                        if (colliders[i] instanceof PlatformingTileMap) {
+                        if (colliders[i] instanceof PlatformingTileMap && (!isMovingObjTileMap || colliders[i].tilesAffectMovingTilemaps)) {
                             xColliders.push(colliders[i]);
                         } else {
                             xColliders.push(collider);
@@ -669,7 +677,7 @@ PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, collider
                     }
                     var collider = colliders[i].getRect();
                     if (rect.left < collider.right && collider.left < rect.right) {
-                        if (colliders[i] instanceof PlatformingTileMap) {
+                        if (colliders[i] instanceof PlatformingTileMap && (!isMovingObjTileMap || colliders[i].tilesAffectMovingTilemaps)) {
                             yColliders.push(colliders[i]);
                         } else {
                             yColliders.push(collider);
