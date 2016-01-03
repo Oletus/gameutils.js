@@ -575,104 +575,92 @@ PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, collider
             var rectRightHalfWidth = rect.right - movingObj.x;
             var rectLeftHalfWidth = movingObj.x - rect.left;
 
-            if (Math.abs(delta) > 0) {
-                var lastY = movingObj.y;
-                movingObj.y += delta;
-                var yColliders = [];
-                if (colliders !== undefined) {
-                    for (var i = 0; i < colliders.length; ++i) {
-                        if (colliders[i] === movingObj) {
-                            continue;
-                        }
-                        var collider = colliders[i].getRect();
-                        if (rect.left < collider.right && collider.left < rect.right) {
-                            if (colliders[i] instanceof PlatformingTileMap) {
-                                yColliders.push(colliders[i]);
-                            } else {
-                                yColliders.push(collider);
-                            }
+            movingObj.y += delta;
+            var yColliders = [];
+            if (colliders !== undefined) {
+                for (var i = 0; i < colliders.length; ++i) {
+                    if (colliders[i] === movingObj) {
+                        continue;
+                    }
+                    var collider = colliders[i].getRect();
+                    if (rect.left < collider.right && collider.left < rect.right) {
+                        if (colliders[i] instanceof PlatformingTileMap) {
+                            yColliders.push(colliders[i]);
+                        } else {
+                            yColliders.push(collider);
                         }
                     }
                 }
-                if (delta > 0) {
-                    var wallYDown = movingObj.y + rectBottomHalfHeight + 1 + TileMap.epsilon;
-                    var hitSlope = false;
-                    for (var i = 0; i < yColliders.length; ++i) {
-                        if (yColliders[i] instanceof PlatformingTileMap) {
-                            // X movement has already been fully evaluated
-                            var fromWorldToTileMap = new Vec2(-yColliders[i].x, -yColliders[i].lastY);
-                            var relativeDelta = delta - yColliders[i].frameDeltaY;
-                            var relativeRect = new Rect(rect.left, rect.right, rect.top, rect.bottom);
-                            relativeRect.translate(fromWorldToTileMap);
-                            var origBottom = relativeRect.bottom;
-                            relativeRect.bottom += 1;
-                            var wallTileY = yColliders[i].tileMap.nearestTileDownFromRect(relativeRect, isWall, Math.abs(relativeDelta));
-                            if (wallTileY != -1 && wallYDown > wallTileY + yColliders[i].y) {
-                                wallYDown = wallTileY + yColliders[i].y;
-                                hitSlope = false;
-                            }
-                            relativeRect.bottom = origBottom;
-                            var slopeTiles = yColliders[i].tileMap.getNearestTilesDownFromRect(relativeRect, isFloorSlope,
-                                                                                       Math.max(Math.abs(relativeDelta), 1));
-                            if (slopeTiles.length != 0 && wallYDown > slopeTiles[0]._y + yColliders[i].y) {
-                                for (var j = 0; j < slopeTiles.length; ++j) {
-                                    var slopeTile = slopeTiles[j];
-                                    var relativeX = movingObj.x - (slopeTile._x + yColliders[i].x);
-                                    var slopeBaseY = slopeTile._y + 1 + yColliders[i].y;
-                                    var slopeYLeft = slopeBaseY -
-                                                     slopeTile.getFloorRelativeHeight(relativeX - rectLeftHalfWidth);
-                                    var slopeYRight = slopeBaseY -
-                                                      slopeTile.getFloorRelativeHeight(relativeX + rectRightHalfWidth);
-                                    if (slopeYLeft < wallYDown) {
-                                        wallYDown = slopeYLeft;
-                                        hitSlope = true;
-                                    }
-                                    if (slopeYRight < wallYDown) {
-                                        wallYDown = slopeYRight;
-                                        hitSlope = true;
-                                    }
+            }
+            var wallYDown = Number.MAX_VALUE;
+            var wallYUp = -Number.MAX_VALUE;
+            var hitSlope = false;
+            for (var i = 0; i < yColliders.length; ++i) {
+                if (yColliders[i] instanceof PlatformingTileMap) {
+                    // X movement has already been fully evaluated
+                    var fromWorldToTileMap = new Vec2(-yColliders[i].x, -yColliders[i].lastY);
+                    var relativeDelta = delta - yColliders[i].frameDeltaY;
+                    var relativeRect = new Rect(rect.left, rect.right, rect.top, rect.bottom);
+                    relativeRect.translate(fromWorldToTileMap);
+                    if (relativeDelta <= 0) {
+                        var wallTileY = yColliders[i].tileMap.nearestTileUpFromRect(relativeRect, isWallUp, Math.abs(relativeDelta));
+                        if (wallTileY != -1 && wallYUp < wallTileY + 1 + yColliders[i].y) {
+                            wallYUp = wallTileY + 1 + yColliders[i].y;
+                        }
+                    } else {
+                        var origBottom = relativeRect.bottom;
+                        relativeRect.bottom += 1;
+                        var wallTileY = yColliders[i].tileMap.nearestTileDownFromRect(relativeRect, isWall, Math.abs(relativeDelta));
+                        if (wallTileY != -1 && wallYDown > wallTileY + yColliders[i].y) {
+                            wallYDown = wallTileY + yColliders[i].y;
+                            hitSlope = false;
+                        }
+                        relativeRect.bottom = origBottom;
+                        var slopeTiles = yColliders[i].tileMap.getNearestTilesDownFromRect(relativeRect, isFloorSlope,
+                                                                                   Math.max(Math.abs(relativeDelta), 1));
+                        if (slopeTiles.length != 0 && wallYDown > slopeTiles[0]._y + yColliders[i].y) {
+                            for (var j = 0; j < slopeTiles.length; ++j) {
+                                var slopeTile = slopeTiles[j];
+                                var relativeX = movingObj.x - (slopeTile._x + yColliders[i].x);
+                                var slopeBaseY = slopeTile._y + 1 + yColliders[i].y;
+                                var slopeYLeft = slopeBaseY -
+                                                 slopeTile.getFloorRelativeHeight(relativeX - rectLeftHalfWidth);
+                                var slopeYRight = slopeBaseY -
+                                                  slopeTile.getFloorRelativeHeight(relativeX + rectRightHalfWidth);
+                                if (slopeYLeft < wallYDown) {
+                                    wallYDown = slopeYLeft;
+                                    hitSlope = true;
+                                }
+                                if (slopeYRight < wallYDown) {
+                                    wallYDown = slopeYRight;
+                                    hitSlope = true;
                                 }
                             }
-                        } else {
-                            if (yColliders[i].bottom > rect.top && wallYDown > yColliders[i].top) {
-                                wallYDown = yColliders[i].top;
-                            }
                         }
-                    }
-                    if (movingObj.y > wallYDown - rectBottomHalfHeight - TileMap.epsilon) {
-                        movingObj.y = wallYDown - rectBottomHalfHeight - TileMap.epsilon;
-                        movingObj.touchGround();
-                    } else if (hitSlope && stayOnGround) {
-                        // TODO: There's still a bug where the character teleports downwards when there's a slope like this:
-                        // .
-                        // xl
-                        movingObj.y = wallYDown - rectBottomHalfHeight - TileMap.epsilon;
-                        movingObj.touchGround();
                     }
                 } else {
-                    var wallYUp = movingObj.y - rectTopHalfHeight - TileMap.epsilon * 2;
-                    for (var i = 0; i < yColliders.length; ++i) {
-                        if (yColliders[i] instanceof PlatformingTileMap) {
-                            // X movement has already been fully evaluated
-                            var fromWorldToTileMap = new Vec2(-yColliders[i].x, -yColliders[i].lastY);
-                            var relativeDelta = delta - yColliders[i].frameDeltaY;
-                            var relativeRect = new Rect(rect.left, rect.right, rect.top, rect.bottom);
-                            relativeRect.translate(fromWorldToTileMap);
-                            var wallTileY = yColliders[i].tileMap.nearestTileUpFromRect(relativeRect, isWallUp, Math.abs(relativeDelta));
-                            if (wallTileY != -1 && wallYUp < wallTileY + 1 + yColliders[i].y) {
-                                wallYUp = wallTileY + 1 + yColliders[i].y;
-                            }
-                        } else {
-                            if (yColliders[i].top < rect.bottom && wallYUp < yColliders[i].bottom) {
-                                wallYUp = yColliders[i].bottom;
-                            }
-                        }
+                    if (delta < 0 && yColliders[i].top < rect.bottom && wallYUp < yColliders[i].bottom) {
+                        wallYUp = yColliders[i].bottom;
                     }
-                    if (movingObj.y < wallYUp + rectTopHalfHeight + TileMap.epsilon) {
-                        movingObj.y = wallYUp + rectTopHalfHeight + TileMap.epsilon;
-                        movingObj.touchCeiling();
+                    if (delta > 0 && yColliders[i].bottom > rect.top && wallYDown > yColliders[i].top) {
+                        wallYDown = yColliders[i].top;
                     }
                 }
+            }
+
+            if (movingObj.y > wallYDown - rectBottomHalfHeight - TileMap.epsilon) {
+                movingObj.y = wallYDown - rectBottomHalfHeight - TileMap.epsilon;
+                movingObj.touchGround();
+            } else if (hitSlope && stayOnGround) {
+                // TODO: There's still a bug where the character teleports downwards when there's a slope like this:
+                // .
+                // xl
+                movingObj.y = wallYDown - rectBottomHalfHeight - TileMap.epsilon;
+                movingObj.touchGround();
+            }
+            if (movingObj.y < wallYUp + rectTopHalfHeight + TileMap.epsilon) {
+                movingObj.y = wallYUp + rectTopHalfHeight + TileMap.epsilon;
+                movingObj.touchCeiling();
             }
         }
     }
