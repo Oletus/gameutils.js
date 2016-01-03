@@ -515,6 +515,54 @@ describe('PlatformingPhysics', function() {
                 expect(obj1._testTouchGroundCounter).toBe(0);
                 expect(obj1._testTouchCeilingCounter).toBe(0);
             });
+            
+            it ('handles a horizontal collision when both the tilemap and the object are moving to the left', function() {
+                var level = new PlatformingLevel();
+                level.init();
+
+                var pTileMap = testPlatformingTileMapWithWall({x: 8.0, dx: -20.0, dy: 0.0});
+                level.pushObject(pTileMap, []);
+
+                // The object starts from the left side of the tilemap and moves to the left. The tilemap moves faster.
+                var colliderWidth = 1.0;
+                var origY = 1.0;
+                var origX = 5.0; 
+                var testDx = -5.0;
+                var obj1 = testCollider({width: colliderWidth, x: origX, y: origY, dx: testDx, dy: 0});
+                level.pushObject(obj1, []);
+
+                // Move way past the edge of the tilemap. All collisions in between should be detected.
+                var deltaTime = 1.0;
+                level.update(deltaTime);
+                expect(obj1.x).toBeCloseTo(pTileMap.x + pTileMap.getRect().width() - 2 - colliderWidth * 0.5, 4);
+                expect(obj1.y).toBeCloseTo(origY, 4);
+                expect(obj1._testTouchGroundCounter).toBe(0);
+                expect(obj1._testTouchCeilingCounter).toBe(0);
+            });
+            
+            it ('handles a horizontal collision when both the tilemap and the object are moving to the right', function() {
+                var level = new PlatformingLevel();
+                level.init();
+
+                var pTileMap = testPlatformingTileMapWithWall({x: -8.0, dx: 20.0, dy: 0.0});
+                level.pushObject(pTileMap, []);
+
+                // The object starts from the right side of the tilemap and moves to the right. The tilemap moves faster.
+                var colliderWidth = 1.0;
+                var origY = 1.0;
+                var origX = 2.0;
+                var testDx = 2.0;
+                var obj1 = testCollider({width: colliderWidth, x: origX, y: origY, dx: testDx, dy: 0});
+                level.pushObject(obj1, []);
+
+                // Move way past the edge of the tilemap. All collisions in between should be detected.
+                var deltaTime = 1.0;
+                level.update(deltaTime);
+                expect(obj1.x).toBeCloseTo(pTileMap.x + pTileMap.getRect().width() - 2 - colliderWidth * 0.5, 4);
+                expect(obj1.y).toBeCloseTo(origY, 4);
+                expect(obj1._testTouchGroundCounter).toBe(0);
+                expect(obj1._testTouchCeilingCounter).toBe(0);
+            });
 
             it ('handles a horizontal collision with an object moving diagonally', function() {
                 var level = new PlatformingLevel();
