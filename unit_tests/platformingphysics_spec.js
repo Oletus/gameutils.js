@@ -115,6 +115,34 @@ describe('PlatformingPhysics', function() {
         return testPlatformingTileMap(options, initParams);
     };
 
+    var testPlatformingTileMapWithSlopeRight1 = function(options) {
+        var initParams = {
+            width: 4,
+            height: 3,
+            initTile: PlatformingPhysics.initFromData(
+                [
+                    '   /',
+                    '  /x',
+                    'xxxx'
+                ], false)
+        };
+        return testPlatformingTileMap(options, initParams);
+    };
+
+    var testPlatformingTileMapWithSlopeLeft1 = function(options) {
+        var initParams = {
+            width: 4,
+            height: 3,
+            initTile: PlatformingPhysics.initFromData(
+                [
+                    '.   ',
+                    'x.  ',
+                    'xxxx'
+                ], false)
+        };
+        return testPlatformingTileMap(options, initParams);
+    };
+
     describe('PlatformingCharacter', function() {
         it('initializes', function() {
             var c = new PlatformingCharacter();
@@ -448,6 +476,60 @@ describe('PlatformingPhysics', function() {
                 expect(movingTileMap.x).toBeCloseTo(0, 4);
                 expect(movingTileMap.y).toBeCloseTo(pTileMap.y - movingTileMap.getRect().height(), 3);
             });
+            
+            for (var i = 1; i < 3; ++i) {
+                (function(movedTiles) {
+                    it('handles an object moving to the right against an upward slope for ' + movedTiles + ' tiles', function() {
+                        var level = new PlatformingLevel();
+                        level.init();
+
+                        var pTileMap = testPlatformingTileMapWithSlopeRight1({});
+                        level.pushObject(pTileMap, []);
+                        
+                        // The object starts from inside the tilemap and moves downwards and to the right.
+                        var colliderWidth = 1.0;
+                        var origY = pTileMap.getRect().height() - 1 - colliderWidth * 0.5 - 0.01;
+                        var origX = 0.0;
+                        var testDx = 1.1 + movedTiles;
+                        var testDy = pTileMap.getRect().width();
+                        var obj1 = testCollider({width: colliderWidth, x: origX, y: origY, dx: testDx, dy: testDy});
+                        level.pushObject(obj1, []);
+
+                        // Move way past the edge of the tilemap. All collisions in between should be detected.
+                        var deltaTime = 1.0;
+                        level.update(deltaTime);
+                        expect(obj1.x).toBeCloseTo(origX + deltaTime * testDx);
+                        expect(obj1.y).toBeCloseTo(pTileMap.y + pTileMap.getRect().height() - movedTiles - 0.6 - colliderWidth * 0.5, 3);
+                        expect(obj1._testTouchGroundCounter).toBe(1);
+                        expect(obj1._testTouchCeilingCounter).toBe(0);
+                    });
+
+                    it('handles an object moving to the left against an upward slope for ' + movedTiles + ' tiles', function() {
+                        var level = new PlatformingLevel();
+                        level.init();
+
+                        var pTileMap = testPlatformingTileMapWithSlopeLeft1({});
+                        level.pushObject(pTileMap, []);
+                        
+                        // The object starts from inside the tilemap and moves downwards and to the right.
+                        var colliderWidth = 1.0;
+                        var origY = pTileMap.getRect().height() - 1 - colliderWidth * 0.5 - 0.01;
+                        var origX = pTileMap.getRect().width();
+                        var testDx = -1.1 - movedTiles;
+                        var testDy = pTileMap.getRect().width();
+                        var obj1 = testCollider({width: colliderWidth, x: origX, y: origY, dx: testDx, dy: testDy});
+                        level.pushObject(obj1, []);
+
+                        // Move way past the edge of the tilemap. All collisions in between should be detected.
+                        var deltaTime = 1.0;
+                        level.update(deltaTime);
+                        expect(obj1.x).toBeCloseTo(origX + deltaTime * testDx);
+                        expect(obj1.y).toBeCloseTo(pTileMap.y + pTileMap.getRect().height() - movedTiles - 0.6 - colliderWidth * 0.5, 3);
+                        expect(obj1._testTouchGroundCounter).toBe(1);
+                        expect(obj1._testTouchCeilingCounter).toBe(0);
+                    });
+                })(i);
+            }
         }); // stationary tilemap
         
         describe('moving tilemap', function() {
