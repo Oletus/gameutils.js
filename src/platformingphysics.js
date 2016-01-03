@@ -165,6 +165,11 @@ PlatformingLevel.prototype.pushObject = function(object, collisionGroups) {
  * only the object's bounding geometry does.
  */
 PlatformingLevel.prototype.update = function(deltaTime) {
+    for (var i = 0; i < this._objects.length; ++i) {
+        var object = this._objects[i];
+        object.lastX = object.x;
+        object.lastY = object.y;
+    }
     for (var i = 0; i < this._tileMapObjects.length; ++i) {
         var object = this._tileMapObjects[i];
         object.lastX = object.x;
@@ -180,8 +185,6 @@ PlatformingLevel.prototype.update = function(deltaTime) {
     }
     for (var i = 0; i < this._objects.length; ++i) {
         var object = this._objects[i];
-        object.lastX = object.x;
-        object.lastY = object.y;
         object.decideDx(deltaTime);
     }
     for (var i = 0; i < this._objects.length; ++i) {
@@ -440,7 +443,10 @@ PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, collider
                     if (colliders[i] === movingObj) {
                         continue;
                     }
-                    var collider = colliders[i].getRect();
+                    // Ensure that the y value from the begining of the frame is used.
+                    // This adds a bit of flexibility: for example, some objects that don't themselves collide with
+                    // anything can update their positions in a single update function.
+                    var collider = colliders[i].getPositionedRect(colliders[i].x, colliders[i].lastY);
                     if (rect.top < collider.bottom && collider.top < rect.bottom) {
                         if (colliders[i] instanceof PlatformingTileMap) {
                             xColliders.push(colliders[i]);
@@ -473,7 +479,7 @@ PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, collider
                             var possibleWallX = slopeTiles[0]._x + 1 + xColliders[i].x;
                             for (var j = 0; j < slopeTiles.length; ++j) {
                                 var slopeTile = slopeTiles[j];
-                                var slopeBaseY = slopeTile._y + 1 + xColliders[i].y;
+                                var slopeBaseY = slopeTile._y + 1 + xColliders[i].lastY;
                                 var slopeIsEffectivelyWall = (slopeBaseY - slopeTile.getFloorRelativeHeight(1) < rect.bottom - maxStepUp);
                                 if (wallXLeft < possibleWallX && slopeIsEffectivelyWall) {
                                     wallXLeft = possibleWallX;
@@ -499,7 +505,7 @@ PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, collider
                             var possibleWallX = slopeTiles[0]._x + xColliders[i].x;
                             for (var j = 0; j < slopeTiles.length; ++j) {
                                 var slopeTile = slopeTiles[j];
-                                var slopeBaseY = slopeTile._y + 1 + xColliders[i].y;
+                                var slopeBaseY = slopeTile._y + 1 + xColliders[i].lastY;
                                 var slopeIsEffectivelyWall = (slopeBaseY - slopeTile.getFloorRelativeHeight(0) < rect.bottom - maxStepUp);
                                 if (wallXRight > possibleWallX && slopeIsEffectivelyWall) {
                                     wallXRight = possibleWallX;
