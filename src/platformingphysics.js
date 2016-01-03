@@ -115,6 +115,7 @@ PlatformingCharacter.prototype.render = function(ctx) {
  * Override this instead of getRect or getLastRect.
  * @param {number} x Horizontal position.
  * @param {number} y Vertical position.
+ * @return {Rect} Collision rectangle.
  */
 PlatformingCharacter.prototype.getPositionedRect = function(x, y) {
     var width = 1.0;
@@ -125,6 +126,7 @@ PlatformingCharacter.prototype.getPositionedRect = function(x, y) {
 
 /**
  * Get the object's collision rectangle with the current coordinates for the object.
+ * @return {Rect} Collision rectangle.
  * @final
  */
 PlatformingCharacter.prototype.getRect = function() {
@@ -133,6 +135,7 @@ PlatformingCharacter.prototype.getRect = function() {
 
 /**
  * Get the object's collision rectangle with the coordinates for the object in the beginning of the current frame.
+ * @return {Rect} Collision rectangle.
  * @final
  */
 PlatformingCharacter.prototype.getLastRect = function() {
@@ -148,6 +151,13 @@ var PlatformingTileMap = function() {
 
 PlatformingTileMap.prototype = new PlatformingCharacter();
 
+/**
+ * Initialize the tilemap.
+ * @param {Object} options Options for the tilemap. May contain:
+ *   tileMap: TileMap. Mandatory.
+ *   x: number
+ *   y: number
+ */
 PlatformingTileMap.prototype.init = function(options) {
     PlatformingCharacter.prototype.init.call(this, options);
     var defaults = {
@@ -165,16 +175,30 @@ PlatformingTileMap.prototype.init = function(options) {
     this._collisionGroup = '_none';
 };
 
+/**
+ * Get the object's collision rectangle in case the object is positioned at x, y.
+ * @param {number} x Horizontal position.
+ * @param {number} y Vertical position.
+ * @return {Rect} Collision rectangle.
+ */
 PlatformingTileMap.prototype.getPositionedRect = function(x, y) {
     return new Rect(x, x + this.tileMap.width,
                     y, y + this.tileMap.height);
 };
 
-PlatformingTileMap.prototype.decideDx = function() {
+/**
+ * Control the this.dx value that the character uses on each frame.
+ * @param {number} deltaTime
+ */
+PlatformingTileMap.prototype.decideDx = function(deltaTime) {
     this.dx = 0;
 };
 
-PlatformingTileMap.prototype.decideDy = function() {
+/**
+ * Control the this.dy value that the character uses on each frame.
+ * @param {number} deltaTime
+ */
+PlatformingTileMap.prototype.decideDy = function(deltaTime) {
     this.dy = 0;
 };
 
@@ -185,12 +209,21 @@ PlatformingTileMap.prototype.decideDy = function() {
 var PlatformingLevel = function() {
 };
 
+/**
+ * Initialize the level.
+ */
 PlatformingLevel.prototype.init = function() {
     this._objects = [];
     this._tileMapObjects = [];
     this._colliders = {'_all': []}; // All is a special collision group that includes all objects.
 };
 
+/**
+ * Add an object to the level.
+ * @param {PlatformingCharacter} object Object to add.
+ * @param {Array.<string>} collisionGroups Collision groups to add the object to. Will automatically be added to
+ *     the "_all" collision group.
+ */
 PlatformingLevel.prototype.pushObject = function(object, collisionGroups) {
     if (object instanceof PlatformingTileMap) {
         this._tileMapObjects.push(object);
@@ -206,10 +239,12 @@ PlatformingLevel.prototype.pushObject = function(object, collisionGroups) {
 };
 
 /**
+ * Update all object positions.
  * Tilemap objects may move. Their movement only affects the movement of other objects via collisions (so for example
  * logic for player movement matching moving platforms must be implemented in the decideDx function).
  * When the movement of the tilemap objects themselves is evaluated, the tilemap doesn't affect possible collisions,
  * only the object's bounding geometry does.
+ * @param {number} deltaTime
  */
 PlatformingLevel.prototype.update = function(deltaTime) {
     for (var i = 0; i < this._objects.length; ++i) {
