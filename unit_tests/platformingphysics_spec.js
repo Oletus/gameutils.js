@@ -558,7 +558,7 @@ describe('PlatformingPhysics', function() {
                 // Move way past the edge of the tilemap. All collisions in between should be detected.
                 var deltaTime = 1.0;
                 level.update(deltaTime);
-                expect(obj1.x).toBeCloseTo(pTileMap.x + pTileMap.getRect().width() - 2 - colliderWidth * 0.5, 4);
+                expect(obj1.x).toBeCloseTo(pTileMap.x + pTileMap.getRect().width() - 1 + colliderWidth * 0.5, 4);
                 expect(obj1.y).toBeCloseTo(origY, 4);
                 expect(obj1._testTouchGroundCounter).toBe(0);
                 expect(obj1._testTouchCeilingCounter).toBe(0);

@@ -453,15 +453,45 @@ PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, collider
                     }
                 }
                 var slopeFloorY = movingObj.y + rectBottomHalfHeight + TileMap.epsilon * 2;
-                if (delta > 0) {
-                    var wallXRight = movingObj.x + rectRightHalfWidth + TileMap.epsilon * 2;
-                    var slopeEndXRight = wallXRight;
-                    for (var i = 0; i < xColliders.length; ++i) {
-                        if (xColliders[i] instanceof PlatformingTileMap) {
-                            var fromWorldToTileMap = new Vec2(-xColliders[i].lastX, -xColliders[i].lastY);
-                            var relativeDelta = delta - xColliders[i].frameDeltaX;
-                            var relativeRect = new Rect(rect.left, rect.right, rect.top, rect.bottom);
-                            relativeRect.translate(fromWorldToTileMap);
+
+                var wallXRight = Number.MAX_VALUE;
+                var slopeEndXRight = wallXRight;
+                var wallXLeft = -Number.MAX_VALUE;
+                var slopeEndXLeft = wallXLeft;
+
+                for (var i = 0; i < xColliders.length; ++i) {
+                    if (xColliders[i] instanceof PlatformingTileMap) {
+                        var fromWorldToTileMap = new Vec2(-xColliders[i].lastX, -xColliders[i].lastY);
+                        var relativeDelta = delta - xColliders[i].frameDeltaX;
+                        var relativeRect = new Rect(rect.left, rect.right, rect.top, rect.bottom);
+                        relativeRect.translate(fromWorldToTileMap);
+                        if (relativeDelta < 0) {
+                            var wallTileX = xColliders[i].tileMap.nearestTileLeftFromRect(relativeRect, isWallUp, Math.abs(relativeDelta));
+                            if (wallTileX != -1 && wallXLeft < wallTileX + 1 + xColliders[i].x) {
+                                wallXLeft = wallTileX + 1 + xColliders[i].x;
+                            }
+                            var slopeTiles = xColliders[i].tileMap.getNearestTilesLeftFromRect(relativeRect, isFloorSlope, Math.abs(relativeDelta));
+                            if (slopeTiles.length != 0) {
+                                var possibleWallX = slopeTiles[0]._x + 1 + xColliders[i].x;
+                                for (var j = 0; j < slopeTiles.length; ++j) {
+                                    var slopeTile = slopeTiles[j];
+                                    var slopeBaseY = slopeTile._y + 1 + xColliders[i].y;
+                                    var slopeIsEffectivelyWall = (slopeBaseY - slopeTile.getFloorRelativeHeight(1) < rect.bottom - maxStepUp);
+                                    if (wallXLeft < possibleWallX && slopeIsEffectivelyWall) {
+                                        wallXLeft = possibleWallX;
+                                    }
+                                    if (!slopeIsEffectivelyWall) {
+                                        slopeEndXLeft = slopeTile._x + xColliders[i].x;
+                                        var relativeX = movingObj.x - slopeEndXLeft;
+                                        var slopeYLeft = slopeBaseY -
+                                            slopeTile.getFloorRelativeHeight(relativeX - rectLeftHalfWidth);
+                                        if (slopeFloorY > slopeYLeft) {
+                                            slopeFloorY = slopeYLeft;
+                                        }
+                                    }
+                                }
+                            }
+                        } else {
                             var wallTileX = xColliders[i].tileMap.nearestTileRightFromRect(relativeRect, isWallUp, Math.abs(relativeDelta));
                             if (wallTileX != -1 && wallXRight > wallTileX + xColliders[i].x) {
                                 wallXRight = wallTileX + xColliders[i].x;
@@ -487,94 +517,54 @@ PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, collider
                                     }
                                 }
                             }
-                        } else {
-                            if (xColliders[i].right > rect.left && wallXRight > xColliders[i].left) {
-                                wallXRight = xColliders[i].left;
-                            }
+                        }
+                    } else {
+                        if (delta < 0 && xColliders[i].left < rect.right && wallXLeft < xColliders[i].right) {
+                            wallXLeft = xColliders[i].right;
+                        }
+                        if (delta > 0 && xColliders[i].right > rect.left && wallXRight > xColliders[i].left) {
+                            wallXRight = xColliders[i].left;
                         }
                     }
-                    if (movingObj.x > slopeEndXRight - rectRightHalfWidth + TileMap.epsilon * 2) {
-                        var afterOriginalMove = movingObj.x;
-                        movingObj.x = slopeEndXRight - rectRightHalfWidth + TileMap.epsilon * 2;
-                        delta = afterOriginalMove - movingObj.x;
-                        // Finish this iteration on the tile boundary and continue movement on the next slope tile.
-                        if (delta > TileMap.epsilon * 2 && delta < lastDelta) {
-                            done = false;
-                            lastDelta = delta;
-                        }
+                }
+                
+                if (movingObj.x > slopeEndXRight - rectRightHalfWidth + TileMap.epsilon * 2) {
+                    var afterOriginalMove = movingObj.x;
+                    movingObj.x = slopeEndXRight - rectRightHalfWidth + TileMap.epsilon * 2;
+                    delta = afterOriginalMove - movingObj.x;
+                    // Finish this iteration on the tile boundary and continue movement on the next slope tile.
+                    if (delta > TileMap.epsilon * 2 && delta < lastDelta) {
+                        done = false;
+                        lastDelta = delta;
                     }
-                    if (movingObj.y > slopeFloorY - rectBottomHalfHeight - TileMap.epsilon) {
-                        movingObj.y = slopeFloorY - rectBottomHalfHeight - TileMap.epsilon;
+                }
+                if (movingObj.x < slopeEndXLeft + rectLeftHalfWidth - TileMap.epsilon * 2) {
+                    var afterOriginalMove = movingObj.x;
+                    movingObj.x = slopeEndXLeft + rectLeftHalfWidth - TileMap.epsilon * 2;
+                    delta = afterOriginalMove - movingObj.x;
+                    // Finish this iteration on the tile boundary and continue movement on the next slope tile.
+                    if (delta < -TileMap.epsilon * 2 && delta > lastDelta) {
+                        done = false;
+                        lastDelta = delta;
                     }
-                    // Apply walls only when movement is done. When moving along a slope, the code may have placed
-                    // the object right beyond the tile boundary for the next iteration so that movement wouldn't
-                    // be stuck in a case like below:
-                    //         /
-                    //  obj-> /x
-                    if (movingObj.x > wallXRight - rectRightHalfWidth - TileMap.epsilon && done) {
-                        movingObj.x = wallXRight - rectRightHalfWidth - TileMap.epsilon;
-                    }
-                } else {
-                    var wallXLeft = movingObj.x - rectLeftHalfWidth - TileMap.epsilon * 2;
-                    var slopeEndXLeft = wallXLeft;
-                    for (var i = 0; i < xColliders.length; ++i) {
-                        if (xColliders[i] instanceof PlatformingTileMap) {
-                            var fromWorldToTileMap = new Vec2(-xColliders[i].lastX, -xColliders[i].lastY);
-                            var relativeDelta = delta - xColliders[i].frameDeltaX;
-                            var relativeRect = new Rect(rect.left, rect.right, rect.top, rect.bottom);
-                            relativeRect.translate(fromWorldToTileMap);
-                            var wallTileX = xColliders[i].tileMap.nearestTileLeftFromRect(relativeRect, isWallUp, Math.abs(relativeDelta));
-                            if (wallTileX != -1 && wallXLeft < wallTileX + 1 + xColliders[i].x) {
-                                wallXLeft = wallTileX + 1 + xColliders[i].x;
-                            }
-                            var slopeTiles = xColliders[i].tileMap.getNearestTilesLeftFromRect(relativeRect, isFloorSlope, Math.abs(relativeDelta));
-                            if (slopeTiles.length != 0) {
-                                var possibleWallX = slopeTiles[0]._x + 1 + xColliders[i].x;
-                                for (var j = 0; j < slopeTiles.length; ++j) {
-                                    var slopeTile = slopeTiles[j];
-                                    var slopeBaseY = slopeTile._y + 1 + xColliders[i].y;
-                                    var slopeIsEffectivelyWall = (slopeBaseY - slopeTile.getFloorRelativeHeight(1) < rect.bottom - maxStepUp);
-                                    if (wallXLeft < possibleWallX && slopeIsEffectivelyWall) {
-                                        wallXLeft = possibleWallX;
-                                    }
-                                    if (!slopeIsEffectivelyWall) {
-                                        slopeEndXLeft = slopeTile._x + xColliders[i].x;
-                                        var relativeX = movingObj.x - slopeEndXLeft;
-                                        var slopeYRight = slopeBaseY -
-                                            slopeTile.getFloorRelativeHeight(relativeX - rectLeftHalfWidth);
-                                        if (slopeFloorY > slopeYRight) {
-                                            slopeFloorY = slopeYRight;
-                                        }
-                                    }
-                                }
-                            }
-                        } else {
-                            if (xColliders[i].left < rect.right && wallXLeft < xColliders[i].right) {
-                                wallXLeft = xColliders[i].right;
-                            }
-                        }
-                    }
-                    if (movingObj.x < slopeEndXLeft + rectLeftHalfWidth - TileMap.epsilon * 2) {
-                        var afterOriginalMove = movingObj.x;
-                        movingObj.x = slopeEndXLeft + rectLeftHalfWidth - TileMap.epsilon * 2;
-                        delta = afterOriginalMove - movingObj.x;
-                        // Finish this iteration on the tile boundary and continue movement on the next slope tile.
-                        if (delta < -TileMap.epsilon * 2 && delta > lastDelta) {
-                            done = false;
-                            lastDelta = delta;
-                        }
-                    }
-                    if (movingObj.y > slopeFloorY - rectBottomHalfHeight - TileMap.epsilon) {
-                        movingObj.y = slopeFloorY - rectBottomHalfHeight - TileMap.epsilon;
-                    }
-                    // Apply walls only when movement is done. When moving along a slope, the code may have placed
-                    // the object right beyond the tile boundary for the next iteration so that movement wouldn't
-                    // be stuck in a case like below:
-                    // .
-                    // x. <- obj
-                    if (movingObj.x < wallXLeft + rectLeftHalfWidth + TileMap.epsilon && done) {
-                        movingObj.x = wallXLeft + rectLeftHalfWidth + TileMap.epsilon;
-                    }
+                }
+                if (movingObj.y > slopeFloorY - rectBottomHalfHeight - TileMap.epsilon) {
+                    movingObj.y = slopeFloorY - rectBottomHalfHeight - TileMap.epsilon;
+                }
+                
+                // Apply walls only when movement is done. When moving along a slope, the code may have placed
+                // the object right beyond the tile boundary for the next iteration so that movement wouldn't
+                // be stuck in cases like below:
+                //         /
+                //  obj-> /x
+                //
+                // .
+                // x. <- obj
+                if (movingObj.x > wallXRight - rectRightHalfWidth - TileMap.epsilon && done) {
+                    movingObj.x = wallXRight - rectRightHalfWidth - TileMap.epsilon;
+                }
+                if (movingObj.x < wallXLeft + rectLeftHalfWidth + TileMap.epsilon && done) {
+                    movingObj.x = wallXLeft + rectLeftHalfWidth + TileMap.epsilon;
                 }
             }
         } // dim == 'x'
