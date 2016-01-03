@@ -14,8 +14,7 @@ var TileMap = function(options)
         width: 1,
         height: 1,
         initTile: function(x, y) { return ' '; }, // Function that returns an initial tile. x and y parameters.
-        initEdgeTile: null, // Function that returns a tile to fill the edges with. x and y parameters. Optional.
-        worldPos: new Vec2(0, 0) // Position of the origin of the tile map in the world coordinates.
+        initEdgeTile: null // Function that returns a tile to fill the edges with. x and y parameters. Optional.
     };
     objectUtil.initWithDefaults(this, defaults, options);
     this.tiles = [];
@@ -67,7 +66,7 @@ TileMap.prototype.tileAt = function(x, y) {
 
 /**
  * A function for debug rendering of the tiles. Will fill rectangles at the
- * coordinates of tiles that match. Does not take worldPos into account.
+ * coordinates of tiles that match.
  * @param {CanvasRenderingContext2D} ctx Context to use.
  * @param {function} matchFunc Gets passed a tile and returns true if the tile should be drawn.
  * @param {number?} extraYTop How much to extend the drawn tiles in the y direction. Defaults to 0.
@@ -363,8 +362,8 @@ TileMap.prototype.overlapsTiles = function(rect, matchFunc) {
 };
 
 /**
- * @return {Rect} tileMap rect in world coordinates.
+ * @return {Rect} tileMap rect representing the size of the tilemap.
  */
 TileMap.prototype.getRect = function() {
-    return new Rect(this.worldPos.x, this.worldPos.x + this.width, this.worldPos.y, this.worldPos.y + this.height);
+    return new Rect(0.0, this.width, 0.0, this.height);
 };
