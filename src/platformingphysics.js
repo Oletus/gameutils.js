@@ -74,18 +74,22 @@ PlatformingCharacter.prototype.render = function(ctx) {
     ctx.fillRect(rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top);
 };
 
-PlatformingCharacter.prototype.getRect = function() {
+/**
+ * Override this instead of getRect or getLastRect.
+ */
+PlatformingCharacter.prototype.getPositionedRect = function(x, y) {
     var width = 1.0;
     var height = 2.0;
-    return new Rect(this.x - width * 0.5, this.x + width * 0.5,
-                    this.y - height * 0.5, this.y + height * 0.5);
+    return new Rect(x - width * 0.5, x + width * 0.5,
+                    y - height * 0.5, y + height * 0.5);
+};
+
+PlatformingCharacter.prototype.getRect = function() {
+    return this.getPositionedRect(this.x, this.y);
 };
 
 PlatformingCharacter.prototype.getLastRect = function() {
-    var width = 1.0;
-    var height = 2.0;
-    return new Rect(this.lastX - width * 0.5, this.lastX + width * 0.5,
-                    this.lastY - height * 0.5, this.lastY + height * 0.5);
+    return this.getPositionedRect(this.lastX, this.lastY);
 };
 
 /**
@@ -114,14 +118,9 @@ PlatformingTileMap.prototype.init = function(options) {
     this._collisionGroup = '_none';
 };
 
-PlatformingTileMap.prototype.getRect = function() {
-    return new Rect(this.x, this.x + this.tileMap.width,
-                    this.y, this.y + this.tileMap.height);    
-};
-
-PlatformingTileMap.prototype.getLastRect = function() {
-    return new Rect(this.lastX, this.lastX + this.tileMap.width,
-                    this.lastY, this.lastY + this.tileMap.height);
+PlatformingTileMap.prototype.getPositionedRect = function(x, y) {
+    return new Rect(x, x + this.tileMap.width,
+                    y, y + this.tileMap.height);
 };
 
 PlatformingTileMap.prototype.decideDx = function() {

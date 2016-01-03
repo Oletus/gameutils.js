@@ -18,17 +18,11 @@ describe('PlatformingPhysics', function() {
         }
         if (options.hasOwnProperty('width')) {
             var width = options.width;
-            c.getRect = function() {
-                return new Rect(this.x - width * 0.5,
-                                this.x + width * 0.5,
-                                this.y - width * 0.5,
-                                this.y + width * 0.5);        
-            };
-            c.getLastRect = function() {
-                return new Rect(this.lastX - width * 0.5,
-                                this.lastX + width * 0.5,
-                                this.lastY - width * 0.5,
-                                this.lastY + width * 0.5);        
+            c.getPositionedRect = function(x, y) {
+                return new Rect(x - width * 0.5,
+                                x + width * 0.5,
+                                y - width * 0.5,
+                                y + width * 0.5);
             };
         }
         c._testTouchGroundCounter = 0;
