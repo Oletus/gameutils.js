@@ -13,6 +13,12 @@ var PlatformingPhysics = {};
 var PlatformingCharacter = function() {
 };
 
+/**
+ * Initialize the character.
+ * @param {Object} options Options for the character. May contain:
+ *   x: number
+ *   y: number
+ */
 PlatformingCharacter.prototype.init = function(options) {
     var defaults = {
         x: 0,
@@ -36,19 +42,37 @@ PlatformingCharacter.prototype.init = function(options) {
     this._collisionGroup = '_all';
 };
 
+/**
+ * Override this to control the this.dx value that the character uses on each frame.
+ * @param {number} deltaTime
+ */
 PlatformingCharacter.prototype.decideDx = function(deltaTime) {
 };
 
+/**
+ * Update the x value and do some related bookkeeping.
+ * @param {number} deltaTime
+ * @param {Array.<PlatformingCharacter>} colliders Objects to collide against.
+ */
 PlatformingCharacter.prototype.updateX = function(deltaTime, colliders) {
     this.lastDeltaTime = deltaTime;
     this.stayOnGround = this.onGround;
     PlatformingPhysics.moveAndCollide(this, deltaTime, 'x', colliders, this.stayOnGround);
 };
 
+/**
+ * Override this to control the this.dy value that the character uses on each frame.
+ * @param {number} deltaTime
+ */
 PlatformingCharacter.prototype.decideDy = function(deltaTime) {
     this.dy += 1.0 * deltaTime;
 };
 
+/**
+ * Update the y value and do some related bookkeeping.
+ * @param {number} deltaTime
+ * @param {Array.<PlatformingCharacter>} colliders Objects to collide against.
+ */
 PlatformingCharacter.prototype.updateY = function(deltaTime, colliders) {
     this.onGround = false;
     PlatformingPhysics.moveAndCollide(this, deltaTime, 'y', colliders, this.stayOnGround);
@@ -59,15 +83,27 @@ PlatformingCharacter.prototype.updateY = function(deltaTime, colliders) {
     }
 };
 
+/**
+ * Callback when the character touches ground.
+ */
 PlatformingCharacter.prototype.touchGround = function() {
     this.onGround = true;
+    // TODO: The Math.max is problematic if it's desired that a collider would launch the character into the air.
+    // On the other hand it's not desired that upwards slopes would launch the character.
     this.dy = Math.max((this.y - this.lastY) / this.lastDeltaTime, 0);
 };
 
+/**
+ * Callback when the character touches the ceiling.
+ */
 PlatformingCharacter.prototype.touchCeiling = function() {
     this.dy = 0;
 };
 
+/**
+ * Debug rendering of the character.
+ * @param {CanvasRenderingContext2D} ctx Context to draw to.
+ */
 PlatformingCharacter.prototype.render = function(ctx) {
     ctx.fillStyle = this.color;
     var rect = this.getRect();
@@ -75,7 +111,10 @@ PlatformingCharacter.prototype.render = function(ctx) {
 };
 
 /**
+ * Get the object's collision rectangle in case the object is positioned at x, y.
  * Override this instead of getRect or getLastRect.
+ * @param {number} x Horizontal position.
+ * @param {number} y Vertical position.
  */
 PlatformingCharacter.prototype.getPositionedRect = function(x, y) {
     var width = 1.0;
@@ -84,10 +123,18 @@ PlatformingCharacter.prototype.getPositionedRect = function(x, y) {
                     y - height * 0.5, y + height * 0.5);
 };
 
+/**
+ * Get the object's collision rectangle with the current coordinates for the object.
+ * @final
+ */
 PlatformingCharacter.prototype.getRect = function() {
     return this.getPositionedRect(this.x, this.y);
 };
 
+/**
+ * Get the object's collision rectangle with the coordinates for the object in the beginning of the current frame.
+ * @final
+ */
 PlatformingCharacter.prototype.getLastRect = function() {
     return this.getPositionedRect(this.lastX, this.lastY);
 };
