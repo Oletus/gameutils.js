@@ -33,6 +33,7 @@ PlatformingCharacter.prototype.init = function(options) {
     }
     this.lastX = this.x;
     this.lastY = this.y;
+    this.lastYAfterUpwardSlopes = this.y;
     this.onGround = true;
     this.maxStickToGroundDistance = 0;
     this.lastOnGround = true;
@@ -46,6 +47,7 @@ PlatformingCharacter.prototype.init = function(options) {
     this.collisionGroup = '_all';
     this.frameDeltaX = 0;
     this.frameDeltaY = 0;
+    this.frameDeltaYWithoutUpwardSlopes = 0;
 };
 
 /**
@@ -290,6 +292,7 @@ PlatformingLevel.prototype.update = function(deltaTime) {
         var object = this._objects[i];
         object.updateX(deltaTime, this._colliders[object.collisionGroup]);
         object.frameDeltaX = object.x - object.lastX;
+        object.lastYAfterUpwardSlopes = object.y;
     }
 
     for (var i = 0; i < this._tileMapObjects.length; ++i) {
@@ -317,6 +320,7 @@ PlatformingLevel.prototype.update = function(deltaTime) {
         var object = this._objects[i];
         object.updateY(deltaTime, this._colliders[object.collisionGroup]);
         object.frameDeltaY = object.y - object.lastY;
+        object.frameDeltaYWithoutUpwardSlopes = object.y - object.lastYAfterUpwardSlopes;
     }
 };
 
