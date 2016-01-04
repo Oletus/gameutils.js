@@ -942,6 +942,7 @@ describe('PlatformingPhysics', function() {
                         var origX = 0.1;
                         var testDy = 0.1;
                         var obj1 = testCollider({width: colliderWidth, x: origX, y: origY, dx: testDx, dy: testDy});
+                        obj1.maxStickToGroundDistance = 3;
                         level.pushObject(obj1, []);
 
                         // Move to the middle of the tilemap.

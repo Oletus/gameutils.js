@@ -34,7 +34,7 @@ PlatformingCharacter.prototype.init = function(options) {
     this.lastX = this.x;
     this.lastY = this.y;
     this.onGround = true;
-    this.preferStayingOnGround = true;
+    this.maxStickToGroundDistance = 0;
     this.lastOnGround = true;
     this.lastDeltaTime = 0;
     this.airTime = 0;
@@ -706,7 +706,6 @@ PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, collider
             }
             var wallYDown = Number.MAX_VALUE;
             var wallYUp = -Number.MAX_VALUE;
-            var hitSlope = false;
             for (var i = 0; i < yColliders.length; ++i) {
                 if (yColliders[i] instanceof PlatformingTileMap) {
                     // X movement has already been fully evaluated
@@ -720,16 +719,16 @@ PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, collider
                             wallYUp = wallTileY + 1 + yColliders[i].y;
                         }
                     } else {
+                        var floorSearchDistance = Math.max(Math.abs(relativeDelta), movingObj.maxStickToGroundDistance);
                         var origBottom = relativeRect.bottom;
                         relativeRect.bottom += 1;
-                        var wallTileY = yColliders[i].tileMap.nearestTileDownFromRect(relativeRect, isWall, Math.abs(relativeDelta));
+                        var wallTileY = yColliders[i].tileMap.nearestTileDownFromRect(relativeRect, isWall, floorSearchDistance);
                         if (wallTileY != -1 && wallYDown > wallTileY + yColliders[i].y) {
                             wallYDown = wallTileY + yColliders[i].y;
-                            hitSlope = false;
                         }
                         relativeRect.bottom = origBottom;
                         var slopeTiles = yColliders[i].tileMap.getNearestTilesDownFromRect(relativeRect, isFloorSlope,
-                                                                                   Math.max(Math.abs(relativeDelta), 1));
+                                                                                           floorSearchDistance);
                         if (slopeTiles.length != 0 && wallYDown > slopeTiles[0]._y + yColliders[i].y) {
                             for (var j = 0; j < slopeTiles.length; ++j) {
                                 var slopeTile = slopeTiles[j];
@@ -741,11 +740,9 @@ PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, collider
                                                   slopeTile.getFloorRelativeHeight(relativeX + rectRightHalfWidth);
                                 if (slopeYLeft < wallYDown) {
                                     wallYDown = slopeYLeft;
-                                    hitSlope = true;
                                 }
                                 if (slopeYRight < wallYDown) {
                                     wallYDown = slopeYRight;
-                                    hitSlope = true;
                                 }
                             }
                         }
@@ -763,7 +760,8 @@ PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, collider
             if (movingObj.y > wallYDown - rectBottomHalfHeight - TileMap.epsilon) {
                 movingObj.y = wallYDown - rectBottomHalfHeight - TileMap.epsilon;
                 movingObj.touchGround();
-            } else if (hitSlope && movingObj.lastOnGround && movingObj.preferStayingOnGround) {
+            } else if (movingObj.lastOnGround &&
+                       movingObj.y > wallYDown - rectBottomHalfHeight - TileMap.epsilon - movingObj.maxStickToGroundDistance) {
                 // TODO: There's still a bug where the character teleports downwards when there's a slope like this:
                 // .
                 // xl
