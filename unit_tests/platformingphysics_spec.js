@@ -848,42 +848,77 @@ describe('PlatformingPhysics', function() {
                 expect(obj1._testTouchCeilingCounter).toBe(0);
             });
 
-            for (var i = 0; i < 8; ++i) {
+            for (var i = 0; i < 16; ++i) {
                 (function(moveTilemapHorizontally, moveTilemapVertically, movedTiles) {
                     var movingStr = (moveTilemapHorizontally ? ' horizontally moving' : '');
                     movingStr += (moveTilemapVertically ? ' vertically moving' : '');
-                    it('handles an object moving to the right against a' + movingStr + ' upward slope for ' + movedTiles + ' tiles', function() {
-                        var level = new PlatformingLevel();
-                        level.init();
+                    if (movedTiles < 3) {
+                        it('handles an object moving to the right against a' + movingStr + ' upward slope for ' + movedTiles + ' tiles', function() {
+                            var level = new PlatformingLevel();
+                            level.init();
 
-                        var tileMapParams = {}
-                        var testDx = 1.1 + movedTiles;
-                        if (moveTilemapHorizontally) {
-                            tileMapParams.dx = -1.0;
-                            testDx -= 1.0;
-                        }
-                        if (moveTilemapVertically) {
-                            tileMapParams.dy = -1.5;
-                        }
-                        var pTileMap = testPlatformingTileMapWithSlopeRight1(tileMapParams);
-                        level.pushObject(pTileMap, []);
+                            var tileMapParams = {}
+                            var testDx = 1.1 + movedTiles;
+                            if (moveTilemapHorizontally) {
+                                tileMapParams.dx = -1.0;
+                                testDx -= 1.0;
+                            }
+                            if (moveTilemapVertically) {
+                                tileMapParams.dy = -1.5;
+                            }
+                            var pTileMap = testPlatformingTileMapWithSlopeRight1(tileMapParams);
+                            level.pushObject(pTileMap, []);
 
-                        // The object starts from inside the tilemap and moves downwards and to the right.
-                        var colliderWidth = 1.0;
-                        var origY = pTileMap.getRect().height() - 1 - colliderWidth * 0.5 - 0.01;
-                        var origX = 0.0;
-                        var testDy = 1.0;
-                        var obj1 = testCollider({width: colliderWidth, x: origX, y: origY, dx: testDx, dy: testDy});
-                        level.pushObject(obj1, []);
+                            // The object starts from inside the tilemap and moves downwards and to the right.
+                            var colliderWidth = 1.0;
+                            var origY = pTileMap.getRect().height() - 1 - colliderWidth * 0.5 - 0.01;
+                            var origX = 0.0;
+                            var testDy = 1.0;
+                            var obj1 = testCollider({width: colliderWidth, x: origX, y: origY, dx: testDx, dy: testDy});
+                            level.pushObject(obj1, []);
 
-                        // Move against the slope.
-                        var deltaTime = 1.0;
-                        level.update(deltaTime);
-                        expect(obj1.x).toBeCloseTo(origX + deltaTime * testDx, 4);
-                        expect(obj1.y).toBeCloseTo(pTileMap.y + pTileMap.getRect().height() - movedTiles - 0.6 - colliderWidth * 0.5, 3);
-                        expect(obj1._testTouchGroundCounter).toBe(1);
-                        expect(obj1._testTouchCeilingCounter).toBe(0);
-                    });
+                            // Move against the slope.
+                            var deltaTime = 1.0;
+                            level.update(deltaTime);
+                            expect(obj1.x).toBeCloseTo(origX + deltaTime * testDx, 4);
+                            expect(obj1.y).toBeCloseTo(pTileMap.y + pTileMap.getRect().height() - movedTiles - 0.6 - colliderWidth * 0.5, 3);
+                            expect(obj1._testTouchGroundCounter).toBe(1);
+                            expect(obj1._testTouchCeilingCounter).toBe(0);
+                        });
+                        
+                        it('handles an object moving to the left against a' + movingStr + ' upward slope for ' + movedTiles + ' tiles', function() {
+                            var level = new PlatformingLevel();
+                            level.init();
+
+                            var tileMapParams = {}
+                            var testDx = -1.1 - movedTiles;
+                            if (moveTilemapHorizontally) {
+                                tileMapParams.dx = 1.0;
+                                testDx += 1.0;
+                            }
+                            if (moveTilemapVertically) {
+                                tileMapParams.dy = -1.5;
+                            }
+                            var pTileMap = testPlatformingTileMapWithSlopeLeft1(tileMapParams);
+                            level.pushObject(pTileMap, []);
+
+                            // The object starts from inside the tilemap and moves downwards and to the right.
+                            var colliderWidth = 1.0;
+                            var origY = pTileMap.getRect().height() - 1 - colliderWidth * 0.5 - 0.01;
+                            var origX = pTileMap.getRect().width();
+                            var testDy = 1.0;
+                            var obj1 = testCollider({width: colliderWidth, x: origX, y: origY, dx: testDx, dy: testDy});
+                            level.pushObject(obj1, []);
+
+                            // Move against the slope.
+                            var deltaTime = 1.0;
+                            level.update(deltaTime);
+                            expect(obj1.x).toBeCloseTo(origX + deltaTime * testDx, 4);
+                            expect(obj1.y).toBeCloseTo(pTileMap.y + pTileMap.getRect().height() - movedTiles - 0.6 - colliderWidth * 0.5, 3);
+                            expect(obj1._testTouchGroundCounter).toBe(1);
+                            expect(obj1._testTouchCeilingCounter).toBe(0);
+                        });
+                    } // movedTiles < 3
 
                     it('handles an object moving to the right against a' + movingStr + ' downward slope for ' + movedTiles + ' tiles', function() {
                         var level = new PlatformingLevel();
@@ -917,40 +952,7 @@ describe('PlatformingPhysics', function() {
                         expect(obj1._testTouchGroundCounter).toBe(1);
                         expect(obj1._testTouchCeilingCounter).toBe(0);
                     });
-
-                    it('handles an object moving to the left against a' + movingStr + ' upward slope for ' + movedTiles + ' tiles', function() {
-                        var level = new PlatformingLevel();
-                        level.init();
-
-                        var tileMapParams = {}
-                        var testDx = -1.1 - movedTiles;
-                        if (moveTilemapHorizontally) {
-                            tileMapParams.dx = 1.0;
-                            testDx += 1.0;
-                        }
-                        if (moveTilemapVertically) {
-                            tileMapParams.dy = -1.5;
-                        }
-                        var pTileMap = testPlatformingTileMapWithSlopeLeft1(tileMapParams);
-                        level.pushObject(pTileMap, []);
-
-                        // The object starts from inside the tilemap and moves downwards and to the right.
-                        var colliderWidth = 1.0;
-                        var origY = pTileMap.getRect().height() - 1 - colliderWidth * 0.5 - 0.01;
-                        var origX = pTileMap.getRect().width();
-                        var testDy = 1.0;
-                        var obj1 = testCollider({width: colliderWidth, x: origX, y: origY, dx: testDx, dy: testDy});
-                        level.pushObject(obj1, []);
-
-                        // Move against the slope.
-                        var deltaTime = 1.0;
-                        level.update(deltaTime);
-                        expect(obj1.x).toBeCloseTo(origX + deltaTime * testDx, 4);
-                        expect(obj1.y).toBeCloseTo(pTileMap.y + pTileMap.getRect().height() - movedTiles - 0.6 - colliderWidth * 0.5, 3);
-                        expect(obj1._testTouchGroundCounter).toBe(1);
-                        expect(obj1._testTouchCeilingCounter).toBe(0);
-                    });
-                })((i & 4) != 0, (i & 2) != 0, (i & 1) + 1);
+                })((i & 8) != 0, (i & 4) != 0, (i & 3) + 1);
             }
         }); // slopes
     }); // PlatformingLevel
