@@ -93,12 +93,14 @@ PlatformingCharacter.prototype.updateY = function(deltaTime, colliders) {
  */
 PlatformingCharacter.prototype.touchGround = function() {
     this.onGround = true;
+    this.dy = (this.y - this.lastY) / this.lastDeltaTime;
 };
 
 /**
  * Callback when the character touches the ceiling.
  */
 PlatformingCharacter.prototype.touchCeiling = function() {
+    this.dy = (this.y - this.lastY) / this.lastDeltaTime;
 };
 
 /**
