@@ -44,6 +44,8 @@ PlatformingCharacter.prototype.init = function(options) {
     this.color = '#f00';
 
     this.collisionGroup = '_all';
+    this.frameDeltaX = 0;
+    this.frameDeltaY = 0;
 };
 
 /**
@@ -174,8 +176,6 @@ PlatformingTileMap.prototype.init = function(options) {
             this[key] = options[key];
         }
     }
-    this.frameDeltaX = 0;
-    this.frameDeltaY = 0;
     this.prevFrameDeltaX = 0;
     this.prevFrameDeltaY = 0;
     this.collisionGroup = '_none';
@@ -291,6 +291,7 @@ PlatformingLevel.prototype.update = function(deltaTime) {
     for (var i = 0; i < this._objects.length; ++i) {
         var object = this._objects[i];
         object.updateX(deltaTime, this._colliders[object.collisionGroup]);
+        object.frameDeltaX = object.x - object.lastX;
     }
 
     for (var i = 0; i < this._tileMapObjects.length; ++i) {
@@ -317,6 +318,7 @@ PlatformingLevel.prototype.update = function(deltaTime) {
     for (var i = 0; i < this._objects.length; ++i) {
         var object = this._objects[i];
         object.updateY(deltaTime, this._colliders[object.collisionGroup]);
+        object.frameDeltaY = object.y - object.lastY;
     }
 };
 
