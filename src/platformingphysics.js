@@ -33,12 +33,16 @@ PlatformingCharacter.prototype.init = function(options) {
     }
     this.lastX = this.x;
     this.lastY = this.y;
+    this.onGround = true;
+    this.preferStayingOnGround = true;
+    this.lastOnGround = true;
+    this.lastDeltaTime = 0;
+    this.airTime = 0;
     this.dx = 0;
     this.dy = 0;
+
     this.color = '#f00';
-    this.onGround = true;
-    this.airTime = 0;
-    this.lastDeltaTime = 0;
+
     this.collisionGroup = '_all';
 };
 
@@ -56,8 +60,7 @@ PlatformingCharacter.prototype.decideDx = function(deltaTime) {
  */
 PlatformingCharacter.prototype.updateX = function(deltaTime, colliders) {
     this.lastDeltaTime = deltaTime;
-    this.stayOnGround = this.onGround;
-    PlatformingPhysics.moveAndCollide(this, deltaTime, 'x', colliders, this.stayOnGround);
+    PlatformingPhysics.moveAndCollide(this, deltaTime, 'x', colliders);
 };
 
 /**
@@ -75,7 +78,7 @@ PlatformingCharacter.prototype.decideDy = function(deltaTime) {
  */
 PlatformingCharacter.prototype.updateY = function(deltaTime, colliders) {
     this.onGround = false;
-    PlatformingPhysics.moveAndCollide(this, deltaTime, 'y', colliders, this.stayOnGround);
+    PlatformingPhysics.moveAndCollide(this, deltaTime, 'y', colliders);
     if (this.onGround) {
         this.airTime = 0.0;
     } else {
@@ -259,11 +262,13 @@ PlatformingLevel.prototype.update = function(deltaTime) {
         var object = this._objects[i];
         object.lastX = object.x;
         object.lastY = object.y;
+        object.lastOnGround = object.onGround;
     }
     for (var i = 0; i < this._tileMapObjects.length; ++i) {
         var object = this._tileMapObjects[i];
         object.lastX = object.x;
         object.lastY = object.y;
+        object.lastOnGround = object.onGround;
         object.decideDx(deltaTime);
     }
     for (var i = 0; i < this._tileMapObjects.length; ++i) {
@@ -509,9 +514,8 @@ PlatformingPhysics.initFromData = function(data, flippedX) {
  * @param {string} dim Either 'x' or 'y' to move the object horizontally or vertically.
  * @param {Array?} colliders List of objects to collide against. The moved object is automatically excluded in case it
  * is in this array. Colliders must report coordinates relative to the world. Colliders must be PlatformingCharacters.
- * @param {boolean} stayOnGround True if the character should try to follow the ground when going down on a slope.
  */
-PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, colliders, stayOnGround) {
+PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, colliders) {
     var maxStepUp = 0.1;
     var isWall = function(tile) {
         return tile.isWall();
@@ -757,7 +761,7 @@ PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, collider
             if (movingObj.y > wallYDown - rectBottomHalfHeight - TileMap.epsilon) {
                 movingObj.y = wallYDown - rectBottomHalfHeight - TileMap.epsilon;
                 movingObj.touchGround();
-            } else if (hitSlope && stayOnGround) {
+            } else if (hitSlope && movingObj.lastOnGround && movingObj.preferStayingOnGround) {
                 // TODO: There's still a bug where the character teleports downwards when there's a slope like this:
                 // .
                 // xl
