@@ -93,16 +93,12 @@ PlatformingCharacter.prototype.updateY = function(deltaTime, colliders) {
  */
 PlatformingCharacter.prototype.touchGround = function() {
     this.onGround = true;
-    // TODO: The Math.max is problematic if it's desired that a collider would launch the character into the air.
-    // On the other hand it's not desired that upwards slopes would launch the character.
-    this.dy = Math.max((this.y - this.lastY) / this.lastDeltaTime, 0);
 };
 
 /**
  * Callback when the character touches the ceiling.
  */
 PlatformingCharacter.prototype.touchCeiling = function() {
-    this.dy = 0;
 };
 
 /**
@@ -176,8 +172,8 @@ PlatformingTileMap.prototype.init = function(options) {
             this[key] = options[key];
         }
     }
-    this.prevFrameDeltaX = 0;
-    this.prevFrameDeltaY = 0;
+    this.frameDeltaDeltaX = 0;
+    this.frameDeltaDeltaY = 0;
     this.collisionGroup = '_none';
 };
 
