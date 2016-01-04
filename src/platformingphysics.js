@@ -512,8 +512,8 @@ PlatformingPhysics.initFromData = function(data, flippedX) {
  *   touchGround(), touchCeiling()
  * @param {number} deltaTime Time step to use to move the object.
  * @param {string} dim Either 'x' or 'y' to move the object horizontally or vertically.
- * @param {Array?} colliders List of objects to collide against. The moved object is automatically excluded in case it
- * is in this array. Colliders must report coordinates relative to the world. Colliders must be PlatformingCharacters.
+ * @param {Array.<PlatformingCharacter>?} colliders List of objects to collide against. The moved object is
+ * automatically excluded in case it is in this array. Colliders must report coordinates relative to the world.
  */
 PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, colliders) {
     var maxStepUp = 0.1;
