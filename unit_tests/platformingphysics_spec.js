@@ -142,6 +142,20 @@ describe('PlatformingPhysics', function() {
         };
         return testPlatformingTileMap(options, initParams);
     };
+    
+    var testPlatformingTileMapWithSlopeFloor = function(options) {
+        var initParams = {
+            width: 4,
+            height: 3,
+            initTile: PlatformingPhysics.initFromData(
+                [
+                    '    ',
+                    '    ',
+                    ' /. '
+                ], false)
+        };
+        return testPlatformingTileMap(options, initParams);
+    };
 
     describe('PlatformingCharacter', function() {
         it('initializes', function() {
@@ -845,6 +859,48 @@ describe('PlatformingPhysics', function() {
                 expect(obj1.x).toBeCloseTo(origX, 4);
                 expect(obj1.y).toBeCloseTo(pTileMap.y + pTileMap.getRect().height() - 2.4 - colliderWidth * 0.5, 3);
                 expect(obj1._testTouchGroundCounter).toBe(1);
+                expect(obj1._testTouchCeilingCounter).toBe(0);
+            });
+            it('handles an object colliding a slope from the left', function() {
+                var level = new PlatformingLevel();
+                level.init();
+                var tileMapParams = {};
+                var pTileMap = testPlatformingTileMapWithSlopeFloor(tileMapParams);
+                level.pushObject(pTileMap, []);
+                
+                var colliderWidth = 1.0;
+                var origX = -1.0;
+                var origY = pTileMap.getRect().height();
+                var testDx = 5.0;
+                var obj1 = testCollider({width: colliderWidth, x: origX, y: origY, dx: testDx, dy: 0});
+                level.pushObject(obj1, []);
+
+                var deltaTime = 1.0;
+                level.update(deltaTime);
+                expect(obj1.x).toBeCloseTo(pTileMap.x + 1 - colliderWidth * 0.5, 3);
+                expect(obj1.y).toBeCloseTo(origY, 4);
+                expect(obj1._testTouchGroundCounter).toBe(0);
+                expect(obj1._testTouchCeilingCounter).toBe(0);
+            });
+            it('handles an object colliding a slope from the right', function() {
+                var level = new PlatformingLevel();
+                level.init();
+                var tileMapParams = {};
+                var pTileMap = testPlatformingTileMapWithSlopeFloor(tileMapParams);
+                level.pushObject(pTileMap, []);
+                
+                var colliderWidth = 1.0;
+                var origX = pTileMap.getRect().width() + 1.0;
+                var origY = pTileMap.getRect().height();
+                var testDx = -5.0;
+                var obj1 = testCollider({width: colliderWidth, x: origX, y: origY, dx: testDx, dy: 0});
+                level.pushObject(obj1, []);
+
+                var deltaTime = 1.0;
+                level.update(deltaTime);
+                expect(obj1.x).toBeCloseTo(pTileMap.x + 3 + colliderWidth * 0.5, 3);
+                expect(obj1.y).toBeCloseTo(origY, 4);
+                expect(obj1._testTouchGroundCounter).toBe(0);
                 expect(obj1._testTouchCeilingCounter).toBe(0);
             });
 
