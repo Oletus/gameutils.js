@@ -218,6 +218,28 @@ describe('PlatformingPhysics', function() {
             expect(level._colliders['_all'][0]).toBe(c);
         });
 
+        it('adds objects to the requested collision groups', function() {
+            var level = new PlatformingLevel();
+            level.init();
+            var c = testCollider(1, 12, 3);
+            level.pushObject(c, ['foo', 'bar']);
+            expect(level._objects[0]).toBe(c);
+            expect(level._colliders['_all'][0]).toBe(c);
+            expect(level._colliders['foo'][0]).toBe(c);
+            expect(level._colliders['bar'][0]).toBe(c);
+        });
+        
+        it('removes an object', function() {
+            var level = new PlatformingLevel();
+            level.init();
+            var c = testPlatformingTileMapWithFloor({});
+            level.pushObject(c, ['foo']);
+            level.removeObject(c);
+            expect(level._tileMapObjects.length).toBe(0);
+            expect(level._colliders['_all'].length).toBe(0);
+            expect(level._colliders['foo'].length).toBe(0);
+        });
+
         it('updates when it has one object', function() {
             var level = new PlatformingLevel();
             level.init();

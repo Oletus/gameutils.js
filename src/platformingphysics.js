@@ -249,6 +249,20 @@ PlatformingLevel.prototype.pushObject = function(object, collisionGroups) {
     this._colliders['_all'].push(object);
 };
 
+PlatformingLevel.prototype.removeObject = function(object) {
+    if (object instanceof PlatformingTileMap) {
+        this._tileMapObjects.splice(this._tileMapObjects.indexOf(object), 1);
+    } else {
+        this._objects.splice(this._objects.indexOf(object), 1);
+    }
+    for (var groupKey in this._colliders) {
+        var indexInGroup = this._colliders[groupKey].indexOf(object);
+        if (indexInGroup >= 0) {
+            this._colliders[groupKey].splice(indexInGroup, 1);
+        }
+    }
+};
+
 /**
  * Update all object positions.
  * Tilemap objects may move. Their movement only affects the movement of other objects via collisions (so for example
