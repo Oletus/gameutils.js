@@ -522,7 +522,7 @@ CanvasResizer.prototype._isInMinMode = function() {
     return this.mode === CanvasResizer.Mode.MINIMUM_RESOLUTION ||
            this.mode === CanvasResizer.Mode.MINIMUM_HEIGHT ||
            this.mode === CanvasResizer.Mode.MINIMUM_WIDTH;
-}
+};
 
 /**
  * Resize the canvas in one of the fixed resolution modes.
