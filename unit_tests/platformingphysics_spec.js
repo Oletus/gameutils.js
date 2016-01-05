@@ -861,7 +861,28 @@ describe('PlatformingPhysics', function() {
                 expect(obj1._testTouchGroundCounter).toBe(1);
                 expect(obj1._testTouchCeilingCounter).toBe(0);
             });
-            it('handles an object colliding a slope from the left', function() {
+            it('handles an object colliding a floor slope from below', function() {
+                var level = new PlatformingLevel();
+                level.init();
+                var tileMapParams = {};
+                var pTileMap = testPlatformingTileMapWithSlopeFloor(tileMapParams);
+                level.pushObject(pTileMap, []);
+                
+                var colliderWidth = 1.0;
+                var origY = 5.0;
+                var testDy = -6.0;
+                var origX = 2.0;
+                var obj1 = testCollider({width: colliderWidth, x: origX, y: origY, dx: 0, dy: testDy});
+                level.pushObject(obj1, []);
+
+                var deltaTime = 1.0;
+                level.update(deltaTime);
+                expect(obj1.x).toBeCloseTo(origX, 4);
+                expect(obj1.y).toBeCloseTo(pTileMap.y + pTileMap.getRect().height() + colliderWidth * 0.5, 3);
+                expect(obj1._testTouchGroundCounter).toBe(0);
+                expect(obj1._testTouchCeilingCounter).toBe(1);
+            });
+            it('handles an object colliding a floor slope from the left', function() {
                 var level = new PlatformingLevel();
                 level.init();
                 var tileMapParams = {};
@@ -882,7 +903,7 @@ describe('PlatformingPhysics', function() {
                 expect(obj1._testTouchGroundCounter).toBe(0);
                 expect(obj1._testTouchCeilingCounter).toBe(0);
             });
-            it('handles an object colliding a slope from the right', function() {
+            it('handles an object colliding a floor slope from the right', function() {
                 var level = new PlatformingLevel();
                 level.init();
                 var tileMapParams = {};

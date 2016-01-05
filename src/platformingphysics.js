@@ -530,6 +530,9 @@ PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, collider
     var isFloorSlope = function(tile) {
         return tile.isFloorSlope();
     };
+    var isWallUpOrFloorSlope = function(tile) {
+        return tile.isWallUp() || tile.isFloorSlope();
+    };
     var done = false;
     var delta = 0;
     if (dim == 'x') {
@@ -716,7 +719,7 @@ PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, collider
                     var relativeRect = new Rect(rect.left, rect.right, rect.top, rect.bottom);
                     relativeRect.translate(fromWorldToTileMap);
                     if (relativeDelta <= 0) {
-                        var wallTileY = yColliders[i].tileMap.nearestTileUpFromRect(relativeRect, isWallUp, Math.abs(relativeDelta));
+                        var wallTileY = yColliders[i].tileMap.nearestTileUpFromRect(relativeRect, isWallUpOrFloorSlope, Math.abs(relativeDelta));
                         if (wallTileY != -1 && wallYUp < wallTileY + 1 + yColliders[i].y) {
                             wallYUp = wallTileY + 1 + yColliders[i].y;
                         }
