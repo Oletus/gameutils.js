@@ -249,6 +249,10 @@ PlatformingLevel.prototype.pushObject = function(object, collisionGroups) {
     this._colliders['_all'].push(object);
 };
 
+/**
+ * Remove an object from the level.
+ * @param {PlatformingCharacter} object Object to remove.
+ */
 PlatformingLevel.prototype.removeObject = function(object) {
     if (object instanceof PlatformingTileMap) {
         this._tileMapObjects.splice(this._tileMapObjects.indexOf(object), 1);
