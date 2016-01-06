@@ -59,13 +59,22 @@ PlatformingCharacter.prototype.decideDx = function(deltaTime) {
 };
 
 /**
+ * Override this to perform custom per-frame changes to this.x instead of the normal dx/dy dependent behavior.
+ * @param {number} deltaTime
+ * @param {Array.<PlatformingCharacter>} colliders Objects to collide against.
+ */
+PlatformingCharacter.prototype.moveX = function(deltaTime, colliders) {
+    PlatformingPhysics.moveAndCollide(this, deltaTime, 'x', colliders);
+};
+
+/**
  * Update the x value and do some related bookkeeping.
  * @param {number} deltaTime
  * @param {Array.<PlatformingCharacter>} colliders Objects to collide against.
  */
 PlatformingCharacter.prototype.updateX = function(deltaTime, colliders) {
     this.lastDeltaTime = deltaTime;
-    PlatformingPhysics.moveAndCollide(this, deltaTime, 'x', colliders);
+    this.moveX(deltaTime, colliders);
     var prevFrameDeltaX = this.frameDeltaX;
     // Save the real x movement of the object/tilemap this frame, so that other objects can take it into account
     // when colliding against it.
@@ -87,6 +96,15 @@ PlatformingCharacter.prototype.decideDy = function(deltaTime) {
 };
 
 /**
+ * Override this to perform custom per-frame changes to this.y instead of the normal dx/dy dependent behavior.
+ * @param {number} deltaTime
+ * @param {Array.<PlatformingCharacter>} colliders Objects to collide against.
+ */
+PlatformingCharacter.prototype.moveY = function(deltaTime, colliders) {
+    PlatformingPhysics.moveAndCollide(this, deltaTime, 'y', colliders);
+};
+
+/**
  * Update the y value and do some related bookkeeping.
  * @param {number} deltaTime
  * @param {Array.<PlatformingCharacter>} colliders Objects to collide against.
@@ -94,7 +112,7 @@ PlatformingCharacter.prototype.decideDy = function(deltaTime) {
 PlatformingCharacter.prototype.updateY = function(deltaTime, colliders) {
     this.onGround = false;
     this.groundPlatform = null;
-    PlatformingPhysics.moveAndCollide(this, deltaTime, 'y', colliders);
+    this.moveY(deltaTime, colliders);
     if (this.onGround) {
         this.airTime = 0.0;
     } else {
