@@ -273,7 +273,6 @@ PlatformingTileMap.prototype.render = function(ctx) {
 
 /**
  * Render only sloped tiles to a canvas.
- * @param {TileMap} tileMap Map to render.
  * @param {CanvasRenderingContext2D} ctx 2D rendering context to use for drawing.
  */
 PlatformingTileMap.prototype.renderSlopes = function(ctx) {
@@ -405,6 +404,19 @@ PlatformingLevel.prototype.update = function(deltaTime) {
     }
 };
 
+/**
+ * Debug render the level. Renders tiles as 1 wide and 1 tall, so set transform on the rendering context before
+ * calling to scale the rendering.
+ * @param {CanvasRenderingContext2D} ctx 2D rendering context to use for drawing.
+ */
+PlatformingLevel.prototype.render = function(ctx) {
+    for (var i = 0; i < this._tileMapObjects.length; ++i) {
+        this._tileMapObjects[i].render(ctx);
+    }
+    for (var i = 0; i < this._objects.length; ++i) {
+        this._objects[i].render(ctx);
+    }
+};
  
 /**
  * A platforming tile.

@@ -81,8 +81,7 @@ Tester.prototype.update = function() {
     ctx.save();
     
     ctx.scale(20, 20);
-    this.platform.render(ctx);
-    this.character.render(ctx);
+    this.physicsLevel.render(ctx);
     ctx.restore();
     
     this.physicsLevel.update(1 / 60);
