@@ -51,23 +51,23 @@ var Tester = function() {
         x: 8,
         y: 10
     });
-    this.character.touchGround = function() {
+    this.character.touchGround = function(collisionObject) {
         this.dx = that.platform.dx;
         this.dy = that.platform.dy;
-        this.skipCollisionInertia = true;
+        this.standingOnPlatform = collisionObject;
         return true;
     };
 
     this.character.decideDx = function(deltaTime) { // Normally this would be in an inherited class
         if (this.onGround) {
-            this.dx += that.platform.frameDeltaDeltaX / deltaTime;
+            this.dx += this.standingOnPlatform.frameDeltaDeltaX / deltaTime;
         }
     };
     this.character.decideDy = function(deltaTime) { // Normally this would be in an inherited class
-        // The character automatically sticks to a slow moving platform, but a fast moving one
+        // The character automatically sticks to a slow moving platform, but a fast accelerating one
         // will launch the character to the air.
-        if (this.onGround && that.platform.frameDeltaDeltaY / deltaTime < 0.5) {
-            this.dy += that.platform.frameDeltaDeltaY / deltaTime;
+        if (this.onGround && this.standingOnPlatform.frameDeltaDeltaY / deltaTime < 0.5) {
+            this.dy += this.standingOnPlatform.frameDeltaDeltaY / deltaTime;
         }
         this.dy += 10.0 * deltaTime;
     };

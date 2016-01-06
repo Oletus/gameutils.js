@@ -112,36 +112,40 @@ PlatformingCharacter.prototype.updateY = function(deltaTime, colliders) {
 
 /**
  * Callback when the character touches ground.
+ * @param {PlatformingCharacter} collisionObject Object that was collided with.
  */
-PlatformingCharacter.prototype._touchGround = function() {
+PlatformingCharacter.prototype._touchGround = function(collisionObject) {
     this.onGround = true;
-    if (!this.touchGround()) {
+    if (!this.touchGround(collisionObject)) {
         this.dy = (this.y - this.lastY) / this.lastDeltaTime;
     }
 };
 
 /**
  * Prefer overriding this if you need to trigger behaviors when touching ground.
+ * @param {PlatformingCharacter} collisionObject Object that was collided with.
  * @return {boolean} Return true to override changes to dy that are done by default when touching ground.
  */
-PlatformingCharacter.prototype.touchGround = function() {
+PlatformingCharacter.prototype.touchGround = function(collisionObject) {
     return false;
 };
 
 /**
  * Callback when the character touches the ceiling.
+ * @param {PlatformingCharacter} collisionObject Object that was collided with.
  */
-PlatformingCharacter.prototype._touchCeiling = function() {
-    if (!this.touchCeiling()) {
+PlatformingCharacter.prototype._touchCeiling = function(collisionObject) {
+    if (!this.touchCeiling(collisionObject)) {
         this.dy = (this.y - this.lastY) / this.lastDeltaTime;
     }
 };
 
 /**
  * Prefer overriding this if you need to trigger behaviors when touching ceiling.
+ * @param {PlatformingCharacter} collisionObject Object that was collided with.
  * @return {boolean} Return true to override changes to dy that are done by default when touching the ceiling.
  */
-PlatformingCharacter.prototype.touchCeiling = function() {
+PlatformingCharacter.prototype.touchCeiling = function(collisionObject) {
     return false;
 };
 
@@ -778,19 +782,16 @@ PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, collider
                     }
                     var collider = colliders[i].getRect();
                     if (rect.left < collider.right && collider.left < rect.right) {
-                        if (colliders[i] instanceof PlatformingTileMap && (!isMovingObjTileMap || colliders[i].tilesAffectMovingTilemaps)) {
-                            yColliders.push(colliders[i]);
-                        } else {
-                            yColliders.push(collider);
-                        }
+                        yColliders.push(colliders[i]);
                     }
                 }
             }
             var wallYDown = Number.MAX_VALUE;
             var wallYUp = -Number.MAX_VALUE;
             var wallDownObject = null;
+            var wallUpObject = null;
             for (var i = 0; i < yColliders.length; ++i) {
-                if (yColliders[i] instanceof PlatformingTileMap) {
+                if (yColliders[i] instanceof PlatformingTileMap && (!isMovingObjTileMap || colliders[i].tilesAffectMovingTilemaps)) {
                     // X movement has already been fully evaluated
                     var fromWorldToTileMap = new Vec2(-yColliders[i].x, -yColliders[i].lastY);
                     var relativeDelta = delta - yColliders[i].frameDeltaY;
@@ -800,6 +801,7 @@ PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, collider
                         var wallTileY = yColliders[i].tileMap.nearestTileUpFromRect(relativeRect, isWallUpOrFloorSlope, Math.abs(relativeDelta));
                         if (wallTileY != -1 && wallYUp < wallTileY + 1 + yColliders[i].y) {
                             wallYUp = wallTileY + 1 + yColliders[i].y;
+                            wallUpObject = yColliders[i];
                         }
                     } else {
                         var floorSearchDistance = Math.max(Math.abs(relativeDelta), movingObj.maxStickToGroundDistance);
@@ -808,6 +810,7 @@ PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, collider
                         var wallTileY = yColliders[i].tileMap.nearestTileDownFromRect(relativeRect, isWall, floorSearchDistance);
                         if (wallTileY != -1 && wallYDown > wallTileY + yColliders[i].y) {
                             wallYDown = wallTileY + yColliders[i].y;
+                            wallDownObject = yColliders[i];
                         }
                         relativeRect.bottom = origBottom;
                         var slopeTiles = yColliders[i].tileMap.getNearestTilesDownFromRect(relativeRect, isFloorSlope,
@@ -823,37 +826,42 @@ PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, collider
                                                   slopeTile.getFloorRelativeHeight(relativeX + rectRightHalfWidth);
                                 if (slopeYLeft < wallYDown) {
                                     wallYDown = slopeYLeft;
+                                    wallDownObject = yColliders[i];
                                 }
                                 if (slopeYRight < wallYDown) {
                                     wallYDown = slopeYRight;
+                                    wallDownObject = yColliders[i];
                                 }
                             }
                         }
                     }
                 } else {
-                    if (delta < 0 && yColliders[i].top < rect.bottom && wallYUp < yColliders[i].bottom) {
-                        wallYUp = yColliders[i].bottom;
+                    var colliderRect = yColliders[i].getRect();
+                    if (delta < 0 && colliderRect.top < rect.bottom && wallYUp < colliderRect.bottom) {
+                        wallYUp = colliderRect.bottom;
+                        wallUpObject = yColliders[i];
                     }
-                    if (delta > 0 && yColliders[i].bottom > rect.top && wallYDown > yColliders[i].top) {
-                        wallYDown = yColliders[i].top;
+                    if (delta > 0 && colliderRect.bottom > rect.top && wallYDown > colliderRect.top) {
+                        wallYDown = colliderRect.top;
+                        wallDownObject = yColliders[i];
                     }
                 }
             }
 
             if (movingObj.y > wallYDown - rectBottomHalfHeight - TileMap.epsilon) {
                 movingObj.y = wallYDown - rectBottomHalfHeight - TileMap.epsilon;
-                movingObj._touchGround();
+                movingObj._touchGround(wallDownObject);
             } else if (movingObj.lastOnGround &&
                        movingObj.y > wallYDown - rectBottomHalfHeight - TileMap.epsilon - movingObj.maxStickToGroundDistance) {
                 // TODO: There's still a bug where the character teleports downwards when there's a slope like this:
                 // .
                 // xl
                 movingObj.y = wallYDown - rectBottomHalfHeight - TileMap.epsilon;
-                movingObj._touchGround();
+                movingObj._touchGround(wallDownObject);
             }
             if (movingObj.y < wallYUp + rectTopHalfHeight + TileMap.epsilon) {
                 movingObj.y = wallYUp + rectTopHalfHeight + TileMap.epsilon;
-                movingObj._touchCeiling();
+                movingObj._touchCeiling(wallUpObject);
             }
         }
     }
