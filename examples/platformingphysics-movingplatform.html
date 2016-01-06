@@ -7,6 +7,12 @@
 <script src="../src/util2d.js"></script>
 <script src="../src/tilemap.js"></script>
 <script src="../src/platformingphysics.js"></script>
+
+<!-- These are just for input -->
+<script src="../src/lib/mousetrap.js"></script>
+<script src="../src/lib/mousetrap-global-bind.js"></script>
+<script src="../src/gamepad.js"></script>
+<script src="../src/inputmapper.js"></script>
 <script>
 'use strict';
 
@@ -14,6 +20,10 @@ var ctx;
 var tester;
 
 var Tester = function() {
+    this.input = new InputMapper(this, 1);
+    this.input.addListener(Gamepad.BUTTONS.LEFT_OR_ANALOG_LEFT, ['left', 'a'], this.leftPress, this.leftRelease);
+    this.input.addListener(Gamepad.BUTTONS.RIGHT_OR_ANALOG_RIGHT, ['right', 'd'], this.rightPress, this.rightRelease);
+
     this.physicsLevel = new PlatformingLevel();
     this.physicsLevel.init();
     
@@ -24,7 +34,7 @@ var Tester = function() {
         initTile: PlatformingPhysics.initFromData(
             [
                 '      ',
-                '.    /',
+                'l    r',
                 'xxxxxx'
             ], false)
     };
@@ -51,16 +61,27 @@ var Tester = function() {
         x: 8,
         y: 10
     });
+    this.character.playerMoveIntent = 0;
+
     this.character.touchGround = function(collisionObject) {
-        this.dx = that.platform.dx;
-        this.dy = that.platform.dy;
-        this.standingOnPlatform = collisionObject;
+        if (this.standingOnPlatform != collisionObject) {
+            this.dx = that.platform.dx;
+            this.dy = that.platform.dy;
+            this.standingOnPlatform = collisionObject;
+        }
         return true;
     };
 
     this.character.decideDx = function(deltaTime) { // Normally this would be in an inherited class
         if (this.onGround) {
             this.dx += this.standingOnPlatform.frameDeltaDeltaX / deltaTime;
+            propertyToValue(this, "dx", this.playerMoveIntent * 5.0 + this.standingOnPlatform.frameDeltaX / deltaTime, deltaTime * 200.0);
+        } else {
+            if (this.playerMoveIntent < 0) {
+                propertyToValue(this, "dx", Math.min(this.dx, this.playerMoveIntent * 5.0), deltaTime * 20.0);
+            } else if (this.playerMoveIntent > 0) {
+                propertyToValue(this, "dx", Math.max(this.dx, this.playerMoveIntent * 5.0), deltaTime * 20.0);
+            }
         }
     };
     this.character.decideDy = function(deltaTime) { // Normally this would be in an inherited class
@@ -69,10 +90,26 @@ var Tester = function() {
         if (this.onGround && this.standingOnPlatform.frameDeltaDeltaY / deltaTime < 0.5) {
             this.dy += this.standingOnPlatform.frameDeltaDeltaY / deltaTime;
         }
-        this.dy += 10.0 * deltaTime;
+        this.dy += 15.0 * deltaTime;
     };
     this.physicsLevel.pushObject(this.platform);
     this.physicsLevel.pushObject(this.character);
+};
+
+Tester.prototype.leftPress = function() {
+    this.character.playerMoveIntent -= 1.0;
+};
+
+Tester.prototype.leftRelease = function() {
+    this.character.playerMoveIntent += 1.0;
+};
+
+Tester.prototype.rightPress = function() {
+    this.character.playerMoveIntent += 1.0;
+};
+
+Tester.prototype.rightRelease = function() {
+    this.character.playerMoveIntent -= 1.0;
 };
 
 Tester.prototype.update = function() {
