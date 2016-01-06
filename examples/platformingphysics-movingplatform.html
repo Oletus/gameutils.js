@@ -1,0 +1,113 @@
+<html>
+<head>
+<title>Gameutils.js: Using the PlatformingPhysics classes to implement a moving platform</title>
+<meta charset="UTF-8">
+<link rel="stylesheet" type="text/css" href="assets/default.css">
+<script src="../src/utiljs.js"></script>
+<script src="../src/util2d.js"></script>
+<script src="../src/tilemap.js"></script>
+<script src="../src/platformingphysics.js"></script>
+<script>
+'use strict';
+
+var ctx;
+var tester;
+
+var Tester = function() {
+    this.physicsLevel = new PlatformingLevel();
+    this.physicsLevel.init();
+    
+    this.platform = new PlatformingTileMap();
+    var tileMapInitParams = {
+        width: 6,
+        height: 3,
+        initTile: PlatformingPhysics.initFromData(
+            [
+                '      ',
+                '.    /',
+                'xxxxxx'
+            ], false)
+    };
+    this.platform.init({
+        x: 5,
+        y: 10,
+        color: '#fff',
+        tileMap: new TileMap(tileMapInitParams)
+    });
+    var that = this;
+    this.platformFlingSpeed = 1.0;
+    this.platform.decisionTime = 0;
+    this.platform.decideDx = function(deltaTime) { // Normally this would be in an inherited class
+        this.decisionTime += deltaTime;
+        this.dx = Math.sin(this.decisionTime) * 5.0;
+    };
+    
+    this.platform.decideDy = function(deltaTime) { // Normally this would be in an inherited class
+        this.dy = -Math.cos(this.decisionTime * 3.0) * 3.0 * that.platformFlingSpeed;
+    };
+
+    this.character = new PlatformingCharacter();
+    this.character.init({
+        x: 8,
+        y: 10
+    });
+    this.character.touchGround = function() {
+        this.dx = that.platform.dx;
+        this.dy = that.platform.dy;
+        this.skipCollisionInertia = true;
+        return true;
+    };
+
+    this.character.decideDx = function(deltaTime) { // Normally this would be in an inherited class
+        if (this.onGround) {
+            this.dx += that.platform.frameDeltaDeltaX / deltaTime;
+        }
+    };
+    this.character.decideDy = function(deltaTime) { // Normally this would be in an inherited class
+        // The character automatically sticks to a slow moving platform, but a fast moving one
+        // will launch the character to the air.
+        if (this.onGround && that.platform.frameDeltaDeltaY / deltaTime < 0.5) {
+            this.dy += that.platform.frameDeltaDeltaY / deltaTime;
+        }
+        this.dy += 10.0 * deltaTime;
+    };
+    this.physicsLevel.pushObject(this.platform);
+    this.physicsLevel.pushObject(this.character);
+};
+
+Tester.prototype.update = function() {
+    ctx.fillStyle = '#888';
+    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.save();
+    
+    ctx.scale(20, 20);
+    this.platform.render(ctx);
+    this.character.render(ctx);
+    ctx.restore();
+    
+    this.physicsLevel.update(1 / 60);
+};
+
+var frame = function() {
+    tester.update();
+    requestAnimationFrame(frame);
+};
+
+var start = function() {
+    tester = new Tester();
+    var canvas = document.createElement('canvas');
+    canvas.width = 600;
+    canvas.height = 600;
+    ctx = canvas.getContext('2d');
+    document.body.appendChild(canvas);
+    frame();
+};
+</script>
+</head>
+<body onload="start()">
+<h2>Using the PlatformingPhysics classes to implement a moving platform</h2>
+<p>Compatibility: Chrome 47, Firefox 43, IE 11.</p>
+<input type="button" value="Fling character" onclick="tester.platformFlingSpeed = 5.0;"></input>
+<br />
+</body>
+</html>

@@ -29,9 +29,11 @@ describe('PlatformingPhysics', function() {
         c._testTouchCeilingCounter = 0;
         c.touchGround = function() {
             c._testTouchGroundCounter++;
+            return false;
         };
         c.touchCeiling = function() {
             c._testTouchCeilingCounter++;
+            return false;
         };
         return c;
     };
@@ -1041,6 +1043,8 @@ describe('PlatformingPhysics', function() {
                         var origX = 0.1;
                         var testDy = 0.1;
                         var obj1 = testCollider({width: colliderWidth, x: origX, y: origY, dx: testDx, dy: testDy});
+                        obj1.onGround = true;
+                        obj1.lastOnGround = true;
                         obj1.maxStickToGroundDistance = 3;
                         level.pushObject(obj1, []);
 

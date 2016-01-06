@@ -22,7 +22,9 @@ var PlatformingCharacter = function() {
 PlatformingCharacter.prototype.init = function(options) {
     var defaults = {
         x: 0,
-        y: 0
+        y: 0,
+        color: '#f00',
+        preserveInertiaFromCollisions: true
     };
     for(var key in defaults) {
         if (!options.hasOwnProperty(key)) {
@@ -34,15 +36,13 @@ PlatformingCharacter.prototype.init = function(options) {
     this.lastX = this.x;
     this.lastY = this.y;
     this.lastYAfterUpwardSlopes = this.y;
-    this.onGround = true;
+    this.onGround = false;
     this.maxStickToGroundDistance = 0;
-    this.lastOnGround = true;
+    this.lastOnGround = false;
     this.lastDeltaTime = 0;
     this.airTime = 0;
     this.dx = 0;
     this.dy = 0;
-
-    this.color = '#f00';
 
     this.collisionGroup = '_all';
     this.frameDeltaX = 0;
@@ -72,7 +72,7 @@ PlatformingCharacter.prototype.updateX = function(deltaTime, colliders) {
  * @param {number} deltaTime
  */
 PlatformingCharacter.prototype.decideDy = function(deltaTime) {
-    this.dy += 1.0 * deltaTime;
+    this.dy += 5.0 * deltaTime;
 };
 
 /**
@@ -93,16 +93,36 @@ PlatformingCharacter.prototype.updateY = function(deltaTime, colliders) {
 /**
  * Callback when the character touches ground.
  */
-PlatformingCharacter.prototype.touchGround = function() {
+PlatformingCharacter.prototype._touchGround = function() {
     this.onGround = true;
-    this.dy = (this.y - this.lastY) / this.lastDeltaTime;
+    if (!this.touchGround()) {
+        this.dy = (this.y - this.lastY) / this.lastDeltaTime;
+    }
+};
+
+/**
+ * Prefer overriding this if you need to trigger behaviors when touching ground.
+ * @return {boolean} Return true to override changes to dy that are done by default when touching ground.
+ */
+PlatformingCharacter.prototype.touchGround = function() {
+    return false;
 };
 
 /**
  * Callback when the character touches the ceiling.
  */
+PlatformingCharacter.prototype._touchCeiling = function() {
+    if (!this.touchCeiling()) {
+        this.dy = (this.y - this.lastY) / this.lastDeltaTime;
+    }
+};
+
+/**
+ * Prefer overriding this if you need to trigger behaviors when touching ceiling.
+ * @return {boolean} Return true to override changes to dy that are done by default when touching the ceiling.
+ */
 PlatformingCharacter.prototype.touchCeiling = function() {
-    this.dy = (this.y - this.lastY) / this.lastDeltaTime;
+    return false;
 };
 
 /**
@@ -209,6 +229,41 @@ PlatformingTileMap.prototype.decideDy = function(deltaTime) {
 };
 
 /**
+ * Render all the tiles to a canvas.
+ * @param {CanvasRenderingContext2D} ctx Context to draw to.
+ */
+PlatformingTileMap.prototype.render = function(ctx) {
+    ctx.fillStyle = this.color;
+    /*var rect = this.getRect();
+    ctx.fillRect(rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top);*/
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    var isWall = function(tile) {
+        return tile.isWall();
+    };
+    this.tileMap.render(ctx, isWall);
+    this.renderSlopes(ctx);
+    ctx.restore();
+};
+
+
+/**
+ * Render only sloped tiles to a canvas.
+ * @param {TileMap} tileMap Map to render.
+ * @param {CanvasRenderingContext2D} ctx 2D rendering context to use for drawing.
+ */
+PlatformingTileMap.prototype.renderSlopes = function(ctx) {
+    for (var y = 0; y < this.tileMap.height; ++y) {
+        for (var x = 0; x < this.tileMap.width; ++x) {
+            var tile = this.tileMap.tiles[y][x];
+            if (tile.isFloorSlope()) {
+                tile.render(ctx);
+            }
+        }
+    }
+};
+
+/**
  * A platforming level composed of tilemaps and objects that collide against them (or against each other).
  * @constructor
  */
@@ -300,6 +355,9 @@ PlatformingLevel.prototype.update = function(deltaTime) {
             object.frameDeltaX = object.x - object.lastX;
             // Also measure secondary delta, this can be used to implement moving platforms.
             object.frameDeltaDeltaX = object.frameDeltaX - prevFrameDeltaX;
+            if (object.preserveInertiaFromCollisions) {
+                object.dx = object.frameDeltaX / deltaTime;
+            }
         }
     }
     for (var i = 0; i < this._objects.length; ++i) {
@@ -339,6 +397,9 @@ PlatformingLevel.prototype.update = function(deltaTime) {
         object.updateY(deltaTime, this._colliders[object.collisionGroup]);
         object.frameDeltaY = object.y - object.lastY;
         object.frameDeltaYWithoutUpwardSlopes = object.y - object.lastYAfterUpwardSlopes;
+        if (object.preserveInertiaFromCollisions) {
+            object.dy = object.frameDeltaYWithoutUpwardSlopes / deltaTime;
+        }
     }
 };
 
@@ -358,7 +419,7 @@ PlatformingTile.prototype.getFloorRelativeHeight = function(xInTile) {
 };
 
 /**
- * Set the position of the tile.
+ * Set the position of the tile relative to the tilemap.
  */
 PlatformingTile.prototype.setPos = function(x, y) {
     this._x = x;
@@ -729,6 +790,7 @@ PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, collider
             }
             var wallYDown = Number.MAX_VALUE;
             var wallYUp = -Number.MAX_VALUE;
+            var wallDownObject = null;
             for (var i = 0; i < yColliders.length; ++i) {
                 if (yColliders[i] instanceof PlatformingTileMap) {
                     // X movement has already been fully evaluated
@@ -782,34 +844,18 @@ PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, collider
 
             if (movingObj.y > wallYDown - rectBottomHalfHeight - TileMap.epsilon) {
                 movingObj.y = wallYDown - rectBottomHalfHeight - TileMap.epsilon;
-                movingObj.touchGround();
+                movingObj._touchGround();
             } else if (movingObj.lastOnGround &&
                        movingObj.y > wallYDown - rectBottomHalfHeight - TileMap.epsilon - movingObj.maxStickToGroundDistance) {
                 // TODO: There's still a bug where the character teleports downwards when there's a slope like this:
                 // .
                 // xl
                 movingObj.y = wallYDown - rectBottomHalfHeight - TileMap.epsilon;
-                movingObj.touchGround();
+                movingObj._touchGround();
             }
             if (movingObj.y < wallYUp + rectTopHalfHeight + TileMap.epsilon) {
                 movingObj.y = wallYUp + rectTopHalfHeight + TileMap.epsilon;
-                movingObj.touchCeiling();
-            }
-        }
-    }
-};
-
-/**
- * Render sloped tiles to a canvas.
- * @param {TileMap} tileMap Map to render.
- * @param {CanvasRenderingContext2D} ctx 2D rendering context to use for drawing.
- */
-PlatformingPhysics.renderSlopes = function(tileMap, ctx) {
-    for (var y = 0; y < tileMap.height; ++y) {
-        for (var x = 0; x < tileMap.width; ++x) {
-            var tile = tileMap.tiles[y][x];
-            if (tile.isFloorSlope()) {
-                tile.render(ctx);
+                movingObj._touchCeiling();
             }
         }
     }
