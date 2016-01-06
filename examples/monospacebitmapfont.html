@@ -1,0 +1,65 @@
+<html>
+<head>
+<title>Gameutils.js: Using the MonospaceBitmapFont class</title>
+<meta charset="UTF-8">
+<link rel="stylesheet" type="text/css" href="assets/default.css">
+<script src="../src/sprite.js"></script>
+<script src="../src/utiljs.js"></script>
+<script src="../src/monospacebitmapfont.js"></script>
+<script>
+'use strict';
+
+var ctx;
+var tester;
+
+Sprite.gfxPath = 'assets/gfx/';
+
+var Tester = function() {
+    this.font = new MonospaceBitmapFont({
+        spriteSrc: 'bitmapfont-medium.png',
+        characterWidth: 8,
+        characterHeight: 13,
+        closerKerningCharacters: ['i', 'l', "'", '.', '!']
+    });
+};
+
+Tester.prototype.update = function() {
+    ctx.fillStyle = '#888';
+    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    var width = ctx.canvas.width;
+    var height = ctx.canvas.height;
+    // No need to wait for async loading... just start drawing!
+    ctx.textAlign = 'left';
+    this.font.drawText(ctx, 'Quick brown fox jumped over the lazy dog in the Närpiö café!', 10, 10);
+    this.font.drawText(ctx, 'Quick brown fox jumped over the lazy dog in the Närpiö café!'.toUpperCase(), 10, 30);
+    ctx.textAlign = 'center';
+    this.font.drawText(ctx, 'CENTERED? Centered.', ctx.canvas.width * 0.5, 70);
+    this.font.drawText(ctx, 'Ülemiste is in Tallinn, Günther visited there, spending $.', ctx.canvas.width * 0.5, 90);
+    ctx.textAlign = 'right';
+    this.font.drawText(ctx, 'Right aligned & awesome!', ctx.canvas.width - 10, 130);
+    var accentedNonsense = 'niño dapidûs, liçlà, "sélecrum" cubliâ l\'leçtus?';
+    this.font.drawText(ctx, accentedNonsense, ctx.canvas.width - 10, 150);
+    this.font.drawText(ctx, accentedNonsense.toUpperCase(), ctx.canvas.width - 10, 170);
+};
+
+var frame = function() {
+    tester.update();
+    requestAnimationFrame(frame);
+};
+
+var start = function() {
+    tester = new Tester();
+    var canvas = document.createElement('canvas');
+    canvas.width = 600;
+    canvas.height = 300;
+    ctx = canvas.getContext('2d');
+    document.body.appendChild(canvas);
+    frame();
+};
+</script>
+</head>
+<body onload="start()">
+<h2>Using the MonospaceBitmapFont</h2>
+<p>Compatibility: Chrome 47, Firefox 43, IE 11.</p>
+</body>
+</html>
