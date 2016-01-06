@@ -65,6 +65,16 @@ PlatformingCharacter.prototype.decideDx = function(deltaTime) {
 PlatformingCharacter.prototype.updateX = function(deltaTime, colliders) {
     this.lastDeltaTime = deltaTime;
     PlatformingPhysics.moveAndCollide(this, deltaTime, 'x', colliders);
+    var prevFrameDeltaX = this.frameDeltaX;
+    // Save the real x movement of the object/tilemap this frame, so that other objects can take it into account
+    // when colliding against it.
+    this.frameDeltaX = this.x - this.lastX;
+    // Also measure secondary delta, this can be used to implement moving platforms.
+    this.frameDeltaDeltaX = this.frameDeltaX - prevFrameDeltaX;
+    if (this.preserveInertiaFromCollisions) {
+        this.dx = this.frameDeltaX / deltaTime;
+    }
+    this.lastYAfterUpwardSlopes = this.y;
 };
 
 /**
@@ -87,6 +97,16 @@ PlatformingCharacter.prototype.updateY = function(deltaTime, colliders) {
         this.airTime = 0.0;
     } else {
         this.airTime += deltaTime;
+    }
+    // Save the real y movement of the tilemap this frame, so that other objects can take it into account
+    // when colliding against it.
+    var prevFrameDeltaY = this.frameDeltaY;
+    this.frameDeltaY = this.y - this.lastY;
+    this.frameDeltaYWithoutUpwardSlopes = this.y - this.lastYAfterUpwardSlopes;
+    // Also measure secondary delta, this can be used to implement moving platforms.
+    this.frameDeltaDeltaY = this.frameDeltaY - prevFrameDeltaY;
+    if (this.preserveInertiaFromCollisions) {
+        this.dy = this.frameDeltaYWithoutUpwardSlopes / deltaTime;
     }
 };
 
@@ -349,15 +369,6 @@ PlatformingLevel.prototype.update = function(deltaTime) {
         // tilemaps which affect moving tilemaps may not move.
         if (!object.tilesAffectMovingTilemaps) {
             object.updateX(deltaTime, this._colliders[object.collisionGroup]);
-            // Save the real x movement of the tilemap this frame, so that other objects can take it into account
-            // when colliding against it.
-            var prevFrameDeltaX = object.frameDeltaX;
-            object.frameDeltaX = object.x - object.lastX;
-            // Also measure secondary delta, this can be used to implement moving platforms.
-            object.frameDeltaDeltaX = object.frameDeltaX - prevFrameDeltaX;
-            if (object.preserveInertiaFromCollisions) {
-                object.dx = object.frameDeltaX / deltaTime;
-            }
         }
     }
     for (var i = 0; i < this._objects.length; ++i) {
@@ -367,8 +378,6 @@ PlatformingLevel.prototype.update = function(deltaTime) {
     for (var i = 0; i < this._objects.length; ++i) {
         var object = this._objects[i];
         object.updateX(deltaTime, this._colliders[object.collisionGroup]);
-        object.frameDeltaX = object.x - object.lastX;
-        object.lastYAfterUpwardSlopes = object.y;
     }
 
     for (var i = 0; i < this._tileMapObjects.length; ++i) {
@@ -380,12 +389,6 @@ PlatformingLevel.prototype.update = function(deltaTime) {
         // tilemaps which affect moving tilemaps may not move.
         if (!object.tilesAffectMovingTilemaps) {
             object.updateY(deltaTime, this._colliders[object.collisionGroup]);
-            // Save the real y movement of the tilemap this frame, so that other objects can take it into account
-            // when colliding against it.
-            var prevFrameDeltaY = object.frameDeltaY;
-            object.frameDeltaY = object.y - object.lastY;
-            // Also measure secondary delta, this can be used to implement moving platforms.
-            object.frameDeltaDeltaY = object.frameDeltaY - prevFrameDeltaY;
         }
     }
     for (var i = 0; i < this._objects.length; ++i) {
@@ -395,11 +398,6 @@ PlatformingLevel.prototype.update = function(deltaTime) {
     for (var i = 0; i < this._objects.length; ++i) {
         var object = this._objects[i];
         object.updateY(deltaTime, this._colliders[object.collisionGroup]);
-        object.frameDeltaY = object.y - object.lastY;
-        object.frameDeltaYWithoutUpwardSlopes = object.y - object.lastYAfterUpwardSlopes;
-        if (object.preserveInertiaFromCollisions) {
-            object.dy = object.frameDeltaYWithoutUpwardSlopes / deltaTime;
-        }
     }
 };
 
