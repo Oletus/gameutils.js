@@ -24,6 +24,7 @@ PlatformingCharacter.prototype.init = function(options) {
         x: 0,
         y: 0,
         color: '#f00',
+        collisionGroup: '_all',
         preserveInertiaFromCollisions: true
     };
     for(var key in defaults) {
@@ -45,7 +46,6 @@ PlatformingCharacter.prototype.init = function(options) {
     this.dx = 0;
     this.dy = 0;
 
-    this.collisionGroup = '_all';
     this.frameDeltaX = 0;
     this.frameDeltaY = 0;
     this.frameDeltaYWithoutUpwardSlopes = 0;

@@ -205,7 +205,7 @@ describe('PlatformingPhysics', function() {
         it('adds objects to the "_all" collision group', function() {
             var level = new PlatformingLevel();
             level.init();
-            var c = testCollider(1, 12, 3);
+            var c = testCollider({x: 1, y: 12});
             level.pushObject(c, []);
             expect(level._objects[0]).toBe(c);
             expect(level._colliders['_all'][0]).toBe(c);
@@ -223,7 +223,7 @@ describe('PlatformingPhysics', function() {
         it('adds objects to the requested collision groups', function() {
             var level = new PlatformingLevel();
             level.init();
-            var c = testCollider(1, 12, 3);
+            var c = testCollider({x: 1, y: 12});
             level.pushObject(c, ['foo', 'bar']);
             expect(level._objects[0]).toBe(c);
             expect(level._colliders['_all'][0]).toBe(c);
@@ -245,7 +245,7 @@ describe('PlatformingPhysics', function() {
         it('updates when it has one object', function() {
             var level = new PlatformingLevel();
             level.init();
-            level.pushObject(testCollider(1, 12, 3), []);
+            level.pushObject(testCollider({x: 1, y: 12}), []);
             var deltaTime = 1 / 60;
             level.update(deltaTime);
         });
@@ -270,6 +270,24 @@ describe('PlatformingPhysics', function() {
             level.update(deltaTime);
             expect(obj.lastX).toBe(12);
             expect(obj.x).toBe(14);
+        });
+        
+        it('uses collision groups to determine objects that are candidates for collision', function() {
+            var level = new PlatformingLevel();
+            level.init();
+            var c = testCollider({x: 1, y: 12});
+            level.pushObject(c, ['foo', 'bar']);
+            var c2 = testCollider({x: 1, y: 12});
+            level.pushObject(c2, ['foo']);
+            var c3 = testCollider({x: 3, y: 12, collisionGroup: 'foo'});
+            c3.moveX = function(deltaTime, colliders) {
+                expect(deltaTime).toBe(1 / 2);
+                expect(colliders.length).toBe(2);
+                expect(colliders[0]).toBe(c);
+                expect(colliders[1]).toBe(c2);
+            };
+            level.pushObject(c3, ['bar']);
+            level.update(1 / 2);
         });
         
         it('updates tilemap x and y when it is moving', function() {
