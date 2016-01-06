@@ -64,18 +64,17 @@ var Tester = function() {
     this.character.playerMoveIntent = 0;
 
     this.character.touchGround = function(collisionObject) {
-        if (this.standingOnPlatform != collisionObject) {
+        if (!this.lastOnGround) {
             this.dx = that.platform.dx;
             this.dy = that.platform.dy;
-            this.standingOnPlatform = collisionObject;
         }
         return true;
     };
 
     this.character.decideDx = function(deltaTime) { // Normally this would be in an inherited class
         if (this.onGround) {
-            this.dx += this.standingOnPlatform.frameDeltaDeltaX / deltaTime;
-            propertyToValue(this, "dx", this.playerMoveIntent * 5.0 + this.standingOnPlatform.frameDeltaX / deltaTime, deltaTime * 200.0);
+            this.dx += this.groundPlatform.frameDeltaDeltaX / deltaTime;
+            propertyToValue(this, "dx", this.playerMoveIntent * 5.0 + this.groundPlatform.frameDeltaX / deltaTime, deltaTime * 200.0);
         } else {
             if (this.playerMoveIntent < 0) {
                 propertyToValue(this, "dx", Math.min(this.dx, this.playerMoveIntent * 5.0), deltaTime * 20.0);
@@ -87,8 +86,8 @@ var Tester = function() {
     this.character.decideDy = function(deltaTime) { // Normally this would be in an inherited class
         // The character automatically sticks to a slow moving platform, but a fast accelerating one
         // will launch the character to the air.
-        if (this.onGround && this.standingOnPlatform.frameDeltaDeltaY / deltaTime < 0.5) {
-            this.dy += this.standingOnPlatform.frameDeltaDeltaY / deltaTime;
+        if (this.onGround && this.groundPlatform.frameDeltaDeltaY / deltaTime < 0.5) {
+            this.dy += this.groundPlatform.frameDeltaDeltaY / deltaTime;
         }
         this.dy += 15.0 * deltaTime;
     };

@@ -37,6 +37,7 @@ PlatformingCharacter.prototype.init = function(options) {
     this.lastY = this.y;
     this.lastYAfterUpwardSlopes = this.y;
     this.onGround = false;
+    this.groundPlatform = null;
     this.maxStickToGroundDistance = 0;
     this.lastOnGround = false;
     this.lastDeltaTime = 0;
@@ -92,6 +93,7 @@ PlatformingCharacter.prototype.decideDy = function(deltaTime) {
  */
 PlatformingCharacter.prototype.updateY = function(deltaTime, colliders) {
     this.onGround = false;
+    this.groundPlatform = null;
     PlatformingPhysics.moveAndCollide(this, deltaTime, 'y', colliders);
     if (this.onGround) {
         this.airTime = 0.0;
@@ -116,6 +118,7 @@ PlatformingCharacter.prototype.updateY = function(deltaTime, colliders) {
  */
 PlatformingCharacter.prototype._touchGround = function(collisionObject) {
     this.onGround = true;
+    this.groundPlatform = collisionObject;
     if (!this.touchGround(collisionObject)) {
         this.dy = (this.y - this.lastY) / this.lastDeltaTime;
     }
