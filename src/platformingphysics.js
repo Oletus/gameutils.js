@@ -674,13 +674,9 @@ PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, collider
                     // Ensure that the y value from the begining of the frame is used.
                     // This adds a bit of flexibility: for example, some objects that don't themselves collide with
                     // anything can update their positions in a single update function.
-                    var collider = colliders[i].getPositionedRect(colliders[i].x, colliders[i].lastY);
-                    if (rect.top < collider.bottom && collider.top < rect.bottom) {
-                        if (colliders[i] instanceof PlatformingTileMap && (!isMovingObjTileMap || colliders[i].tilesAffectMovingTilemaps)) {
-                            xColliders.push(colliders[i]);
-                        } else {
-                            xColliders.push(collider);
-                        }
+                    var colliderRect = colliders[i].getPositionedRect(colliders[i].x, colliders[i].lastY);
+                    if (rect.top < colliderRect.bottom && colliderRect.top < rect.bottom) {
+                        xColliders.push(colliders[i]);
                     }
                 }
             }
@@ -692,7 +688,7 @@ PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, collider
             var slopeEndXLeft = wallXLeft;
 
             for (var i = 0; i < xColliders.length; ++i) {
-                if (xColliders[i] instanceof PlatformingTileMap) {
+                if (xColliders[i] instanceof PlatformingTileMap && (!isMovingObjTileMap || colliders[i].tilesAffectMovingTilemaps)) {
                     var fromWorldToTileMap = new Vec2(-xColliders[i].lastX, -xColliders[i].lastY);
                     var relativeDelta = delta - xColliders[i].frameDeltaX;
                     var relativeRect = new Rect(rect.left, rect.right, rect.top, rect.bottom);
@@ -751,11 +747,13 @@ PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, collider
                         }
                     }
                 } else {
-                    if (delta < 0 && xColliders[i].left < rect.right && wallXLeft < xColliders[i].right) {
-                        wallXLeft = xColliders[i].right;
+                    var colliderLastRect = xColliders[i].getLastRect();
+                    var colliderRect = xColliders[i].getRect();
+                    if (colliderLastRect.right < rect.left && wallXLeft < colliderRect.right) {
+                        wallXLeft = colliderRect.right;
                     }
-                    if (delta > 0 && xColliders[i].right > rect.left && wallXRight > xColliders[i].left) {
-                        wallXRight = xColliders[i].left;
+                    if (colliderLastRect.left > rect.right && wallXRight > colliderRect.left) {
+                        wallXRight = colliderRect.left;
                     }
                 }
             }
@@ -870,11 +868,12 @@ PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, collider
                     }
                 } else {
                     var colliderRect = yColliders[i].getRect();
-                    if (delta < 0 && colliderRect.top < rect.bottom && wallYUp < colliderRect.bottom) {
+                    var colliderLastRect = yColliders[i].getLastRect();
+                    if (colliderLastRect.bottom < rect.top && wallYUp < colliderRect.bottom) {
                         wallYUp = colliderRect.bottom;
                         wallUpObject = yColliders[i];
                     }
-                    if (delta > 0 && colliderRect.bottom > rect.top && wallYDown > colliderRect.top) {
+                    if (colliderLastRect.top > rect.bottom && wallYDown > colliderRect.top) {
                         wallYDown = colliderRect.top;
                         wallDownObject = yColliders[i];
                     }
