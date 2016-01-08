@@ -325,7 +325,31 @@ describe('PlatformingPhysics', function() {
             expect(obj1.y).toBeCloseTo(origY + testDy * deltaTime, 4);
             expect(obj2.x).toBeCloseTo(origX1 + colliderWidth, 3);
             expect(obj2.y).toBeCloseTo(origY + testDy * deltaTime, 4);
+        });
+        
+        it('handles a high-velocity collision between two objects', function() {
+            var level = new PlatformingLevel();
+            level.init();
             
+            var colliderWidth = 1.0;
+            
+            var origY = 1.0;
+            var origX1 = 1.0; 
+            var origX2 = origX1 + colliderWidth + 0.0001;
+            var testDy = 0.1;
+            
+            // Both objects are moving fast against each other.
+            var obj1 = testCollider({width: colliderWidth, x: origX1, y: origY, dx: 50.0, dy: testDy});
+            level.pushObject(obj1, []);
+            var obj2 = testCollider({width: colliderWidth, x: origX2, y: origY, dx: -100.0, dy: testDy});
+            level.pushObject(obj2, []);
+            
+            var deltaTime = 0.1;
+            level.update(deltaTime);
+            expect(obj1.x).toBeCloseTo(origX1, 2);
+            expect(obj1.y).toBeCloseTo(origY + testDy * deltaTime, 4);
+            expect(obj2.x).toBeCloseTo(obj1.x + colliderWidth, 3);
+            expect(obj2.y).toBeCloseTo(origY + testDy * deltaTime, 4);
         });
         
         describe('stationary tilemap', function() {
