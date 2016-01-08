@@ -18,7 +18,7 @@ describe('PlatformingPhysics', function() {
         }
         if (options.hasOwnProperty('width')) {
             var width = options.width;
-            c.getPositionedRect = function(x, y) {
+            c.getPositionedCollisionRect = function(x, y) {
                 return new Rect(x - width * 0.5,
                                 x + width * 0.5,
                                 y - width * 0.5,
@@ -170,7 +170,7 @@ describe('PlatformingPhysics', function() {
         it('has a default collision rectangle', function() {
             var c = new PlatformingObject();
             c.init({x: 12, y: 3});
-            var rect = c.getRect();
+            var rect = c.getCollisionRect();
             expect(rect.left).toBe(11.5);
             expect(rect.right).toBe(12.5);
             expect(rect.top).toBe(2);
@@ -340,7 +340,7 @@ describe('PlatformingPhysics', function() {
                 var colliderWidth = 1.0;
                 var origY = 1.0;
                 var origX1 = 1.0; 
-                var testDy = pTileMap.getRect().height() * 2;
+                var testDy = pTileMap.getCollisionRect().height() * 2;
                 var obj1 = testCollider({width: colliderWidth, x: origX1, y: origY, dx: 0, dy: testDy});
                 level.pushObject(obj1, []);
 
@@ -348,7 +348,7 @@ describe('PlatformingPhysics', function() {
                 var deltaTime = 1.0;
                 level.update(deltaTime);
                 expect(obj1.x).toBeCloseTo(origX1, 4);
-                expect(obj1.y).toBeCloseTo(pTileMap.getRect().height() - 1 - colliderWidth * 0.5, 3);
+                expect(obj1.y).toBeCloseTo(pTileMap.getCollisionRect().height() - 1 - colliderWidth * 0.5, 3);
                 expect(obj1._testTouchGroundCounter).toBe(1);
                 expect(obj1._testTouchCeilingCounter).toBe(0);
             });
@@ -362,9 +362,9 @@ describe('PlatformingPhysics', function() {
 
                 // The object starts from outside the tilemap and moves towards it from below.
                 var colliderWidth = 1.0;
-                var origY = pTileMap.getRect().height() + 2;
+                var origY = pTileMap.getCollisionRect().height() + 2;
                 var origX = 1.0; 
-                var testDy = -pTileMap.getRect().height() * 2;
+                var testDy = -pTileMap.getCollisionRect().height() * 2;
                 var obj1 = testCollider({width: colliderWidth, x: origX, y: origY, dx: 0, dy: testDy});
                 level.pushObject(obj1, []);
                 
@@ -373,7 +373,7 @@ describe('PlatformingPhysics', function() {
                 var deltaTime = 1.0;
                 level.update(deltaTime);
                 expect(obj1.x).toBeCloseTo(origX, 4);
-                expect(obj1.y).toBeCloseTo(pTileMap.getRect().height() + colliderWidth * 0.5, 3);
+                expect(obj1.y).toBeCloseTo(pTileMap.getCollisionRect().height() + colliderWidth * 0.5, 3);
                 expect(obj1._testTouchGroundCounter).toBe(0);
                 expect(obj1._testTouchCeilingCounter).toBe(1);
             });
@@ -387,9 +387,9 @@ describe('PlatformingPhysics', function() {
 
                 // The object starts from outside the tilemap and moves towards it from below.
                 var colliderWidth = 1.0;
-                var origY = pTileMap.getRect().height() + 2;
+                var origY = pTileMap.getCollisionRect().height() + 2;
                 var origX = 1.0; 
-                var testDy = -pTileMap.getRect().height() * 2;
+                var testDy = -pTileMap.getCollisionRect().height() * 2;
                 var obj1 = testCollider({width: colliderWidth, x: origX, y: origY, dx: 0, dy: testDy});
                 level.pushObject(obj1, []);
 
@@ -413,14 +413,14 @@ describe('PlatformingPhysics', function() {
                 var colliderWidth = 1.0;
                 var origY = 1.0;
                 var origX = 1.0; 
-                var testDx = pTileMap.getRect().width() * 2;
+                var testDx = pTileMap.getCollisionRect().width() * 2;
                 var obj1 = testCollider({width: colliderWidth, x: origX, y: origY, dx: testDx, dy: 0});
                 level.pushObject(obj1, []);
 
                 // Move way past the edge of the tilemap. All collisions in between should be detected.
                 var deltaTime = 1.0;
                 level.update(deltaTime);
-                expect(obj1.x).toBeCloseTo(pTileMap.getRect().width() - 2 - colliderWidth * 0.5, 4);
+                expect(obj1.x).toBeCloseTo(pTileMap.getCollisionRect().width() - 2 - colliderWidth * 0.5, 4);
                 expect(obj1.y).toBeCloseTo(origY, 4);
                 expect(obj1._testTouchGroundCounter).toBe(0);
                 expect(obj1._testTouchCeilingCounter).toBe(0);
@@ -436,15 +436,15 @@ describe('PlatformingPhysics', function() {
                 // The object starts from outside the tilemap and moves to the left.
                 var colliderWidth = 1.0;
                 var origY = 1.0;
-                var origX = pTileMap.getRect().width() + 2; 
-                var testDx = -pTileMap.getRect().width() * 2;
+                var origX = pTileMap.getCollisionRect().width() + 2; 
+                var testDx = -pTileMap.getCollisionRect().width() * 2;
                 var obj1 = testCollider({width: colliderWidth, x: origX, y: origY, dx: testDx, dy: 0});
                 level.pushObject(obj1, []);
 
                 // Move way past the edge of the tilemap. All collisions in between should be detected.
                 var deltaTime = 1.0;
                 level.update(deltaTime);
-                expect(obj1.x).toBeCloseTo(pTileMap.getRect().width() - 1 + colliderWidth * 0.5, 4);
+                expect(obj1.x).toBeCloseTo(pTileMap.getCollisionRect().width() - 1 + colliderWidth * 0.5, 4);
                 expect(obj1.y).toBeCloseTo(origY, 4);
                 expect(obj1._testTouchGroundCounter).toBe(0);
                 expect(obj1._testTouchCeilingCounter).toBe(0);
@@ -460,8 +460,8 @@ describe('PlatformingPhysics', function() {
                 // The object starts from outside the tilemap and moves to the left and downwards.
                 var colliderWidth = 1.0;
                 var origY = 1.0;
-                var origX = pTileMap.getRect().width() + 2; 
-                var testDx = -pTileMap.getRect().width() * 2;
+                var origX = pTileMap.getCollisionRect().width() + 2; 
+                var testDx = -pTileMap.getCollisionRect().width() * 2;
                 var testDy = 1.0;
                 var obj1 = testCollider({width: colliderWidth, x: origX, y: origY, dx: testDx, dy: testDy});
                 level.pushObject(obj1, []);
@@ -469,7 +469,7 @@ describe('PlatformingPhysics', function() {
                 // Move way past the edge of the tilemap. All collisions in between should be detected.
                 var deltaTime = 1.0;
                 level.update(deltaTime);
-                expect(obj1.x).toBeCloseTo(pTileMap.getRect().width() - 1 + colliderWidth * 0.5, 4);
+                expect(obj1.x).toBeCloseTo(pTileMap.getCollisionRect().width() - 1 + colliderWidth * 0.5, 4);
                 expect(obj1.y).toBeCloseTo(origY + testDy * deltaTime, 4);
                 expect(obj1._testTouchGroundCounter).toBe(0);
                 expect(obj1._testTouchCeilingCounter).toBe(0);
@@ -487,8 +487,8 @@ describe('PlatformingPhysics', function() {
                 var colliderWidth = 1.0;
                 var origY = pTileMap.y + 1.0;
                 var origX = pTileMap.x + 0.0; 
-                var testDx = pTileMap.getRect().width();
-                var testDy = pTileMap.getRect().width();
+                var testDx = pTileMap.getCollisionRect().width();
+                var testDy = pTileMap.getCollisionRect().width();
                 var obj1 = testCollider({width: colliderWidth, x: origX, y: origY, dx: testDx, dy: testDy});
                 level.pushObject(obj1, []);
 
@@ -496,7 +496,7 @@ describe('PlatformingPhysics', function() {
                 var deltaTime = 1.0;
                 level.update(deltaTime);
                 expect(obj1.x).toBeCloseTo(pTileMap.x + 1 - colliderWidth * 0.5, 3);
-                expect(obj1.y).toBeCloseTo(pTileMap.y + pTileMap.getRect().height() - 1 - colliderWidth * 0.5, 3);
+                expect(obj1.y).toBeCloseTo(pTileMap.y + pTileMap.getCollisionRect().height() - 1 - colliderWidth * 0.5, 3);
                 expect(obj1._testTouchGroundCounter).toBe(1);
                 expect(obj1._testTouchCeilingCounter).toBe(0);
             });
@@ -514,7 +514,7 @@ describe('PlatformingPhysics', function() {
                 var deltaTime = 1.0;
                 level.update(deltaTime);
                 expect(movingTileMap.x).toBeCloseTo(0, 4);
-                expect(movingTileMap.y).toBeCloseTo(pTileMap.y + pTileMap.getRect().height() - 1 - movingTileMap.getRect().height(), 3);
+                expect(movingTileMap.y).toBeCloseTo(pTileMap.y + pTileMap.getCollisionRect().height() - 1 - movingTileMap.getCollisionRect().height(), 3);
             });
             
             it('does not take the tilemap into account when evaluating collision with a moving tilemap and tilesAffectMovingTilemaps is false', function() {
@@ -530,7 +530,7 @@ describe('PlatformingPhysics', function() {
                 var deltaTime = 1.0;
                 level.update(deltaTime);
                 expect(movingTileMap.x).toBeCloseTo(0, 4);
-                expect(movingTileMap.y).toBeCloseTo(pTileMap.y - movingTileMap.getRect().height(), 3);
+                expect(movingTileMap.y).toBeCloseTo(pTileMap.y - movingTileMap.getCollisionRect().height(), 3);
             });
         }); // stationary tilemap
         
@@ -546,7 +546,7 @@ describe('PlatformingPhysics', function() {
                 var colliderWidth = 1.0;
                 var origY = 1.0;
                 var origX = 1.0; 
-                var testDy = pTileMap.getRect().height() * 2;
+                var testDy = pTileMap.getCollisionRect().height() * 2;
                 var obj1 = testCollider({width: colliderWidth, x: origX, y: origY, dx: 0, dy: testDy});
                 level.pushObject(obj1, []);
 
@@ -554,7 +554,7 @@ describe('PlatformingPhysics', function() {
                 var deltaTime = 1.0;
                 level.update(deltaTime);
                 expect(obj1.x).toBeCloseTo(origX, 4);
-                expect(obj1.y).toBeCloseTo(pTileMap.y + pTileMap.getRect().height() - 1 - colliderWidth * 0.5, 3);
+                expect(obj1.y).toBeCloseTo(pTileMap.y + pTileMap.getCollisionRect().height() - 1 - colliderWidth * 0.5, 3);
                 expect(obj1._testTouchGroundCounter).toBe(1);
                 expect(obj1._testTouchCeilingCounter).toBe(0);
             });
@@ -568,9 +568,9 @@ describe('PlatformingPhysics', function() {
 
                 // The object starts from outside the tilemap and moves towards it from below.
                 var colliderWidth = 1.0;
-                var origY = pTileMap.getRect().height() + 2;
+                var origY = pTileMap.getCollisionRect().height() + 2;
                 var origX = 1.0; 
-                var testDy = -pTileMap.getRect().height() * 2;
+                var testDy = -pTileMap.getCollisionRect().height() * 2;
                 var obj1 = testCollider({width: colliderWidth, x: origX, y: origY, dx: 0, dy: testDy});
                 level.pushObject(obj1, []);
                 
@@ -579,7 +579,7 @@ describe('PlatformingPhysics', function() {
                 var deltaTime = 1.0;
                 level.update(deltaTime);
                 expect(obj1.x).toBeCloseTo(origX, 4);
-                expect(obj1.y).toBeCloseTo(pTileMap.y + pTileMap.getRect().height() + colliderWidth * 0.5, 3);
+                expect(obj1.y).toBeCloseTo(pTileMap.y + pTileMap.getCollisionRect().height() + colliderWidth * 0.5, 3);
                 expect(obj1._testTouchGroundCounter).toBe(0);
                 expect(obj1._testTouchCeilingCounter).toBe(1);
             });
@@ -603,7 +603,7 @@ describe('PlatformingPhysics', function() {
                 var deltaTime = 1.0;
                 level.update(deltaTime);
                 expect(obj1.x).toBeCloseTo(origX, 4);
-                expect(obj1.y).toBeCloseTo(pTileMap.y + pTileMap.getRect().height() + colliderWidth * 0.5, 3);
+                expect(obj1.y).toBeCloseTo(pTileMap.y + pTileMap.getCollisionRect().height() + colliderWidth * 0.5, 3);
                 expect(obj1._testTouchGroundCounter).toBe(0);
                 expect(obj1._testTouchCeilingCounter).toBe(1);
             });
@@ -627,7 +627,7 @@ describe('PlatformingPhysics', function() {
                 var deltaTime = 1.0;
                 level.update(deltaTime);
                 expect(obj1.x).toBeCloseTo(origX, 4);
-                expect(obj1.y).toBeCloseTo(pTileMap.y + pTileMap.getRect().height() - 1 - colliderWidth * 0.5, 3);
+                expect(obj1.y).toBeCloseTo(pTileMap.y + pTileMap.getCollisionRect().height() - 1 - colliderWidth * 0.5, 3);
                 expect(obj1._testTouchGroundCounter).toBe(1);
                 expect(obj1._testTouchCeilingCounter).toBe(0);
             });
@@ -643,14 +643,14 @@ describe('PlatformingPhysics', function() {
                 var colliderWidth = 1.0;
                 var origY = 1.0;
                 var origX = 1.0; 
-                var testDx = pTileMap.getRect().width() * 2;
+                var testDx = pTileMap.getCollisionRect().width() * 2;
                 var obj1 = testCollider({width: colliderWidth, x: origX, y: origY, dx: testDx, dy: 0});
                 level.pushObject(obj1, []);
 
                 // Move way past the edge of the tilemap. All collisions in between should be detected.
                 var deltaTime = 1.0;
                 level.update(deltaTime);
-                expect(obj1.x).toBeCloseTo(pTileMap.x + pTileMap.getRect().width() - 2 - colliderWidth * 0.5, 4);
+                expect(obj1.x).toBeCloseTo(pTileMap.x + pTileMap.getCollisionRect().width() - 2 - colliderWidth * 0.5, 4);
                 expect(obj1.y).toBeCloseTo(origY, 4);
                 expect(obj1._testTouchGroundCounter).toBe(0);
                 expect(obj1._testTouchCeilingCounter).toBe(0);
@@ -666,15 +666,15 @@ describe('PlatformingPhysics', function() {
                 // The object starts from outside the tilemap and moves to the left.
                 var colliderWidth = 1.0;
                 var origY = 1.0;
-                var origX = pTileMap.getRect().width() + 2; 
-                var testDx = -pTileMap.getRect().width() * 2;
+                var origX = pTileMap.getCollisionRect().width() + 2; 
+                var testDx = -pTileMap.getCollisionRect().width() * 2;
                 var obj1 = testCollider({width: colliderWidth, x: origX, y: origY, dx: testDx, dy: 0});
                 level.pushObject(obj1, []);
 
                 // Move way past the edge of the tilemap. All collisions in between should be detected.
                 var deltaTime = 1.0;
                 level.update(deltaTime);
-                expect(obj1.x).toBeCloseTo(pTileMap.x + pTileMap.getRect().width() - 1 + colliderWidth * 0.5, 4);
+                expect(obj1.x).toBeCloseTo(pTileMap.x + pTileMap.getCollisionRect().width() - 1 + colliderWidth * 0.5, 4);
                 expect(obj1.y).toBeCloseTo(origY, 4);
                 expect(obj1._testTouchGroundCounter).toBe(0);
                 expect(obj1._testTouchCeilingCounter).toBe(0);
@@ -698,7 +698,7 @@ describe('PlatformingPhysics', function() {
                 // Move way past the edge of the tilemap. All collisions in between should be detected.
                 var deltaTime = 1.0;
                 level.update(deltaTime);
-                expect(obj1.x).toBeCloseTo(pTileMap.x + pTileMap.getRect().width() - 2 - colliderWidth * 0.5, 4);
+                expect(obj1.x).toBeCloseTo(pTileMap.x + pTileMap.getCollisionRect().width() - 2 - colliderWidth * 0.5, 4);
                 expect(obj1.y).toBeCloseTo(origY, 4);
                 expect(obj1._testTouchGroundCounter).toBe(0);
                 expect(obj1._testTouchCeilingCounter).toBe(0);
@@ -722,7 +722,7 @@ describe('PlatformingPhysics', function() {
                 // Move way past the edge of the tilemap. All collisions in between should be detected.
                 var deltaTime = 1.0;
                 level.update(deltaTime);
-                expect(obj1.x).toBeCloseTo(pTileMap.x + pTileMap.getRect().width() - 1 + colliderWidth * 0.5, 4);
+                expect(obj1.x).toBeCloseTo(pTileMap.x + pTileMap.getCollisionRect().width() - 1 + colliderWidth * 0.5, 4);
                 expect(obj1.y).toBeCloseTo(origY, 4);
                 expect(obj1._testTouchGroundCounter).toBe(0);
                 expect(obj1._testTouchCeilingCounter).toBe(0);
@@ -738,8 +738,8 @@ describe('PlatformingPhysics', function() {
                 // The object starts from outside the tilemap and moves to the left and downwards.
                 var colliderWidth = 1.0;
                 var origY = 1.0;
-                var origX = pTileMap.getRect().width() + 2; 
-                var testDx = -pTileMap.getRect().width() * 2;
+                var origX = pTileMap.getCollisionRect().width() + 2; 
+                var testDx = -pTileMap.getCollisionRect().width() * 2;
                 var testDy = 1.0;
                 var obj1 = testCollider({width: colliderWidth, x: origX, y: origY, dx: testDx, dy: testDy});
                 level.pushObject(obj1, []);
@@ -747,7 +747,7 @@ describe('PlatformingPhysics', function() {
                 // Move way past the edge of the tilemap. All collisions in between should be detected.
                 var deltaTime = 1.0;
                 level.update(deltaTime);
-                expect(obj1.x).toBeCloseTo(pTileMap.x + pTileMap.getRect().width() - 1 + colliderWidth * 0.5, 4);
+                expect(obj1.x).toBeCloseTo(pTileMap.x + pTileMap.getCollisionRect().width() - 1 + colliderWidth * 0.5, 4);
                 expect(obj1.y).toBeCloseTo(origY + testDy * deltaTime, 4);
                 expect(obj1._testTouchGroundCounter).toBe(0);
                 expect(obj1._testTouchCeilingCounter).toBe(0);
@@ -765,8 +765,8 @@ describe('PlatformingPhysics', function() {
                 var colliderWidth = 1.0;
                 var origY = pTileMap.y + 1.0;
                 var origX = pTileMap.x + 0.0;
-                var testDx = pTileMap.getRect().width() * 2;
-                var testDy = pTileMap.getRect().width();
+                var testDx = pTileMap.getCollisionRect().width() * 2;
+                var testDy = pTileMap.getCollisionRect().width();
                 var obj1 = testCollider({width: colliderWidth, x: origX, y: origY, dx: testDx, dy: testDy});
                 level.pushObject(obj1, []);
 
@@ -774,7 +774,7 @@ describe('PlatformingPhysics', function() {
                 var deltaTime = 1.0;
                 level.update(deltaTime);
                 expect(obj1.x).toBeCloseTo(pTileMap.x + 1 - colliderWidth * 0.5, 3);
-                expect(obj1.y).toBeCloseTo(pTileMap.y + pTileMap.getRect().height() - 1 - colliderWidth * 0.5, 3);
+                expect(obj1.y).toBeCloseTo(pTileMap.y + pTileMap.getCollisionRect().height() - 1 - colliderWidth * 0.5, 3);
                 expect(obj1._testTouchGroundCounter).toBe(1);
                 expect(obj1._testTouchCeilingCounter).toBe(0);
             });
@@ -795,8 +795,8 @@ describe('PlatformingPhysics', function() {
                 var colliderWidth = 1.0;
                 var origY = pTileMap.y + 1.0;
                 var origX = pTileMap.x - 1.0;
-                var testDx = pTileMap.getRect().width() * 2;
-                var testDy = pTileMap.getRect().width();
+                var testDx = pTileMap.getCollisionRect().width() * 2;
+                var testDy = pTileMap.getCollisionRect().width();
                 var obj1 = testCollider({width: colliderWidth, x: origX, y: origY, dx: testDx, dy: testDy});
                 level.pushObject(obj1, []);
 
@@ -804,7 +804,7 @@ describe('PlatformingPhysics', function() {
                 var deltaTime = 1.0;
                 level.update(deltaTime);
                 expect(obj1.x).toBeCloseTo(pTileMap.x + 1 - colliderWidth * 0.5, 3);
-                expect(obj1.y).toBeCloseTo(pTileMap.y + pTileMap.getRect().height() - 1 - colliderWidth * 0.5, 3);
+                expect(obj1.y).toBeCloseTo(pTileMap.y + pTileMap.getCollisionRect().height() - 1 - colliderWidth * 0.5, 3);
                 expect(obj1._testTouchGroundCounter).toBe(1);
                 expect(obj1._testTouchCeilingCounter).toBe(0);
             });
@@ -829,7 +829,7 @@ describe('PlatformingPhysics', function() {
                 var deltaTime = 1.0;
                 level.update(deltaTime);
                 expect(obj1.x).toBeCloseTo(origX, 4);
-                expect(obj1.y).toBeCloseTo(pTileMap.y + pTileMap.getRect().height() - 1 - colliderWidth * 0.5, 3);
+                expect(obj1.y).toBeCloseTo(pTileMap.y + pTileMap.getCollisionRect().height() - 1 - colliderWidth * 0.5, 3);
                 expect(obj1._testTouchGroundCounter).toBe(1);
                 expect(obj1._testTouchCeilingCounter).toBe(0);
             });
@@ -854,7 +854,7 @@ describe('PlatformingPhysics', function() {
                 var deltaTime = 1.0;
                 level.update(deltaTime);
                 expect(obj1.x).toBeCloseTo(origX + testDx * deltaTime, 4);
-                expect(obj1.y).toBeCloseTo(pTileMap.y + pTileMap.getRect().height() - 1 - colliderWidth * 0.5, 3);
+                expect(obj1.y).toBeCloseTo(pTileMap.y + pTileMap.getCollisionRect().height() - 1 - colliderWidth * 0.5, 3);
                 expect(obj1._testTouchGroundCounter).toBe(1);
                 expect(obj1._testTouchCeilingCounter).toBe(0);
             });
@@ -878,7 +878,7 @@ describe('PlatformingPhysics', function() {
                 var deltaTime = 1.0;
                 level.update(deltaTime);
                 expect(obj1.x).toBeCloseTo(origX, 4);
-                expect(obj1.y).toBeCloseTo(pTileMap.y + pTileMap.getRect().height() - 2.6 - colliderWidth * 0.5, 3);
+                expect(obj1.y).toBeCloseTo(pTileMap.y + pTileMap.getCollisionRect().height() - 2.6 - colliderWidth * 0.5, 3);
                 expect(obj1._testTouchGroundCounter).toBe(1);
                 expect(obj1._testTouchCeilingCounter).toBe(0);
             });
@@ -899,7 +899,7 @@ describe('PlatformingPhysics', function() {
                 var deltaTime = 1.0;
                 level.update(deltaTime);
                 expect(obj1.x).toBeCloseTo(origX, 4);
-                expect(obj1.y).toBeCloseTo(pTileMap.y + pTileMap.getRect().height() - 2.4 - colliderWidth * 0.5, 3);
+                expect(obj1.y).toBeCloseTo(pTileMap.y + pTileMap.getCollisionRect().height() - 2.4 - colliderWidth * 0.5, 3);
                 expect(obj1._testTouchGroundCounter).toBe(1);
                 expect(obj1._testTouchCeilingCounter).toBe(0);
             });
@@ -920,7 +920,7 @@ describe('PlatformingPhysics', function() {
                 var deltaTime = 1.0;
                 level.update(deltaTime);
                 expect(obj1.x).toBeCloseTo(origX, 4);
-                expect(obj1.y).toBeCloseTo(pTileMap.y + pTileMap.getRect().height() + colliderWidth * 0.5, 3);
+                expect(obj1.y).toBeCloseTo(pTileMap.y + pTileMap.getCollisionRect().height() + colliderWidth * 0.5, 3);
                 expect(obj1._testTouchGroundCounter).toBe(0);
                 expect(obj1._testTouchCeilingCounter).toBe(1);
             });
@@ -933,7 +933,7 @@ describe('PlatformingPhysics', function() {
                 
                 var colliderWidth = 1.0;
                 var origX = -1.0;
-                var origY = pTileMap.getRect().height();
+                var origY = pTileMap.getCollisionRect().height();
                 var testDx = 5.0;
                 var obj1 = testCollider({width: colliderWidth, x: origX, y: origY, dx: testDx, dy: 0});
                 level.pushObject(obj1, []);
@@ -953,8 +953,8 @@ describe('PlatformingPhysics', function() {
                 level.pushObject(pTileMap, []);
                 
                 var colliderWidth = 1.0;
-                var origX = pTileMap.getRect().width() + 1.0;
-                var origY = pTileMap.getRect().height();
+                var origX = pTileMap.getCollisionRect().width() + 1.0;
+                var origY = pTileMap.getCollisionRect().height();
                 var testDx = -5.0;
                 var obj1 = testCollider({width: colliderWidth, x: origX, y: origY, dx: testDx, dy: 0});
                 level.pushObject(obj1, []);
@@ -990,7 +990,7 @@ describe('PlatformingPhysics', function() {
 
                             // The object starts from inside the tilemap and moves downwards and to the right.
                             var colliderWidth = 1.0;
-                            var origY = pTileMap.getRect().height() - 1 - colliderWidth * 0.5 - 0.01;
+                            var origY = pTileMap.getCollisionRect().height() - 1 - colliderWidth * 0.5 - 0.01;
                             var origX = 0.0;
                             var testDy = 1.0;
                             var obj1 = testCollider({width: colliderWidth, x: origX, y: origY, dx: testDx, dy: testDy});
@@ -1000,7 +1000,7 @@ describe('PlatformingPhysics', function() {
                             var deltaTime = 1.0;
                             level.update(deltaTime);
                             expect(obj1.x).toBeCloseTo(origX + deltaTime * testDx, 4);
-                            expect(obj1.y).toBeCloseTo(pTileMap.y + pTileMap.getRect().height() - movedTiles - 0.6 - colliderWidth * 0.5, 3);
+                            expect(obj1.y).toBeCloseTo(pTileMap.y + pTileMap.getCollisionRect().height() - movedTiles - 0.6 - colliderWidth * 0.5, 3);
                             expect(obj1._testTouchGroundCounter).toBe(1);
                             expect(obj1._testTouchCeilingCounter).toBe(0);
                         });
@@ -1023,8 +1023,8 @@ describe('PlatformingPhysics', function() {
 
                             // The object starts from inside the tilemap and moves downwards and to the right.
                             var colliderWidth = 1.0;
-                            var origY = pTileMap.getRect().height() - 1 - colliderWidth * 0.5 - 0.01;
-                            var origX = pTileMap.getRect().width();
+                            var origY = pTileMap.getCollisionRect().height() - 1 - colliderWidth * 0.5 - 0.01;
+                            var origX = pTileMap.getCollisionRect().width();
                             var testDy = 1.0;
                             var obj1 = testCollider({width: colliderWidth, x: origX, y: origY, dx: testDx, dy: testDy});
                             level.pushObject(obj1, []);
@@ -1033,7 +1033,7 @@ describe('PlatformingPhysics', function() {
                             var deltaTime = 1.0;
                             level.update(deltaTime);
                             expect(obj1.x).toBeCloseTo(origX + deltaTime * testDx, 4);
-                            expect(obj1.y).toBeCloseTo(pTileMap.y + pTileMap.getRect().height() - movedTiles - 0.6 - colliderWidth * 0.5, 3);
+                            expect(obj1.y).toBeCloseTo(pTileMap.y + pTileMap.getCollisionRect().height() - movedTiles - 0.6 - colliderWidth * 0.5, 3);
                             expect(obj1._testTouchGroundCounter).toBe(1);
                             expect(obj1._testTouchCeilingCounter).toBe(0);
                         });

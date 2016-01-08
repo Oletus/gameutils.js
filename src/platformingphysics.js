@@ -176,18 +176,18 @@ PlatformingObject.prototype.touchCeiling = function(collisionObject) {
  */
 PlatformingObject.prototype.render = function(ctx) {
     ctx.fillStyle = this.color;
-    var rect = this.getRect();
+    var rect = this.getCollisionRect();
     ctx.fillRect(rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top);
 };
 
 /**
  * Get the object's collision rectangle in case the object is positioned at x, y.
- * Override this instead of getRect or getLastRect.
+ * Override this instead of getCollisionRect or getLastCollisionRect.
  * @param {number} x Horizontal position.
  * @param {number} y Vertical position.
  * @return {Rect} Collision rectangle.
  */
-PlatformingObject.prototype.getPositionedRect = function(x, y) {
+PlatformingObject.prototype.getPositionedCollisionRect = function(x, y) {
     var width = 1.0;
     var height = 2.0;
     return new Rect(x - width * 0.5, x + width * 0.5,
@@ -199,8 +199,8 @@ PlatformingObject.prototype.getPositionedRect = function(x, y) {
  * @return {Rect} Collision rectangle.
  * @final
  */
-PlatformingObject.prototype.getRect = function() {
-    return this.getPositionedRect(this.x, this.y);
+PlatformingObject.prototype.getCollisionRect = function() {
+    return this.getPositionedCollisionRect(this.x, this.y);
 };
 
 /**
@@ -208,8 +208,8 @@ PlatformingObject.prototype.getRect = function() {
  * @return {Rect} Collision rectangle.
  * @final
  */
-PlatformingObject.prototype.getLastRect = function() {
-    return this.getPositionedRect(this.lastX, this.lastY);
+PlatformingObject.prototype.getLastCollisionRect = function() {
+    return this.getPositionedCollisionRect(this.lastX, this.lastY);
 };
 
 /**
@@ -252,7 +252,7 @@ PlatformingTileMap.prototype.init = function(options) {
  * @param {number} y Vertical position.
  * @return {Rect} Collision rectangle.
  */
-PlatformingTileMap.prototype.getPositionedRect = function(x, y) {
+PlatformingTileMap.prototype.getPositionedCollisionRect = function(x, y) {
     return new Rect(x, x + this.tileMap.width,
                     y, y + this.tileMap.height);
 };
@@ -279,7 +279,7 @@ PlatformingTileMap.prototype.decideDy = function(deltaTime) {
  */
 PlatformingTileMap.prototype.render = function(ctx) {
     ctx.fillStyle = this.color;
-    /*var rect = this.getRect();
+    /*var rect = this.getCollisionRect();
     ctx.fillRect(rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top);*/
     ctx.save();
     ctx.translate(this.x, this.y);
@@ -625,7 +625,7 @@ PlatformingPhysics.initFromData = function(data, flippedX) {
 /**
  * Move an object along one axis, reacting to collisions.
  * @param {Object} movingObj Object that moves. Needs to have the following properties in the world coordinate system:
- *   x, y, dx, dy, getRect()
+ *   x, y, dx, dy, getCollisionRect()
  * Properties to react to y collisions:
  *   touchGround(), touchCeiling()
  * @param {number} deltaTime Time step to use to move the object.
@@ -657,7 +657,7 @@ PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, collider
     var lastDelta = delta;
     var isMovingObjTileMap = (movingObj instanceof PlatformingTileMap);
     while (!done) {
-        var rect = movingObj.getRect();
+        var rect = movingObj.getCollisionRect();
         done = true;
         if (dim == 'x') {
             var rectRightHalfWidth = rect.right - movingObj.x;
@@ -674,7 +674,7 @@ PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, collider
                     // Ensure that the y value from the begining of the frame is used.
                     // This adds a bit of flexibility: for example, some objects that don't themselves collide with
                     // anything can update their positions in a single update function.
-                    var colliderRect = colliders[i].getPositionedRect(colliders[i].x, colliders[i].lastY);
+                    var colliderRect = colliders[i].getPositionedCollisionRect(colliders[i].x, colliders[i].lastY);
                     if (rect.top < colliderRect.bottom && colliderRect.top < rect.bottom) {
                         xColliders.push(colliders[i]);
                     }
@@ -747,8 +747,8 @@ PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, collider
                         }
                     }
                 } else {
-                    var colliderLastRect = xColliders[i].getLastRect();
-                    var colliderRect = xColliders[i].getRect();
+                    var colliderLastRect = xColliders[i].getLastCollisionRect();
+                    var colliderRect = xColliders[i].getCollisionRect();
                     if (colliderLastRect.right < rect.left && wallXLeft < colliderRect.right) {
                         wallXLeft = colliderRect.right;
                     }
@@ -811,7 +811,7 @@ PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, collider
                     if (colliders[i] === movingObj) {
                         continue;
                     }
-                    var collider = colliders[i].getRect();
+                    var collider = colliders[i].getCollisionRect();
                     if (rect.left < collider.right && collider.left < rect.right) {
                         yColliders.push(colliders[i]);
                     }
@@ -867,8 +867,8 @@ PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, collider
                         }
                     }
                 } else {
-                    var colliderRect = yColliders[i].getRect();
-                    var colliderLastRect = yColliders[i].getLastRect();
+                    var colliderRect = yColliders[i].getCollisionRect();
+                    var colliderLastRect = yColliders[i].getLastCollisionRect();
                     if (colliderLastRect.bottom < rect.top && wallYUp < colliderRect.bottom) {
                         wallYUp = colliderRect.bottom;
                         wallUpObject = yColliders[i];
