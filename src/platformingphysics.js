@@ -10,7 +10,7 @@ var PlatformingPhysics = {};
  * A character that moves in the platforming level, colliding into other objects and tile maps.
  * @constructor
  */
-var PlatformingCharacter = function() {
+var PlatformingObject = function() {
 };
 
 /**
@@ -19,7 +19,7 @@ var PlatformingCharacter = function() {
  *   x: number
  *   y: number
  */
-PlatformingCharacter.prototype.init = function(options) {
+PlatformingObject.prototype.init = function(options) {
     var defaults = {
         x: 0,
         y: 0,
@@ -55,24 +55,24 @@ PlatformingCharacter.prototype.init = function(options) {
  * Override this to control the this.dx value that the character uses on each frame.
  * @param {number} deltaTime
  */
-PlatformingCharacter.prototype.decideDx = function(deltaTime) {
+PlatformingObject.prototype.decideDx = function(deltaTime) {
 };
 
 /**
  * Override this to perform custom per-frame changes to this.x instead of the normal dx/dy dependent behavior.
  * @param {number} deltaTime
- * @param {Array.<PlatformingCharacter>} colliders Objects to collide against.
+ * @param {Array.<PlatformingObject>} colliders Objects to collide against.
  */
-PlatformingCharacter.prototype.moveX = function(deltaTime, colliders) {
+PlatformingObject.prototype.moveX = function(deltaTime, colliders) {
     PlatformingPhysics.moveAndCollide(this, deltaTime, 'x', colliders);
 };
 
 /**
  * Update the x value and do some related bookkeeping.
  * @param {number} deltaTime
- * @param {Array.<PlatformingCharacter>} colliders Objects to collide against.
+ * @param {Array.<PlatformingObject>} colliders Objects to collide against.
  */
-PlatformingCharacter.prototype.updateX = function(deltaTime, colliders) {
+PlatformingObject.prototype.updateX = function(deltaTime, colliders) {
     this.lastDeltaTime = deltaTime;
     this.moveX(deltaTime, colliders);
     var prevFrameDeltaX = this.frameDeltaX;
@@ -91,25 +91,25 @@ PlatformingCharacter.prototype.updateX = function(deltaTime, colliders) {
  * Override this to control the this.dy value that the character uses on each frame.
  * @param {number} deltaTime
  */
-PlatformingCharacter.prototype.decideDy = function(deltaTime) {
+PlatformingObject.prototype.decideDy = function(deltaTime) {
     this.dy += 5.0 * deltaTime;
 };
 
 /**
  * Override this to perform custom per-frame changes to this.y instead of the normal dx/dy dependent behavior.
  * @param {number} deltaTime
- * @param {Array.<PlatformingCharacter>} colliders Objects to collide against.
+ * @param {Array.<PlatformingObject>} colliders Objects to collide against.
  */
-PlatformingCharacter.prototype.moveY = function(deltaTime, colliders) {
+PlatformingObject.prototype.moveY = function(deltaTime, colliders) {
     PlatformingPhysics.moveAndCollide(this, deltaTime, 'y', colliders);
 };
 
 /**
  * Update the y value and do some related bookkeeping.
  * @param {number} deltaTime
- * @param {Array.<PlatformingCharacter>} colliders Objects to collide against.
+ * @param {Array.<PlatformingObject>} colliders Objects to collide against.
  */
-PlatformingCharacter.prototype.updateY = function(deltaTime, colliders) {
+PlatformingObject.prototype.updateY = function(deltaTime, colliders) {
     this.onGround = false;
     this.groundPlatform = null;
     this.moveY(deltaTime, colliders);
@@ -132,9 +132,9 @@ PlatformingCharacter.prototype.updateY = function(deltaTime, colliders) {
 
 /**
  * Callback when the character touches ground.
- * @param {PlatformingCharacter} collisionObject Object that was collided with.
+ * @param {PlatformingObject} collisionObject Object that was collided with.
  */
-PlatformingCharacter.prototype._touchGround = function(collisionObject) {
+PlatformingObject.prototype._touchGround = function(collisionObject) {
     this.onGround = true;
     this.groundPlatform = collisionObject;
     if (!this.touchGround(collisionObject)) {
@@ -144,18 +144,18 @@ PlatformingCharacter.prototype._touchGround = function(collisionObject) {
 
 /**
  * Prefer overriding this if you need to trigger behaviors when touching ground.
- * @param {PlatformingCharacter} collisionObject Object that was collided with.
+ * @param {PlatformingObject} collisionObject Object that was collided with.
  * @return {boolean} Return true to override changes to dy that are done by default when touching ground.
  */
-PlatformingCharacter.prototype.touchGround = function(collisionObject) {
+PlatformingObject.prototype.touchGround = function(collisionObject) {
     return false;
 };
 
 /**
  * Callback when the character touches the ceiling.
- * @param {PlatformingCharacter} collisionObject Object that was collided with.
+ * @param {PlatformingObject} collisionObject Object that was collided with.
  */
-PlatformingCharacter.prototype._touchCeiling = function(collisionObject) {
+PlatformingObject.prototype._touchCeiling = function(collisionObject) {
     if (!this.touchCeiling(collisionObject)) {
         this.dy = (this.y - this.lastY) / this.lastDeltaTime;
     }
@@ -163,10 +163,10 @@ PlatformingCharacter.prototype._touchCeiling = function(collisionObject) {
 
 /**
  * Prefer overriding this if you need to trigger behaviors when touching ceiling.
- * @param {PlatformingCharacter} collisionObject Object that was collided with.
+ * @param {PlatformingObject} collisionObject Object that was collided with.
  * @return {boolean} Return true to override changes to dy that are done by default when touching the ceiling.
  */
-PlatformingCharacter.prototype.touchCeiling = function(collisionObject) {
+PlatformingObject.prototype.touchCeiling = function(collisionObject) {
     return false;
 };
 
@@ -174,7 +174,7 @@ PlatformingCharacter.prototype.touchCeiling = function(collisionObject) {
  * Debug rendering of the character.
  * @param {CanvasRenderingContext2D} ctx Context to draw to.
  */
-PlatformingCharacter.prototype.render = function(ctx) {
+PlatformingObject.prototype.render = function(ctx) {
     ctx.fillStyle = this.color;
     var rect = this.getRect();
     ctx.fillRect(rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top);
@@ -187,7 +187,7 @@ PlatformingCharacter.prototype.render = function(ctx) {
  * @param {number} y Vertical position.
  * @return {Rect} Collision rectangle.
  */
-PlatformingCharacter.prototype.getPositionedRect = function(x, y) {
+PlatformingObject.prototype.getPositionedRect = function(x, y) {
     var width = 1.0;
     var height = 2.0;
     return new Rect(x - width * 0.5, x + width * 0.5,
@@ -199,7 +199,7 @@ PlatformingCharacter.prototype.getPositionedRect = function(x, y) {
  * @return {Rect} Collision rectangle.
  * @final
  */
-PlatformingCharacter.prototype.getRect = function() {
+PlatformingObject.prototype.getRect = function() {
     return this.getPositionedRect(this.x, this.y);
 };
 
@@ -208,7 +208,7 @@ PlatformingCharacter.prototype.getRect = function() {
  * @return {Rect} Collision rectangle.
  * @final
  */
-PlatformingCharacter.prototype.getLastRect = function() {
+PlatformingObject.prototype.getLastRect = function() {
     return this.getPositionedRect(this.lastX, this.lastY);
 };
 
@@ -219,7 +219,7 @@ PlatformingCharacter.prototype.getLastRect = function() {
 var PlatformingTileMap = function() {
 };
 
-PlatformingTileMap.prototype = new PlatformingCharacter();
+PlatformingTileMap.prototype = new PlatformingObject();
 
 /**
  * Initialize the tilemap.
@@ -229,7 +229,7 @@ PlatformingTileMap.prototype = new PlatformingCharacter();
  *   y: number
  */
 PlatformingTileMap.prototype.init = function(options) {
-    PlatformingCharacter.prototype.init.call(this, options);
+    PlatformingObject.prototype.init.call(this, options);
     var defaults = {
         tileMap: null,
         tilesAffectMovingTilemaps: false
@@ -325,7 +325,7 @@ PlatformingLevel.prototype.init = function() {
 
 /**
  * Add an object to the level.
- * @param {PlatformingCharacter} object Object to add.
+ * @param {PlatformingObject} object Object to add.
  * @param {Array.<string>} collisionGroups Collision groups to add the object to. Will automatically be added to
  *     the "_all" collision group.
  */
@@ -350,7 +350,7 @@ PlatformingLevel.prototype.pushObject = function(object, collisionGroups) {
 
 /**
  * Remove an object from the level.
- * @param {PlatformingCharacter} object Object to remove.
+ * @param {PlatformingObject} object Object to remove.
  */
 PlatformingLevel.prototype.removeObject = function(object) {
     if (object instanceof PlatformingTileMap) {
@@ -630,7 +630,7 @@ PlatformingPhysics.initFromData = function(data, flippedX) {
  *   touchGround(), touchCeiling()
  * @param {number} deltaTime Time step to use to move the object.
  * @param {string} dim Either 'x' or 'y' to move the object horizontally or vertically.
- * @param {Array.<PlatformingCharacter>?} colliders List of objects to collide against. The moved object is
+ * @param {Array.<PlatformingObject>?} colliders List of objects to collide against. The moved object is
  * automatically excluded in case it is in this array. Colliders must report coordinates relative to the world.
  */
 PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, colliders) {

@@ -2,7 +2,7 @@
 
 describe('PlatformingPhysics', function() {
     var testCollider = function(options) {
-        var c = new PlatformingCharacter();
+        var c = new PlatformingObject();
         c.init(options);
         if (options.hasOwnProperty('dx')) {
             var dx = options.dx;
@@ -159,16 +159,16 @@ describe('PlatformingPhysics', function() {
         return testPlatformingTileMap(options, initParams);
     };
 
-    describe('PlatformingCharacter', function() {
+    describe('PlatformingObject', function() {
         it('initializes', function() {
-            var c = new PlatformingCharacter();
+            var c = new PlatformingObject();
             c.init({x: 12, y: 3});
             expect(c.x).toBe(12);
             expect(c.y).toBe(3);
         });
 
         it('has a default collision rectangle', function() {
-            var c = new PlatformingCharacter();
+            var c = new PlatformingObject();
             c.init({x: 12, y: 3});
             var rect = c.getRect();
             expect(rect.left).toBe(11.5);

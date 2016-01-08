@@ -56,7 +56,7 @@ var Tester = function() {
         this.dy = -Math.cos(this.decisionTime * 3.0) * 3.0 * that.platformFlingSpeed;
     };
 
-    this.character = new PlatformingCharacter();
+    this.character = new PlatformingObject();
     this.character.init({
         x: 8,
         y: 10
