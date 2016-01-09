@@ -376,6 +376,7 @@ Editor.prototype.generateCode = function() {
         code.push('particleInterval: ' + this.timedEmitters[i].particleInterval + ',');
         code.push('lifetime: ' + this.timedEmitters[i].lifetime + ',');
         code.push('waitTime: ' + this.timedEmitters[i].waitTime + ',');
+        code.push('maxParticleCount: ' + this.timedEmitters[i].maxParticleCount + ',');
         // Remove extra comma
         code[code.length - 1] = code[code.length - 1].substring(0, code[code.length - 1].length - 1);
         popIndent();
