@@ -65,8 +65,8 @@ var Tester = function() {
 
     this.character.touchGround = function(collisionObject) {
         if (!this.lastOnGround) {
-            this.dx = that.platform.dx;
-            this.dy = that.platform.dy;
+            this.dx = collisionObject.dx;
+            this.dy = collisionObject.dy;
         }
         return true;
     };
