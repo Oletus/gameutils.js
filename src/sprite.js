@@ -123,7 +123,17 @@ Sprite.varyHue = function(options) {
         canvas.height = sprite.height;
         var ctx = canvas.getContext('2d');
         sprite.draw(ctx, 0, 0);
-        var data = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        try {
+            var data = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        } catch (e) {
+            if (e.name == 'SecurityError') {
+                if (!Sprite.reportedSecurityError) {
+                    Sprite.reportedSecurityError = true;
+                    console.log(e.message);
+                }
+                return;
+            }
+        }
         for (var i = 0; i < data.data.length; i += 4) {
             var r = data.data[i];
             var g = data.data[i + 1];
@@ -144,6 +154,8 @@ Sprite.varyHue = function(options) {
         sprite.img = canvas;
     };
 };
+
+Sprite.reportedSecurityError = false;
 
 /**
  * How many Sprite objects have been created.
