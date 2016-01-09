@@ -328,13 +328,17 @@ var Particle = function(options) {
     if (this.rotationMode === Particle.RotationMode.INITIAL_DIRECTION) {
         this.rotation += Math.atan2(this.velY, this.velX);
     }
+    if (this.rotationMode === Particle.RotationMode.RANDOM) {
+        this.rotation = Math.random() * Math.PI * 2;
+    }
     this.dead = false;
 };
 
 Particle.RotationMode = {
     STATIC: 0,
     INITIAL_DIRECTION: 1,
-    CURRENT_DIRECTION: 2
+    CURRENT_DIRECTION: 2,
+    RANDOM: 3
 };
 
 /**
