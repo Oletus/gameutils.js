@@ -1086,7 +1086,7 @@ describe('PlatformingPhysics', function() {
                         var testDy = 0.1;
                         var obj1 = testCollider({width: colliderWidth, x: origX, y: origY, dx: testDx, dy: testDy});
                         obj1.onGround = true;
-                        obj1.lastOnGround = true;
+                        obj1.groundPlatform = pTileMap;
                         obj1.maxStickToGroundDistance = 3;
                         level.pushObject(obj1, []);
 

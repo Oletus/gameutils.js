@@ -41,6 +41,7 @@ PlatformingObject.prototype.init = function(options) {
     this.groundPlatform = null;
     this.maxStickToGroundDistance = 0;
     this.lastOnGround = false;
+    this.lastGroundPlatform = null;
     this.lastDeltaTime = 0;
     this.airTime = 0;
     this.dx = 0;
@@ -380,12 +381,14 @@ PlatformingLevel.prototype.update = function(deltaTime) {
         object.lastX = object.x;
         object.lastY = object.y;
         object.lastOnGround = object.onGround;
+        object.lastGroundPlatform = object.groundPlatform;
     }
     for (var i = 0; i < this._tileMapObjects.length; ++i) {
         var object = this._tileMapObjects[i];
         object.lastX = object.x;
         object.lastY = object.y;
         object.lastOnGround = object.onGround;
+        object.lastGroundPlatform = object.groundPlatform;
         object.decideDx(deltaTime);
     }
     for (var i = 0; i < this._tileMapObjects.length; ++i) {
@@ -883,7 +886,7 @@ PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, collider
             if (movingObj.y > wallYDown - rectBottomHalfHeight - TileMap.epsilon) {
                 movingObj.y = wallYDown - rectBottomHalfHeight - TileMap.epsilon;
                 movingObj._touchGround(wallDownObject);
-            } else if (movingObj.lastOnGround &&
+            } else if (movingObj.lastGroundPlatform === wallDownObject &&
                        movingObj.y > wallYDown - rectBottomHalfHeight - TileMap.epsilon - movingObj.maxStickToGroundDistance) {
                 // TODO: There's still a bug where the character teleports downwards when there's a slope like this:
                 // .
