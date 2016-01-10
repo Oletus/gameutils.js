@@ -886,13 +886,25 @@ PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, collider
             if (movingObj.y > wallYDown - rectBottomHalfHeight - TileMap.epsilon) {
                 movingObj.y = wallYDown - rectBottomHalfHeight - TileMap.epsilon;
                 movingObj._touchGround(wallDownObject);
-            } else if (movingObj.lastGroundPlatform === wallDownObject &&
-                       movingObj.y > wallYDown - rectBottomHalfHeight - TileMap.epsilon - movingObj.maxStickToGroundDistance) {
-                // TODO: There's still a bug where the character teleports downwards when there's a slope like this:
-                // .
-                // xl
-                movingObj.y = wallYDown - rectBottomHalfHeight - TileMap.epsilon;
-                movingObj._touchGround(wallDownObject);
+            } else if (movingObj.lastGroundPlatform === wallDownObject && wallDownObject !== null) {
+                var relativeDeltaX = movingObj.frameDeltaX - wallDownObject.frameDeltaX;
+                var maxStickToGroundDistance = Math.min(movingObj.maxStickToGroundDistance, Math.abs(relativeDeltaX));
+                if (movingObj.y > wallYDown - rectBottomHalfHeight - TileMap.epsilon - maxStickToGroundDistance) {
+                    // TODO: There's still a bug where the character teleports downwards when there's a slope like this:
+                    // .
+                    // xl
+                    // Could be solved something like this:
+                    /*var relativeDelta = delta - wallDownObject.frameDeltaY;
+                    if (PlatformingPhysics.isContinuousFloorSlope(movingObj.lastWallDownX - wallDownObject.lastX,
+                                                                  movingObj.lastY + rectBottomHalfHeight - wallDownObject.lastY,
+                                                                  wallDownX - wallDownObject.x,
+                                                                  wallYDown - wallDownObject.y)) {
+                        movingObj.y = wallYDown - rectBottomHalfHeight - TileMap.epsilon;
+                        movingObj._touchGround(wallDownObject, wallDownX);
+                    }*/
+                    movingObj.y = wallYDown - rectBottomHalfHeight - TileMap.epsilon;
+                    movingObj._touchGround(wallDownObject);
+                }
             }
             if (movingObj.y < wallYUp + rectTopHalfHeight + TileMap.epsilon) {
                 movingObj.y = wallYUp + rectTopHalfHeight + TileMap.epsilon;
