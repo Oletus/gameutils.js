@@ -192,11 +192,13 @@ var ParticleEffect = function() {
  * @param {number} deltaTime Time since the last update in seconds.
  */
 ParticleEffect.prototype.update = function(deltaTime) {
-    this.dead = true;
-    for (var i = 0; i < this.emitters.length; ++i) {
-        this.emitters[i].update(deltaTime);
-        if (!this.emitters[i].dead) {
-            this.dead = false;
+    if (!this.dead) {
+        this.dead = true;
+        for (var i = 0; i < this.emitters.length; ++i) {
+            this.emitters[i].update(deltaTime);
+            if (!this.emitters[i].dead) {
+                this.dead = false;
+            }
         }
     }
 };
@@ -222,6 +224,13 @@ ParticleEffect.prototype.setCoords = function(x, y) {
     for (var i = 0; i < this.emitters.length; ++i) {
         this.emitters[i].setCoords(x, y);
     }
+};
+
+/**
+ * Stop this effect.
+ */
+ParticleEffect.prototype.stop = function() {
+    this.dead = true;
 };
 
 /**
