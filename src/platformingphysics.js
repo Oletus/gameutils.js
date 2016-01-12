@@ -25,8 +25,10 @@ PlatformingObject.prototype.init = function(options) {
         y: 0,
         color: '#f00',
         collisionGroup: '_all',
-        preserveInertiaFromCollisions: true
-    };
+        preserveInertiaFromCollisions: true,
+        maxStickToGroundDistance: 0, // On downward slopes
+        gameObject: null // Reserved for linking back to game-specific object that complements this one.
+    }; 
     for(var key in defaults) {
         if (!options.hasOwnProperty(key)) {
             this[key] = defaults[key];
@@ -39,7 +41,6 @@ PlatformingObject.prototype.init = function(options) {
     this.lastYAfterUpwardSlopes = this.y;
     this.onGround = false;
     this.groundPlatform = null;
-    this.maxStickToGroundDistance = 0;
     this.lastOnGround = false;
     this.lastGroundPlatform = null;
     this.lastDeltaTime = 0;
