@@ -36,6 +36,10 @@ PlatformingObject.prototype.init = function(options) {
             this[key] = options[key];
         }
     }
+    this.resetMovement();
+};
+
+PlatformingObject.prototype.resetMovement = function() {
     this.lastX = this.x;
     this.lastY = this.y;
     this.lastYAfterUpwardSlopes = this.y;
