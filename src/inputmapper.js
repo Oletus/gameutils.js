@@ -242,7 +242,7 @@ InputMapper.prototype.cycleDefaultControllerForInstruction = function() {
  */
 InputMapper.prototype.getKeyInstruction = function(callback, playerIndex) {
     var controller;
-    if (playerIndex !== undefined) {
+    if (playerIndex !== undefined && this.players.length > playerIndex) {
         if (this.players[playerIndex].length > 0) {
             controller = this._getLastUsedController(this.players[playerIndex]);
         } else {
