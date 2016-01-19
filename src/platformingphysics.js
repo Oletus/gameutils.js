@@ -23,7 +23,7 @@ PlatformingObject.prototype.init = function(options) {
     var defaults = {
         x: 0,
         y: 0,
-        color: '#f00',
+        color: '#0ff',
         collisionGroup: '_all',
         preserveInertiaFromCollisions: true,
         maxStickToGroundDistance: 0, // On downward slopes
@@ -240,7 +240,7 @@ PlatformingTileMap.prototype.init = function(options) {
     var defaults = {
         tileMap: null,
         tilesAffectMovingTilemaps: false,
-        resolvePriority: 1
+        resolvePriority: 2
     };
     for(var key in defaults) {
         if (!options.hasOwnProperty(key)) {
@@ -287,8 +287,15 @@ PlatformingTileMap.prototype.decideDy = function(deltaTime) {
  */
 PlatformingTileMap.prototype.render = function(ctx) {
     ctx.fillStyle = this.color;
-    /*var rect = this.getCollisionRect();
-    ctx.fillRect(rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top);*/
+    var rect = this.getCollisionRect();
+    var defaultRect = PlatformingTileMap.prototype.getPositionedCollisionRect.call(this, this.x, this.y);
+    if (Math.abs(rect.left - defaultRect.left) + Math.abs(rect.right - defaultRect.right) + 
+        Math.abs(rect.top - defaultRect.top) + Math.abs(rect.bottom - defaultRect.bottom) > 0.1)
+    {
+        ctx.globalAlpha = ctx.globalAlpha * 0.5;
+        ctx.fillRect(rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top);
+        ctx.globalAlpha = ctx.globalAlpha * 2.0;
+    }
     ctx.save();
     ctx.translate(this.x, this.y);
     var isWall = function(tile) {
