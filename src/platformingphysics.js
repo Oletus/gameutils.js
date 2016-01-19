@@ -27,6 +27,7 @@ PlatformingObject.prototype.init = function(options) {
         collisionGroup: '_all',
         preserveInertiaFromCollisions: true,
         maxStickToGroundDistance: 0, // On downward slopes
+        resolvePriority: 0, // The objects with higher resolve priority have their physics resolved first.
         gameObject: null // Reserved for linking back to game-specific object that complements this one.
     }; 
     for(var key in defaults) {
@@ -238,7 +239,8 @@ PlatformingTileMap.prototype.init = function(options) {
     PlatformingObject.prototype.init.call(this, options);
     var defaults = {
         tileMap: null,
-        tilesAffectMovingTilemaps: false
+        tilesAffectMovingTilemaps: false,
+        resolvePriority: 1
     };
     for(var key in defaults) {
         if (!options.hasOwnProperty(key)) {
@@ -325,8 +327,17 @@ var PlatformingLevel = function() {
  */
 PlatformingLevel.prototype.init = function() {
     this._objects = [];
-    this._tileMapObjects = [];
     this._colliders = {'_all': []}; // All is a special collision group that includes all objects.
+};
+
+PlatformingLevel.resolveSort = function(a, b) {
+    if (a.resolvePriority > b.resolvePriority) {
+        return -1;
+    }
+    if (b.resolvePriority > a.resolvePriority) {
+        return 1;
+    }
+    return 0;
 };
 
 /**
@@ -336,11 +347,8 @@ PlatformingLevel.prototype.init = function() {
  *     the "_all" collision group.
  */
 PlatformingLevel.prototype.pushObject = function(object, collisionGroups) {
-    if (object instanceof PlatformingTileMap) {
-        this._tileMapObjects.push(object);
-    } else {
-        this._objects.push(object);
-    }
+    this._objects.push(object);
+    this._objects.sort(PlatformingLevel.resolveSort);
     if (collisionGroups !== undefined) {
         for (var i = 0; i < collisionGroups.length; ++i) {
             if (collisionGroups[i] !== '_all' && collisionGroups[i] !== '_none') {
@@ -359,11 +367,7 @@ PlatformingLevel.prototype.pushObject = function(object, collisionGroups) {
  * @param {PlatformingObject} object Object to remove.
  */
 PlatformingLevel.prototype.removeObject = function(object) {
-    if (object instanceof PlatformingTileMap) {
-        this._tileMapObjects.splice(this._tileMapObjects.indexOf(object), 1);
-    } else {
-        this._objects.splice(this._objects.indexOf(object), 1);
-    }
+    this._objects.splice(this._objects.indexOf(object), 1);
     for (var groupKey in this._colliders) {
         var indexInGroup = this._colliders[groupKey].indexOf(object);
         if (indexInGroup >= 0) {
@@ -387,49 +391,26 @@ PlatformingLevel.prototype.update = function(deltaTime) {
         object.lastY = object.y;
         object.lastOnGround = object.onGround;
         object.lastGroundPlatform = object.groundPlatform;
-    }
-    for (var i = 0; i < this._tileMapObjects.length; ++i) {
-        var object = this._tileMapObjects[i];
-        object.lastX = object.x;
-        object.lastY = object.y;
-        object.lastOnGround = object.onGround;
-        object.lastGroundPlatform = object.groundPlatform;
         object.decideDx(deltaTime);
     }
-    for (var i = 0; i < this._tileMapObjects.length; ++i) {
-        var object = this._tileMapObjects[i];
+    for (var i = 0; i < this._objects.length; ++i) {
+        var object = this._objects[i];
         // tilemaps which affect moving tilemaps may not move.
-        if (!object.tilesAffectMovingTilemaps) {
+        if (!(object instanceof PlatformingTileMap) || !object.tilesAffectMovingTilemaps) {
             object.updateX(deltaTime, this._colliders[object.collisionGroup]);
         }
     }
-    for (var i = 0; i < this._objects.length; ++i) {
-        var object = this._objects[i];
-        object.decideDx(deltaTime);
-    }
-    for (var i = 0; i < this._objects.length; ++i) {
-        var object = this._objects[i];
-        object.updateX(deltaTime, this._colliders[object.collisionGroup]);
-    }
 
-    for (var i = 0; i < this._tileMapObjects.length; ++i) {
-        var object = this._tileMapObjects[i];
+    for (var i = 0; i < this._objects.length; ++i) {
+        var object = this._objects[i];
         object.decideDy(deltaTime);
     }
-    for (var i = 0; i < this._tileMapObjects.length; ++i) {
-        var object = this._tileMapObjects[i];
+    for (var i = 0; i < this._objects.length; ++i) {
+        var object = this._objects[i];
         // tilemaps which affect moving tilemaps may not move.
-        if (!object.tilesAffectMovingTilemaps) {
+        if (!(object instanceof PlatformingTileMap) || !object.tilesAffectMovingTilemaps) {
             object.updateY(deltaTime, this._colliders[object.collisionGroup]);
         }
-    }
-    for (var i = 0; i < this._objects.length; ++i) {
-        var object = this._objects[i];
-        object.decideDy(deltaTime);
-    }
-    for (var i = 0; i < this._objects.length; ++i) {
-        var object = this._objects[i];
-        object.updateY(deltaTime, this._colliders[object.collisionGroup]);
     }
 };
 
@@ -439,9 +420,6 @@ PlatformingLevel.prototype.update = function(deltaTime) {
  * @param {CanvasRenderingContext2D} ctx 2D rendering context to use for drawing.
  */
 PlatformingLevel.prototype.render = function(ctx) {
-    for (var i = 0; i < this._tileMapObjects.length; ++i) {
-        this._tileMapObjects[i].render(ctx);
-    }
     for (var i = 0; i < this._objects.length; ++i) {
         this._objects[i].render(ctx);
     }

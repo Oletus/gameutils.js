@@ -191,7 +191,6 @@ describe('PlatformingPhysics', function() {
             var level = new PlatformingLevel();
             level.init();
             expect(level._objects.length).toEqual(0);
-            expect(level._tileMapObjects.length).toEqual(0);
             expect(level._colliders['_all'].length).toEqual(0);
         });
         
@@ -216,7 +215,7 @@ describe('PlatformingPhysics', function() {
             level.init();
             var c = testPlatformingTileMapWithFloor({});
             level.pushObject(c, []);
-            expect(level._tileMapObjects[0]).toBe(c);
+            expect(level._objects[0]).toBe(c);
             expect(level._colliders['_all'][0]).toBe(c);
         });
 
@@ -237,7 +236,7 @@ describe('PlatformingPhysics', function() {
             var c = testPlatformingTileMapWithFloor({});
             level.pushObject(c, ['foo']);
             level.removeObject(c);
-            expect(level._tileMapObjects.length).toBe(0);
+            expect(level._objects.length).toBe(0);
             expect(level._colliders['_all'].length).toBe(0);
             expect(level._colliders['foo'].length).toBe(0);
         });
