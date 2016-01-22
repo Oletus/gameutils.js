@@ -6,9 +6,9 @@
  * Assumes r, g, and b are contained in the set [0, 255] and
  * returns h, s, and l in the set [0, 1].
  *
- * @param {number}  r       The red color value
- * @param {number}  g       The green color value
- * @param {number}  b       The blue color value
+ * @param {Number}  r       The red color value
+ * @param {Number}  g       The green color value
+ * @param {Number}  b       The blue color value
  * @return {Array}           The HSL representation
  */
 function rgbToHsl(r, g, b){
@@ -38,9 +38,9 @@ function rgbToHsl(r, g, b){
  * Assumes h, s, and l are contained in the set [0, 1] and
  * returns r, g, and b in the set [0, 255].
  *
- * @param {number}  h       The hue
- * @param {number}  s       The saturation
- * @param {number}  l       The lightness
+ * @param {Number}  h       The hue
+ * @param {Number}  s       The saturation
+ * @param {Number}  l       The lightness
  * @return {Array}           The RGB representation
  */
 function hslToRgb(h, s, l){
@@ -74,9 +74,9 @@ function hslToRgb(h, s, l){
  * Assumes r, g, and b are contained in the set [0, 255] and
  * returns h, s, and v in the set [0, 1].
  *
- * @param {number}  r       The red color value
- * @param {number}  g       The green color value
- * @param {number}  b       The blue color value
+ * @param {Number}  r       The red color value
+ * @param {Number}  g       The green color value
+ * @param {Number}  b       The blue color value
  * @return {Array}           The HSV representation
  */
 function rgbToHsv(r, g, b){
@@ -107,9 +107,9 @@ function rgbToHsv(r, g, b){
  * Assumes h, s, and v are contained in the set [0, 1] and
  * returns r, g, and b in the set [0, 255].
  *
- * @param {number}  h       The hue
- * @param {number}  s       The saturation
- * @param {number}  v       The value
+ * @param {Number}  h       The hue
+ * @param {Number}  s       The saturation
+ * @param {Number}  v       The value
  * @return {Array}           The RGB representation
  */
 function hsvToRgb(h, s, v){
