@@ -2,13 +2,15 @@
 
 /**
  * A particle engine to run particle effects.
+ * To get the same appearance for effects as in the particle editor, leave
+ * parameters to their default values.
  * @constructor
  * @param {Object} options Options for the particle engine.
  */
 var ParticleEngine = function(options) {
     var defaults = {
         gravityX: 0,
-        gravityY: 0
+        gravityY: 1
     };
     for(var key in defaults) {
         if (!options.hasOwnProperty(key)) {
@@ -20,6 +22,11 @@ var ParticleEngine = function(options) {
     this.particles = [];
     this.effects = [];
 };
+
+// This scale value is applied to movement and size of particle effects created
+// in the effects editor. It is particularly useful if the ParticleEngine is
+// run in world space which has a considerably different scale than the editor.
+ParticleEngine.defaultEditorEffectScale = 1.0;
 
 /**
  * Add a particle to update and draw with this engine.

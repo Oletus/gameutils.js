@@ -87,7 +87,7 @@ var AppearanceOptionSet = function() {
 };
 
 var Editor = function() {
-    this.particles = new ParticleEngine({gravityY: 100});
+    this.particles = new ParticleEngine({});
     this.editEmitterIndex = 0;
     this.emitters = [];
     this.timedEmitters = [];
@@ -125,7 +125,7 @@ var Editor = function() {
                 "size": 5,
                 "opacity": 1,
                 "inertia": 1,
-                "weight": 1,
+                "weight": 100,
                 "directionMode": "RELATIVE",
                 "particleInterval": 0.016666666666666666
               }
@@ -142,7 +142,7 @@ var Editor = function() {
                 "size": 29.970710644053703,
                 "opacity": 1,
                 "inertia": 1,
-                "weight": -0.6748517323899696,
+                "weight": -67.48517323899696,
                 "directionMode": "RELATIVE",
                 "particleInterval": 0.011437343206279846
               }
@@ -340,6 +340,7 @@ Editor.prototype.generateCode = function() {
 
     code.push('(function() {');
     pushIndent();
+    code.push('var drawScale = ParticleEngine.defaultEditorEffectScale;');
     
     var specialEmitterKeys = {'x': false, 'y': false, 'appearance': false};
     for (var i = 0; i < this.emitters.length; ++i) {
@@ -353,6 +354,8 @@ Editor.prototype.generateCode = function() {
             if (this.emitters[i].options.hasOwnProperty(key) && !specialEmitterKeys.hasOwnProperty(key)) {
                 if (typeof this.emitters[i].options[key] === 'string') {
                     code.push(key + ': "' + this.emitters[i].options[key] + '",');
+                } else if (key === 'positionSpread' || key === 'minVelocity' || key === 'maxVelocity' || key == 'weight') {
+                    code.push(key + ': ' + this.emitters[i].options[key] + ' / drawScale,');
                 } else {
                     code.push(key + ': ' + this.emitters[i].options[key] + ',');
                 }
@@ -491,6 +494,8 @@ Editor.prototype.updateAppearanceFromUI = function(index) {
         if (optionsCopy.hasOwnProperty(key)) {
             if (typeof optionsCopy[key] === 'function') {
                 appearanceOptionsString += key + ': ' + Editor.functionCode(optionsCopy[key]) + ', ';
+            } else if (key === 'size') {
+                appearanceOptionsString += key + ': ' + optionsCopy[key] + ' / drawScale, ';
             } else {
                 appearanceOptionsString += key + ': ' + optionsCopy[key] + ', ';
             }
@@ -580,7 +585,7 @@ var particleParameters = {
     'minVelocity': {initial: 10, min: 0, max: 1000},
     'maxVelocity': {initial: 80, min: 0, max: 1000},
     'inertia': {initial: 1, min: 0.1, max: 10},
-    'weight': {initial: 1, min: -1, max: 1},
+    'weight': {initial: 100, min: -100, max: 100},
     'positionSpread': {initial: 10, min: 0, max: 100},
     'size': {initial: 5, min: 1, max: 200},
     'sizeFunc': {options: Editor.easingFunctions()},
