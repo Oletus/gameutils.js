@@ -155,6 +155,56 @@ Sprite.varyHue = function(options) {
     };
 };
 
+/**
+ * Filter for generating a variation of the Sprite with colors replaced with others.
+ * @param {Object} paletteMap A mapping from RGB source color values to target values. Source colors should be strings
+ * in "R, G, B" format. Target colors should be arrays [R, G, B]. In both cases the scale is 0-255.
+ * @param {number=} tolerance Tolerance for detecting source colors.
+ */
+Sprite.repalette = function(paletteMap, tolerance) {
+    if (tolerance === undefined) {
+        tolerance = 10;
+    }
+    var palette = [];
+    for (var key in paletteMap) {
+        if (paletteMap.hasOwnProperty(key)) {
+            var sourceRgb = key.split(', ');
+            palette.push({
+                r: sourceRgb[0],
+                g: sourceRgb[1],
+                b: sourceRgb[2],
+                target: paletteMap[key]
+            });
+        }
+    }
+    return function(sprite) {
+        var canvas = document.createElement('canvas');
+        canvas.width = sprite.width;
+        canvas.height = sprite.height;
+        var ctx = canvas.getContext('2d');
+        sprite.draw(ctx, 0, 0);
+        var data = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        for (var i = 0; i < data.data.length; i += 4) {
+            var r = data.data[i];
+            var g = data.data[i + 1];
+            var b = data.data[i + 2];
+            for (var j = 0; j < palette.length; ++j) {
+                if (Math.abs(r - palette[j].r) < tolerance &&
+                    Math.abs(g - palette[j].g) < tolerance &&
+                    Math.abs(b - palette[j].b) < tolerance)
+                {
+                    var rgb = palette[j].target;
+                    data.data[i] = rgb[0];
+                    data.data[i + 1] = rgb[1];
+                    data.data[i + 2] = rgb[2];
+                }
+            }
+        }
+        ctx.putImageData(data, 0, 0);
+        sprite.img = canvas;
+    };
+};
+
 Sprite.reportedSecurityError = false;
 
 /**
