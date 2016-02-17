@@ -72,7 +72,7 @@ Game.prototype.update = function(deltaTime) {
 
 // Parameters added here can be tuned at run time when in developer mode
 Game.parameters = new GameParameters({
-    'muteAudio': false
+    'muteAudio': {initial: false}
 });
 
 var DEV_MODE = (window.location.href.indexOf("?devMode") != -1);
