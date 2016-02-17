@@ -6,11 +6,14 @@
  * @param {Object} animationData Data for animation frames. Keys are animation ids. 
  * Values are arrays containing objects specifying frames.
  * Each frame has two mandatory keys: 'src' for frame source and 'duration' for a duration in milliseconds.
+ * A series of frames can also be defined by using a wildcard. The number of frames needs to be specified.
+ * Frame numbering starts from 1 if a wildcard is used.
  * Duration can be set to 0 to have the frame run into infinity.
  * Example:
  * {
  *  idle: [{src: 'idle.png', duration: 0}],
  *  walk: [{src: 'walk1.png', duration: 50}, {src: 'walk2.png', duration: 50}]
+ *  run: [{src: 'run*.png', frames: 5}]
  * }
  * @param {Object} options Object with the following optional keys:
  *  frameConstructor: function Constructor for single frames that takes the
@@ -39,15 +42,26 @@ var AnimatedSprite = function(animationData, options) {
         if (animationData.hasOwnProperty(key)) {
             var animation = [];
             var singleAnimationData = animationData[key];
+            var frameSrc = [];
             for (var i = 0; i < singleAnimationData.length; ++i) {
-                var frame = AnimatedSprite._getFrame(singleAnimationData[i].src, this.frameConstructor);
                 var duration = this.defaultDuration;
                 if (singleAnimationData[i].duration !== undefined)
                 {
-                    duration = singleAnimationData[i].duration
+                    duration = singleAnimationData[i].duration;
                 }
-                duration *= this.durationMultiplier;
-                animation.push({frame: frame, duration: duration});
+                if (singleAnimationData[i].frames !== undefined) {
+                    var frameCount = singleAnimationData[i].frames;
+                    var srcTemplate = singleAnimationData[i].src;
+                    for (var i = 1; i <= frameCount; ++i) {
+                        frameSrc.push({src: srcTemplate.replace('*', i), duration: duration});
+                    }
+                } else {
+                    frameSrc.push({src: singleAnimationData[i].src, duration: duration});
+                }
+            }
+            for (var i = 0; i < frameSrc.length; ++i) {
+                var frame = AnimatedSprite._getFrame(frameSrc[i].src, this.frameConstructor);
+                animation.push({frame: frame, duration: frameSrc[i].duration * this.durationMultiplier});
             }
             this.animations[key] = animation;
             if (this.defaultAnimation === undefined) {
