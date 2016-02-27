@@ -117,8 +117,7 @@ var AnimatedSpriteInstance = function(animatedSprite, finishedAnimationCallback)
 
     // Add draw functions from Sprite if they are defined
     // A bit slow way to do this but needed to make the animation classes more generic.
-    if (frame instanceof Sprite && frame.draw !== undefined &&
-        frame.drawRotated !== undefined && frame.drawRotatedNonUniform !== undefined)
+    if (frame.implementsGameutilsSprite)
     {
         var that = this;
         this.draw = function(ctx, leftX, topY) {

@@ -3,8 +3,8 @@
 /**
  * A sprite that can be drawn on a 2D canvas.
  * @constructor
- * @param {string|HTMLImageElement|HTMLCanvasElement} filename File to load or a graphical element that's already
- * loaded.
+ * @param {string|HTMLImageElement|HTMLCanvasElement|Sprite} filename File to load, a graphical element that's already
+ * loaded, or another Sprite.
  * @param {string=} filter Filter function to convert the sprite, for example Sprite.turnSolidColored('black')
  * @param {string|HTMLImageElement|HTMLCanvasElement=} fallback Fallback file to load or a graphical element that's
  * already loaded.
@@ -15,7 +15,24 @@ var Sprite = function(filename, /* Optional */ filter, fallback) {
     this.fallback = fallback;
     this.filter = filter;
     Sprite.createdCount++;
+    this.loadedListeners = [];
+    this.implementsGameutilsSprite = true;
     this._reload();
+};
+
+Sprite.prototype.addLoadedListener = function(callback) {
+    if (this.loaded) {
+        callback();
+    }
+    else {
+        this.loadedListeners.push(callback);
+    }
+};
+
+Sprite.prototype._callLoadedListeners = function() {
+    for (var i = 0; i < this.loadedListeners.length; ++i) {
+        this.loadedListeners[i]();
+    }
 };
 
 /**
@@ -25,10 +42,18 @@ var Sprite = function(filename, /* Optional */ filter, fallback) {
 Sprite.prototype._reload = function() {
     if (typeof this.filename != typeof '') {
         this.img = this.filename;
+        if (this.img instanceof Sprite) {
+            var that = this;
+            this.img.addLoadedListener(function() {
+                that.filename = that.img.img;
+                that._reload();
+            });
+            return;
+        }
         this.loaded = true;
         Sprite.loadedCount++;
-        this.width = this.filename.width;
-        this.height = this.filename.height;
+        this.width = this.img.width;
+        this.height = this.img.height;
         if (this.filter !== undefined) {
             this.filter(this);
         }
@@ -49,6 +74,7 @@ Sprite.prototype._reload = function() {
             if (that.filter !== undefined) {
                 that.filter(that);
             }
+            that._callLoadedListeners();
         };
         this.img.onerror = function() {
             if (that.fallback) {
@@ -71,6 +97,7 @@ Sprite.prototype._reload = function() {
             ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
             ctx.fillStyle = '#000';
             ctx.fillText('Missing: ' + that.filename, 0, 0);
+            that._callLoadedListeners();
         };
     }
 };
