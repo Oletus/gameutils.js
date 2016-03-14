@@ -52,8 +52,8 @@ var AnimatedSprite = function(animationData, options) {
                 if (singleAnimationData[i].frames !== undefined) {
                     var frameCount = singleAnimationData[i].frames;
                     var srcTemplate = singleAnimationData[i].src;
-                    for (var i = 1; i <= frameCount; ++i) {
-                        frameSrc.push({src: srcTemplate.replace('*', i), duration: duration});
+                    for (var j = 1; j <= frameCount; ++j) {
+                        frameSrc.push({src: srcTemplate.replace('*', j), duration: duration});
                     }
                 } else {
                     frameSrc.push({src: singleAnimationData[i].src, duration: duration});
