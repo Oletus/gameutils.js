@@ -10,6 +10,8 @@ var Gamepad = function(callbackObj) {
     this.callbackObj = callbackObj;
 };
 
+Gamepad.debugLogEnabled = false;
+
 Gamepad.prototype.gamepadForPlayer = function(gamepads, playerNumber) {
     for (var i = 0; i < gamepads.length; ++i) {
         if (gamepads[i] !== undefined && gamepads[i] !== null && gamepads[i].index === this.players[playerNumber]) {
@@ -70,10 +72,18 @@ Gamepad.prototype.update = function() {
                 if (l.buttonNumber > 100) {
                     buttonNumber -= 100;
                 }
-                if ('value' in pad.buttons[buttonNumber]) {
-                    value = pad.buttons[buttonNumber].value;
-                } else {
-                    value = pad.buttons[buttonNumber];
+                try {
+                    if ('value' in pad.buttons[buttonNumber]) {
+                        value = pad.buttons[buttonNumber].value;
+                    } else {
+                        value = pad.buttons[buttonNumber];
+                    }
+                } catch(e) {
+                    // Accessing pad.buttons seems to randomly fail in Firefox after long uptime sometimes.
+                    if (Gamepad.debugLogEnabled) {
+                        console.log('Accessing pad.buttons failed, pad.buttons is: ', pad.buttons);
+                    }
+                    continue;
                 }
                 if (l.buttonNumber > 100) {
                     var axis = (l.buttonNumber <= Gamepad.BUTTONS.DOWN_OR_ANALOG_DOWN) ? 1 : 0;
