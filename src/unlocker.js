@@ -108,10 +108,15 @@ Unlocker.prototype.popFulfilledUnlockConditions = function() {
 
 /**
  * @param {string} unlockId Id to mark as unlocked.
+ * @return {boolean} True if the unlock was actually stored.
  */
 Unlocker.prototype.commitUnlock = function(unlockId) {
-    this.unlocks[unlockId] = true;
-    this.unlocksInOrder.push(unlockId);
+    if (this.unlocks.hasOwnProperty(unlockId)) {
+        this.unlocks[unlockId] = true;
+        this.unlocksInOrder.push(unlockId);
+        return true;
+    }
+    return false;
 };
 
 /**
@@ -119,7 +124,7 @@ Unlocker.prototype.commitUnlock = function(unlockId) {
  * @param {Storage} storage Storage object to load from.
  */
 Unlocker.prototype.loadFrom = function(storage) {
-    var unlocks = {};
+    var unlocksInOrder = null;
     try {
         unlocksInOrder = JSON.parse(storage.getItem(this.gameName + '-gameutilsjs-unlocks-in-order'));
     } catch(e) {
@@ -129,12 +134,9 @@ Unlocker.prototype.loadFrom = function(storage) {
         return;
     }
     this.unlocksInOrder = [];
-    for (var i = 0; i < this.unlocksInOrder; ++i) {
+    for (var i = 0; i < unlocksInOrder.length; ++i) {
         var key = unlocksInOrder[i];
-        if (this.unlocks.hasOwnProperty(key)) {
-            this.unlocks[key] = true;
-            this.unlocksInOrder.push(key);
-        }
+        this.commitUnlock(key);
     }
 };
 

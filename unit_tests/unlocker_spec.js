@@ -20,6 +20,25 @@ var testUnlockCondition = function() {
     return new TestCondition({unlockId: 'test'});
 };
 
+var testStorage = function() {
+    var TestStorage = function() {
+        this.data = {};
+    };
+    
+    TestStorage.prototype.setItem = function(key, value) {
+        this.data[key] = String(value);
+    };
+    
+    TestStorage.prototype.getItem = function(key) {
+        if (this.data.hasOwnProperty(key)) {
+            return this.data[key];
+        }
+        return null;
+    };
+    
+    return new TestStorage();
+};
+
 /**
  * @constructor
  */
@@ -103,5 +122,41 @@ describe('Unlocker', function() {
         unlocker.commitUnlock('test');
         expect(unlocker.unlocks['test']).toBe(true);
         expect(unlocker.unlocksInOrder[0]).toBe('test');
+    });
+    
+    it('loads from empty storage', function() {
+        var unlocker = new Unlocker({
+            gameName: 'testGame',
+            needCommitUnlocks: false,
+            conditions: [testUnlockCondition()]
+        });
+        
+        var storage = testStorage();
+        
+        unlocker.loadFrom(storage);
+        expect(unlocker.unlocks['test']).toBe(false);
+        expect(unlocker.unlocksInOrder.length).toBe(0);
+    });
+
+    it('loads from storage with unlocks', function() {
+        var unlockerA = new Unlocker({
+            gameName: 'testGame',
+            needCommitUnlocks: false,
+            conditions: [testUnlockCondition()]
+        });
+        unlockerA.commitUnlock('test');
+        
+        var storage = testStorage();
+        
+        unlockerA.saveTo(storage);
+        
+        var unlockerB = new Unlocker({
+            gameName: 'testGame',
+            needCommitUnlocks: false,
+            conditions: [testUnlockCondition()]
+        });
+        unlockerB.loadFrom(storage);
+        expect(unlockerB.unlocks['test']).toBe(true);
+        expect(unlockerB.unlocksInOrder[0]).toBe('test');
     });
 });
