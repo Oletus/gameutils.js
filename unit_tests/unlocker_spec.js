@@ -27,13 +27,21 @@ var TestGameState = function() {
     this.unlocked = false;
 };
 
-describe('unlocker', function() {
-    it('initializes a condition', function() {
+describe('UnlockCondition', function() {
+    it('initializes', function() {
         var condition = testUnlockCondition();
         expect(condition.unlockId).toBe('test');
         expect(condition.fulfilled).toBe(false);
     });
+    
+    it('initializes unlocked by default', function() {
+        var condition = new UnlockByDefault({unlockId: 'foo'});
+        expect(condition.unlockId).toBe('foo');
+        expect(condition.fulfilled).toBe(true);
+    });
+});
 
+describe('Unlocker', function() {
     it('initializes', function() {
         var unlocker = new Unlocker({
             gameName: 'testGame',
@@ -43,7 +51,20 @@ describe('unlocker', function() {
         expect(unlocker.gameName).toBe('testGame');
         expect(unlocker.needCommitUnlocks).toBe(true);
         expect(unlocker.unlocks['test']).toBe(false);
+        expect(unlocker.unlocksInOrder.length).toBe(0);
     });
+    
+    it('initializes with something unlocked by default', function() {
+        var unlocker = new Unlocker({
+            gameName: 'testGame',
+            needCommitUnlocks: false,
+            conditions: [new UnlockByDefault({unlockId: 'foo'})]
+        });
+        expect(unlocker.needCommitUnlocks).toBe(false);
+        expect(unlocker.unlocks['foo']).toBe(true);
+        expect(unlocker.unlocksInOrder[0]).toBe('foo');
+    });
+    
     
     it('updates', function() {
         var gameState = new TestGameState();
@@ -54,9 +75,11 @@ describe('unlocker', function() {
         });
         unlocker.update(gameState, 1 / 60);
         expect(unlocker.unlocks['test']).toBe(false);
+        expect(unlocker.unlocksInOrder.length).toBe(0);
         gameState.unlocked = true;
         unlocker.update(gameState, 1 / 60);
         expect(unlocker.unlocks['test']).toBe(true);
+        expect(unlocker.unlocksInOrder[0]).toBe('test');
     });
     
     it('manually commits unlocks', function() {
@@ -69,6 +92,7 @@ describe('unlocker', function() {
         gameState.unlocked = true;
         unlocker.update(gameState, 1 / 60);
         expect(unlocker.unlocks['test']).toBe(false);
+        expect(unlocker.unlocksInOrder.length).toBe(0);
         expect(unlocker._fulfilledConditions.length).toBe(1);
 
         var fulfilled = unlocker.popFulfilledUnlockConditions();
@@ -78,5 +102,6 @@ describe('unlocker', function() {
 
         unlocker.commitUnlock('test');
         expect(unlocker.unlocks['test']).toBe(true);
+        expect(unlocker.unlocksInOrder[0]).toBe('test');
     });
 });

@@ -60,14 +60,23 @@ var Unlocker = function(options) {
     objectUtil.initWithDefaults(this, defaults, options);
     this._fulfilledConditions = [];
     this.unlocks = {};
+    this.unlocksInOrder = [];
     for (var i = 0; i < this.conditions.length; ++i) {
         var condition = this.conditions[i];
         this.unlocks[condition.unlockId] = false;
-        if (condition.fulfilled) {
-            this._fulfilledConditions.push(condition.unlockId);
-            if (!this.needCommitUnlocks) {
-                this.unlocks[condition.unlockId] = true;
-            }
+        this._checkFulfilled(condition);
+    }
+};
+
+/**
+ * @param {UnlockCondition} condition Check if a condition is fulfilled.
+ * @protected
+ */
+Unlocker.prototype._checkFulfilled = function(condition) {
+    if (condition.fulfilled) {
+        this._fulfilledConditions.push(condition.unlockId);
+        if (!this.needCommitUnlocks) {
+            this.commitUnlock(condition.unlockId);
         }
     }
 };
@@ -82,12 +91,7 @@ Unlocker.prototype.update = function(gameState, deltaTime) {
         var condition = this.conditions[i];
         if (!this.unlocks[condition.unlockId] && this._fulfilledConditions.indexOf(condition.unlockId) < 0) {
             condition.update(gameState, deltaTime);
-            if (condition.fulfilled) {
-                this._fulfilledConditions.push(condition.unlockId);
-                if (!this.needCommitUnlocks) {
-                    this.unlocks[condition.unlockId] = true;
-                }
-            }
+            this._checkFulfilled(condition);
         }
     }
 };
@@ -107,6 +111,7 @@ Unlocker.prototype.popFulfilledUnlockConditions = function() {
  */
 Unlocker.prototype.commitUnlock = function(unlockId) {
     this.unlocks[unlockId] = true;
+    this.unlocksInOrder.push(unlockId);
 };
 
 /**
@@ -116,13 +121,19 @@ Unlocker.prototype.commitUnlock = function(unlockId) {
 Unlocker.prototype.loadFrom = function(storage) {
     var unlocks = {};
     try {
-        unlocks = JSON.parse(storage.getItem(this.gameName + '-gameutilsjs-unlocks'));
+        unlocksInOrder = JSON.parse(storage.getItem(this.gameName + '-gameutilsjs-unlocks-in-order'));
     } catch(e) {
         return;
     }
-    for (var key in this.unlocks) {
-        if (unlocks.hasOwnProperty(key)) {
-            this.unlocks[key] = unlocks[key];
+    if (unlocksInOrder === null) {
+        return;
+    }
+    this.unlocksInOrder = [];
+    for (var i = 0; i < this.unlocksInOrder; ++i) {
+        var key = unlocksInOrder[i];
+        if (this.unlocks.hasOwnProperty(key)) {
+            this.unlocks[key] = true;
+            this.unlocksInOrder.push(key);
         }
     }
 };
@@ -132,6 +143,6 @@ Unlocker.prototype.loadFrom = function(storage) {
  * @param {Storage} storage Storage object to save to.
  */
 Unlocker.prototype.saveTo = function(storage) {
-    storage.setItem(this.gameName + '-gameutilsjs-unlocks-version', '0');
-    storage.setItem(this.gameName + '-gameutilsjs-unlocks', JSON.stringify(this.unlocks));
+    storage.setItem(this.gameName + '-gameutilsjs-unlocks-version', '1');
+    storage.setItem(this.gameName + '-gameutilsjs-unlocks-in-order', JSON.stringify(this.unlocksInOrder));
 };
