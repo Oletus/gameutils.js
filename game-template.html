@@ -29,6 +29,7 @@
 <script src="src/hitbox.js"></script>
 <script src="src/tilemap.js"></script>
 <script src="src/platformingphysics.js"></script>
+<script src="src/unlocker.js"></script>
 <script>
 'use strict';
 
@@ -67,6 +68,7 @@ Game.prototype.render = function(ctx) {
 Game.prototype.update = function(deltaTime) {
     this.time += deltaTime;
     this.input.update();
+    // Update your level here
     Audio.muteAll(Game.parameters.get('muteAudio'));
 };
 
