@@ -33,6 +33,20 @@ UnlockCondition.prototype.update = function(gameState, deltaTime) {
 
 
 /**
+ * An unlock condition that always passes.
+ * @constructor
+ * @param {Object} options Object with the following keys:
+ *   unlockId: string Identifier for the unlock.   
+ */
+var UnlockByDefault = function(options) {
+    this.initCondition(options);
+    this.fulfilled = true;
+};
+
+UnlockByDefault.prototype = new UnlockCondition();
+
+
+/**
  * @constructor
  * Engine for managing game unlocks. Each unlock is identified by an id, has a condition that's an instance of
  * UnlockCondition based on game state and can be either unlocked (true) or locked (false).
@@ -49,6 +63,12 @@ var Unlocker = function(options) {
     for (var i = 0; i < this.conditions.length; ++i) {
         var condition = this.conditions[i];
         this.unlocks[condition.unlockId] = false;
+        if (condition.fulfilled) {
+            this._fulfilledConditions.push(condition.unlockId);
+            if (!this.needCommitUnlocks) {
+                this.unlocks[condition.unlockId] = true;
+            }
+        }
     }
 };
 
@@ -112,6 +132,6 @@ Unlocker.prototype.loadFrom = function(storage) {
  * @param {Storage} storage Storage object to save to.
  */
 Unlocker.prototype.saveTo = function(storage) {
-    storage.setItem(this.gameName + '-gameutilsjs-unlocks-version') = '0';
-    storage.setItem(this.gameName + '-gameutilsjs-unlocks') = JSON.stringify(this.unlocks);
+    storage.setItem(this.gameName + '-gameutilsjs-unlocks-version', '0');
+    storage.setItem(this.gameName + '-gameutilsjs-unlocks', JSON.stringify(this.unlocks));
 };

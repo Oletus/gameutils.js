@@ -80,19 +80,21 @@ Audio.allMuted = false;
  * @param {boolean} mute Set to true to mute all audio.
  */
 Audio.muteAll = function(mute) {
-    Audio.allMuted = mute;
-    if (typeof Howler !== 'undefined') {
-        if (mute) {
-            Howler.mute();
+    if (Audio.allMuted !== mute) {
+        Audio.allMuted = mute;
+        if (typeof Howler !== 'undefined') {
+            if (mute) {
+                Howler.mute();
+            } else {
+                Howler.unmute();
+            }
         } else {
-            Howler.unmute();
-        }
-    } else {
-        for (var i = 0; i < Audio.allAudio.length; ++i) {
-            var audio = Audio.allAudio[i];
-            audio.audio.muted = mute;
-            for (var j = 0; j < audio.clones.length; ++j) {
-                audio.clones[j].muted = mute;
+            for (var i = 0; i < Audio.allAudio.length; ++i) {
+                var audio = Audio.allAudio[i];
+                audio.audio.muted = mute;
+                for (var j = 0; j < audio.clones.length; ++j) {
+                    audio.clones[j].muted = mute;
+                }
             }
         }
     }
