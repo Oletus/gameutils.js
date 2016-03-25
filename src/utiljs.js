@@ -5,6 +5,18 @@ var stringUtil = {}; // Utilities for working with JS strings
 var objectUtil = {}; // Utilities for working with JS objects
 
 /**
+ * Random function. Prefers using mathUtil.random() if available, falls back to Math.random().
+ * @return {number} Random value between 0 and 1 (not including 1).
+ */
+arrayUtil._random = function() {
+    if (window.mathUtil && mathUtil.random) {
+        return mathUtil.random();
+    } else {
+        return Math.random();
+    }
+};
+
+/**
  * Count the number of matches in an array.
  * @param {Array} array Array to check.
  * @param {function} matchFunc Function that takes one array item and returns true if it should be counted.
@@ -37,7 +49,7 @@ arrayUtil.shuffle = function(array) {
     // While there remain elements to shuffle...
     while (0 !== currentIndex) {
         // Pick a remaining element...
-        randomIndex = Math.floor(Math.random() * currentIndex);
+        randomIndex = Math.floor(arrayUtil._random() * currentIndex);
         currentIndex -= 1;
 
         // And swap it with the current element.
@@ -46,6 +58,19 @@ arrayUtil.shuffle = function(array) {
         array[randomIndex] = temporaryValue;
     }
     return array;
+};
+
+/**
+ * @param {Array} array Array to edit in place.
+ * @param {number} indexA Index of one element to swap.
+ * @param {number} indexB Index of another element to swap.
+ */
+arrayUtil.swap = function(array, indexA, indexB) {
+    if (indexA !== indexB) {
+        var temporaryValue = array[indexA];
+        array[indexA] = array[indexB];
+        array[indexB] = temporaryValue;
+    }
 };
 
 /**
@@ -63,7 +88,7 @@ arrayUtil.randomSubset = function(array, maxSubsetLength) {
  * @return {Object} A random item from the array.
  */
 arrayUtil.randomItem = function(array) {
-    var index = Math.floor(Math.random() * array.length);
+    var index = Math.floor(arrayUtil._random() * array.length);
     return array[index];
 };
 
@@ -121,14 +146,54 @@ arrayUtil.stableSort = function(array, compareFunction) {
 };
 
 /**
+ * @param {Array} array An array to permute.
+ * @param {number} n Index of the permutation to generate.
+ * @return {Array} A new array that is the nth permutation of the input array.
+ */
+arrayUtil.nthPermutation = function(array, n) {
+    var copy = array.slice(0);
+    // Generate indices used to permute.
+    var indices = [];
+    var remainingIndices = [];
+    for (var i = 0; i < array.length; ++i) {
+        remainingIndices.push(i);
+    }
+    var x = n;
+    for (var i = 0; i < array.length; ++i) {
+        var permutationsOfOneSmaller = mathUtil.factorial(array.length - i - 1);
+        var remainingIndicesIndex = Math.floor(x / permutationsOfOneSmaller);
+        // TODO: This could probably be more efficient.
+        indices.push(remainingIndices[remainingIndicesIndex]);
+        remainingIndices.splice(remainingIndicesIndex, 1);
+        x = x % permutationsOfOneSmaller;
+    }
+    // Reorder copy according to indices.
+    for (var i = 0; i < array.length; ++i) {
+        copy[i] = array[(indices[i])];
+    }
+    return copy;
+};
+
+/**
+ * @param {Array} a An array.
+ * @param {Array} b An array with the same elements as a, but possibly in a different permutation.
+ * @return {number} How much elements are offset between the two arrays.
+ */
+arrayUtil.permutationDistance = function(a, b) {
+    var distance = 0;
+    for (var i = 0; i < a.length; ++i) {
+        distance += Math.abs(b.indexOf(a[i]) - i);
+    }
+    return distance;
+};
+
+/**
  * @param {string} string Input string.
  * @return {string} String with the first letter capitalized.
  */
 stringUtil.capitalizeFirstLetter = function(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 };
-
-
 
 /**
  * Initialize an object with default values.
@@ -236,3 +301,33 @@ var propertyToValue = function(that, key, value, delta) {
             that[key] = value;
     }
 };
+
+var debugLog = function(output) {
+    if ( window.console && console.log ) {
+        console.log(output);
+    }
+}
+
+
+/*-----------*/
+/* Polyfills */
+/*-----------*/
+
+if (!String.prototype.startsWith) {
+    String.prototype.startsWith = function(searchString, position){
+      position = position || 0;
+      return this.substr(position, searchString.length) === searchString;
+  };
+}
+
+if (!String.prototype.endsWith) {
+  String.prototype.endsWith = function(searchString, position) {
+      var subjectString = this.toString();
+      if (typeof position !== 'number' || !isFinite(position) || Math.floor(position) !== position || position > subjectString.length) {
+        position = subjectString.length;
+      }
+      position -= searchString.length;
+      var lastIndex = subjectString.indexOf(searchString, position);
+      return lastIndex !== -1 && lastIndex === position;
+  };
+}
