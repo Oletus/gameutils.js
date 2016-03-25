@@ -37,7 +37,7 @@ RenderableObject.prototype.render = function(ctx) {
  * @param {Array.<Object>} renderList
  */
 RenderableObject.prototype.pushRenderers = function(renderList) {
-        renderList.push.apply(renderList, this.renderObjects());
+    renderList.push.apply(renderList, this.renderObjects());
 };
 
 /**
