@@ -271,35 +271,34 @@ var changeState = function(that, newState) {
 };
 
 /**
- * Change an attribute of an object closer to zero by a certain delta value.
- * @param {Object} that Object to set state on.
- * @param {string} key Property name to set. Note: always refer to properties changed by this function with [] notation
- * if you want Closure compiler compatibility.
- * @param {number} delta How much to change that[key].
+ * Change a value towards zero by a certain delta value.
+ * @param {number} value Value to change.
+ * @param {number} delta How much to change the value.
+ * @return {number} Changed value.
  */
-var propertyToZero = function(that, key, delta) {
-    propertyToValue(that, key, 0, delta);
+var towardsZero = function(value, delta) {
+    return towardsValue(value, 0, delta);
 };
 
 /**
- * Change an attribute of an object closer to a target value by a certain delta value.
- * @param {Object} that Object to set state on.
- * @param {string} key Property name to set. Note: always refer to properties changed by this function with [] notation
- * if you want Closure compiler compatibility.
- * @param {number} value Value that[key] should approach.
- * @param {number} delta How much to change that[key].
+ * Change a value closer to a target value by a certain delta value.
+ * @param {number} value Value to change.
+ * @param {number} targetValue Value to approach.
+ * @param {number} delta How much to change the value.
+ * @return {number} Changed value.
  */
-var propertyToValue = function(that, key, value, delta) {
-    if (that[key] > value) {
-        that[key] -= delta;
-        if (that[key] < value)
-            that[key] = value;
+var towardsValue = function(value, targetValue, delta) {
+    if (value > targetValue) {
+        value -= delta;
+        if (value < targetValue)
+            value = targetValue;
     }
-    if (that[key] < value) {
-        that[key] += delta;
-        if (that[key] > value)
-            that[key] = value;
+    if (value < targetValue) {
+        value += delta;
+        if (value > targetValue)
+            value = targetValue;
     }
+    return value;
 };
 
 var debugLog = function(output) {
