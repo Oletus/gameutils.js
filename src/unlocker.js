@@ -23,6 +23,14 @@ UnlockCondition.prototype.initCondition = function(options) {
 };
 
 /**
+ * Set the unlock id for the condition. Only call before the condition is added to the Unlocker.
+ * @param {string} unlockId Identifier for the unlock.   
+ */
+UnlockCondition.prototype.setId = function(unlockId) {
+    this.unlockId = unlockId;
+};
+
+/**
  * Evaluate unlocking condition and set the member "fulfilled" when the condition is fulfilled.
  * @param {Object} gameState Object that unlocking is based on.
  * @param {number} deltaTime Time that has passed since the last update in seconds.
