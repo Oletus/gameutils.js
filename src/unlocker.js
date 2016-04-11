@@ -39,12 +39,19 @@ UnlockCondition.prototype.update = function(gameState, deltaTime) {
     return;
 };
 
+/**
+ * @return {string} A description of the unlock condition.
+ */
+UnlockCondition.prototype.getDescription = function() {
+    return "";
+};
+
 
 /**
  * An unlock condition that always passes.
  * @constructor
  * @param {Object} options Object with the following keys:
- *   unlockId: string Identifier for the unlock.   
+ *   unlockId: string Identifier for the unlock.
  */
 var UnlockByDefault = function(options) {
     this.initCondition(options);
@@ -102,6 +109,20 @@ Unlocker.prototype.update = function(gameState, deltaTime) {
             this._checkFulfilled(condition);
         }
     }
+};
+
+/**
+ * @param {string} unlockId Id of the condition to get the description for.
+ * @return {string} A description of the unlock condition.
+ */
+Unlocker.prototype.getDescription = function(unlockId) {
+    for (var i = 0; i < this.conditions.length; ++i) {
+        var condition = this.conditions[i];
+        if (condition.unlockId === unlockId) {
+            return condition.getDescription();
+        }
+    }
+    return '';
 };
 
 /**
