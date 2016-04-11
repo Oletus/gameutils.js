@@ -62,6 +62,19 @@ UnlockByDefault.prototype = new UnlockCondition();
 
 
 /**
+ * An unlock condition that never passes.
+ * @constructor
+ * @param {Object} options Object with the following keys:
+ *   unlockId: string Identifier for the unlock.
+ */
+var NeverUnlock = function(options) {
+    this.initCondition(options);
+};
+
+NeverUnlock.prototype = new UnlockCondition();
+
+
+/**
  * @constructor
  * Engine for managing game unlocks. Each unlock is identified by an id, has a condition that's an instance of
  * UnlockCondition based on game state and can be either unlocked (true) or locked (false).
