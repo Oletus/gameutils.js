@@ -18,6 +18,9 @@
  *      modes. Maximum scale at which the canvas will be drawn interpolated
  *      instead of pixelated. Good for games targeting mobile where having
  *      large unused areas (black bars) on the screen should be avoided.
+ *  setCanvasSizeCallback: A function to call when the canvas width or height
+ *      properties are changed. Can be used to adjust Three.js renderer
+ *      parameters, for example.
  */
 var CanvasResizer = function(options) {
     var defaults = {
