@@ -259,17 +259,6 @@ var requestFullscreen = function(elem) {
     }
 };
 
-
-/**
- * Change 'state' property of an object and set its 'stateTime' property to zero. Meant for very simple state machines.
- * @param {Object} that Object to set state on.
- * @param {Object} state State to set.
- */
-var changeState = function(that, newState) {
-    that.state = newState;
-    that.stateTime = 0.0;
-};
-
 /**
  * Change a value towards zero by a certain delta value.
  * @param {number} value Value to change.
