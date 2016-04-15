@@ -27,7 +27,8 @@ var CanvasResizer = function(options) {
         height: 9,
         parentElement: document.body,
         wrapperElement: null,
-        maxInterpolatedScale: 2
+        maxInterpolatedScale: 2,
+        setCanvasSizeCallback: null
     };
 
     for(var key in defaults) {
@@ -46,15 +47,13 @@ var CanvasResizer = function(options) {
         }
     } else {
         this.canvas = document.createElement('canvas');
-        this.canvas.width = this.width;
-        this.canvas.height = this.height;
+        this._setCanvasSize(this.width, this.height);
     }
     
     this.canvasWidthToHeight = this.width / this.height;
 
     if (this.mode === CanvasResizer.Mode.FIXED_RESOLUTION) {
-        this.canvas.width = this.width;
-        this.canvas.height = this.height;
+        this._setCanvasSize(this.width, this.height);
     }
 
     var that = this;
@@ -87,6 +86,20 @@ var CanvasResizer = function(options) {
     this._wrapCtxPixelate = null; // Wrapper context for automatically aligning pixel art
     this._copyCanvas = null; // For upscaling pixelated copy of the image
     this._pixelator = null;
+};
+
+/**
+ * Set the size properties of the main canvas element.
+ * @param {number} width Width to set.
+ * @param {number} height Height to set.
+ * @protected
+ */
+CanvasResizer.prototype._setCanvasSize = function(width, height) {
+    this.canvas.width = width;
+    this.canvas.height = height;
+    if (this.setCanvasSizeCallback !== null) {
+        this.setCanvasSizeCallback(width, height);
+    }
 };
 
 /**
@@ -292,14 +305,12 @@ CanvasResizer.prototype.render = function() {
                    this.mode === CanvasResizer.Mode.FIXED_ASPECT_RATIO) {
             if (parentWidthToHeight > this.canvasWidthToHeight) {
                 // Parent is wider, so there will be empty space on the left and right
-                this.canvas.height = parentHeight;
-                this.canvas.width = Math.floor(this.canvasWidthToHeight * this.canvas.height);
+                this._setCanvasSize(Math.floor(this.canvasWidthToHeight * parentHeight), parentHeight);
                 this.canvas.style.marginTop = '0';
                 this.canvas.style.marginLeft = Math.round((parentWidth - this.canvas.width) * 0.5) + 'px';
             } else {
                 // Parent is narrower, so there will be empty space on the top and bottom
-                this.canvas.width = parentWidth;
-                this.canvas.height = Math.floor(this.canvas.width / this.canvasWidthToHeight);
+                this._setCanvasSize(parentWidth, Math.floor(parentWidth / this.canvasWidthToHeight));
                 this.canvas.style.marginTop = Math.round((parentHeight - this.canvas.height) * 0.5) + 'px';
                 this.canvas.style.marginLeft = '0';
             }
@@ -307,8 +318,7 @@ CanvasResizer.prototype.render = function() {
             this.canvas.style.height = this.canvas.height + 'px';
             this.canvas.style.marginBottom = '-5px'; // This is to work around a bug in Firefox 38
         } else { // CanvasResizer.Mode.DYNAMIC
-            this.canvas.width = parentWidth;
-            this.canvas.height = parentHeight;
+            this._setCanvasSize(parentWidth, parentHeight);
             this.canvas.style.width = parentWidth + 'px';
             this.canvas.style.height = parentHeight + 'px';
             this.canvas.style.marginTop = '0';
@@ -326,6 +336,9 @@ CanvasResizer.prototype.render = function() {
     }
     if (this.mode == CanvasResizer.Mode.FIXED_COORDINATE_SYSTEM) {
         var ctx = this.canvas.getContext('2d');
+        if (ctx === null) {
+            throw "FIXED_COORDINATE_SYSTEM mode can only be used with a 2D canvas";
+        }
         var scale = this.canvas.width / this.width;
         ctx.setTransform(scale, 0, 0, scale, 0, 0);
 
@@ -350,6 +363,10 @@ CanvasResizer.prototype.render = function() {
     if (this.mode === CanvasResizer.Mode.FIXED_RESOLUTION ||
         this._isInMinMode()) {
         var ctx = this.canvas.getContext('2d');
+        if (ctx === null) {
+            // May be used with WebGL
+            return;
+        }
         if (this._wrapCtxPixelate == null) {
             var pixelatingStack = [true];
             var wrapCtx = CanvasResizer.wrap(ctx, function(prop) {
@@ -534,8 +551,7 @@ CanvasResizer.prototype._resizeFixedResolution = function() {
         this.mode !== CanvasResizer.Mode.FIXED_RESOLUTION_INTERPOLATED) {
         return;
     }
-    this.canvas.width = this.width;
-    this.canvas.height = this.height;
+    this._setCanvasSize(this.width, this.height);
     var parentProperties = this._getParentProperties();
     var parentWidth = parentProperties.width;
     var parentHeight = parentProperties.height;
@@ -589,8 +605,7 @@ CanvasResizer.prototype._resizeFixedResolution = function() {
             }
             styleWidth = w * scale / window.devicePixelRatio;
             styleHeight = h * scale / window.devicePixelRatio;
-            this.canvas.width = w;
-            this.canvas.height = h;
+            this._setCanvasSize(w, h);
         }
         this._canvasPixelationRatio = scale;
     } else if (this.mode === CanvasResizer.Mode.FIXED_RESOLUTION_INTERPOLATED) {
