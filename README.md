@@ -21,3 +21,4 @@ It targets browsers that support modern APIs, and has been tested on Chrome, Fir
 * [Panjandrum vs. Triebflügel](http://oletus.github.io/codename-x/)
 * [Megatitan vs. Cthulhu](http://oletus.github.io/megatitan/)
 * [The Everything Building](http://oletus.github.io/elevator/) - Ludum Dare 34 overall #2 ranked game
+* [Laser Town](http://oletus.github.io/lasertown/)
