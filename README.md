@@ -22,3 +22,18 @@ It targets browsers that support modern APIs, and has been tested on Chrome, Fir
 * [Megatitan vs. Cthulhu](http://oletus.github.io/megatitan/)
 * [The Everything Building](http://oletus.github.io/elevator/) - Ludum Dare 34 overall #2 ranked game
 * [Laser Town](http://oletus.github.io/lasertown/)
+
+## Tools
+
+The utilities include some tools to automate common development tasks.
+
+To install:
+
+* Install [node.js](https://nodejs.org/en/)
+* Install [ffmpeg](https://www.ffmpeg.org/) and add it to PATH
+* Run '''npm install''' in the directory where package.json is.
+
+Things you can do with the tools (note: use cmd for this on Windows, NOT GitHub for Windows shell):
+
+* '''gulp ogg2mp3''' - convert all ogg files under assets/audio to mp3.
+* '''gulp mp32ogg''' - convert all mp3 files under assets/audio to ogg.
