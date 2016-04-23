@@ -118,7 +118,7 @@ OrbitCameraControl.prototype.clampY = function() {
  * @param {number} amount How much to move the orbit angle in radians.
  */
 OrbitCameraControl.prototype.moveOrbitAngle = function(amount) {
-    this.orbitAngle += amount * 0.1;
+    this.orbitAngle += amount;
     this.clampOrbitAngle();
     this.updateCamera();
 };
