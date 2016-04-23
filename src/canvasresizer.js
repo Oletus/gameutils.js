@@ -598,14 +598,16 @@ CanvasResizer.prototype.createPointerEventListener = function(callbackObject, li
         }
         e.preventDefault();
     };
-    this.canvas.addEventListener('mousemove', eventListener);
-    this.canvas.addEventListener('mousedown', eventListener);
-    this.canvas.addEventListener('mouseup', eventListener);
-    this.canvas.addEventListener('mouseout', eventListener);
-    this.canvas.addEventListener('touchmove', eventListener);
-    this.canvas.addEventListener('touchstart', eventListener);
-    this.canvas.addEventListener('touchend', eventListener);
-    this.canvas.addEventListener('touchcancel', eventListener);
+    if (listenOnCanvas) {
+        this.canvas.addEventListener('mousemove', eventListener);
+        this.canvas.addEventListener('mousedown', eventListener);
+        this.canvas.addEventListener('mouseup', eventListener);
+        this.canvas.addEventListener('mouseout', eventListener);
+        this.canvas.addEventListener('touchmove', eventListener);
+        this.canvas.addEventListener('touchstart', eventListener);
+        this.canvas.addEventListener('touchend', eventListener);
+        this.canvas.addEventListener('touchcancel', eventListener);
+    }
     
     return eventListener;
 };
