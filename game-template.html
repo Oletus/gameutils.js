@@ -14,6 +14,7 @@
 <script src="src/particle.js"></script>
 <script src="src/canvasui.js"></script>
 <script src="src/monospacebitmapfont.js"></script>
+<script src="src/lib/tween.min.js"></script>
 <!-- dev mode helpers -->
 <script src="src/lib/dat.gui.js"></script>
 <script src="src/gameparameters.js"></script>
@@ -71,7 +72,7 @@ Game.prototype.update = function(deltaTime) {
     this.time += deltaTime;
     this.input.update();
     // Update your level here
-    Audio.muteAll(Game.parameters.get('muteAudio'));
+    GJS.Audio.muteAll(Game.parameters.get('muteAudio'));
 };
 
 // Parameters added here can be tuned at run time when in developer mode
