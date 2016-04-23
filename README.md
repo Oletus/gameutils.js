@@ -31,9 +31,9 @@ To install:
 
 * Install [node.js](https://nodejs.org/en/)
 * Install [ffmpeg](https://www.ffmpeg.org/) and add it to PATH
-* Run '''npm install''' in the directory where package.json is.
+* Run **npm install** in the directory where package.json is.
 
-Things you can do with the tools (note: use cmd for this on Windows, NOT GitHub for Windows shell):
+Things you can do with the tools (note: use **cmd** for this on Windows, NOT GitHub for Windows shell):
 
-* '''gulp ogg2mp3''' - convert all ogg files under assets/audio to mp3.
-* '''gulp mp32ogg''' - convert all mp3 files under assets/audio to ogg.
+* **gulp ogg2mp3** - convert all ogg files under assets/audio to mp3.
+* **gulp mp32ogg** - convert all mp3 files under assets/audio to ogg.
