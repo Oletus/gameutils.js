@@ -483,9 +483,10 @@ CanvasResizer.prototype.getCanvasPosition = function(event, touchIdentifier) {
  * Create an event listener function that will normalize different events into unified API calls and make the event
  * coordinates relative to the canvas coordinate system.
  * @param {Object} callbackObject Object where canvasPress and canvasRelease functions will be called on.
+ * @param {boolean} listenOnCanvas Automatically add listeners on the canvas.
  * @return {function} Function to be added as a mouse and touch listener to elements (for example the canvas element).
  */
-CanvasResizer.prototype.createPointerEventListener = function(callbackObject) {
+CanvasResizer.prototype.createPointerEventListener = function(callbackObject, listenOnCanvas) {
     var that = this;
 
     var coordinates = [
@@ -597,6 +598,15 @@ CanvasResizer.prototype.createPointerEventListener = function(callbackObject) {
         }
         e.preventDefault();
     };
+    this.canvas.addEventListener('mousemove', eventListener);
+    this.canvas.addEventListener('mousedown', eventListener);
+    this.canvas.addEventListener('mouseup', eventListener);
+    this.canvas.addEventListener('mouseout', eventListener);
+    this.canvas.addEventListener('touchmove', eventListener);
+    this.canvas.addEventListener('touchstart', eventListener);
+    this.canvas.addEventListener('touchend', eventListener);
+    this.canvas.addEventListener('touchcancel', eventListener);
+    
     return eventListener;
 };
 
