@@ -1,6 +1,6 @@
 <html>
 <head>
-<title>Gameutils.js: Using the AnimatedSprite class</title>
+<title>Gameutils.js: Using GJS.AnimatedSprite and GJS.AnimatedSpriteInstance</title>
 <link rel="stylesheet" type="text/css" href="assets/default.css">
 <script src="../src/sprite.js"></script>
 <script src="../src/animatedsprite.js"></script>
@@ -10,12 +10,12 @@
 var ctx;
 var tester;
 
-Sprite.gfxPath = 'assets/gfx/';
-AnimatedSprite.frameConstructor = Sprite;
+GJS.Sprite.gfxPath = 'assets/gfx/';
+GJS.AnimatedSprite.frameConstructor = GJS.Sprite;
 
 var Tester = function() {
     this.time = 0;
-    this.carrotSprite = new AnimatedSprite({
+    this.carrotSprite = new GJS.AnimatedSprite({
         'idle': [{src: 'carrot.png', duration: 0}],
         'animated': [{src: 'carrot.png'},
                      {src: 'carrotflex1.png'},
@@ -26,7 +26,7 @@ var Tester = function() {
         durationMultiplier: 1000 / 60,
         defaultDuration: 5
     });
-    this.carrotInstance = new AnimatedSpriteInstance(this.carrotSprite);
+    this.carrotInstance = new GJS.AnimatedSpriteInstance(this.carrotSprite);
     this.animated = false;
     this.toggleAnimation();
 };
@@ -73,7 +73,7 @@ var start = function() {
 </script>
 </head>
 <body onload="start()">
-<h2>Using the AnimatedSprite/AnimatedSpriteInstance classes</h2>
+<h2>Using GJS.AnimatedSprite and GJS.AnimatedSpriteInstance</h2>
 <p>Compatibility: Chrome 41, Firefox 36, IE 11.</p>
 <p><input type="button" value="Toggle animation" onclick="tester.toggleAnimation()"></input></p>
 </body>

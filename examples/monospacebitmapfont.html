@@ -1,6 +1,6 @@
 <html>
 <head>
-<title>Gameutils.js: Using the MonospaceBitmapFont class</title>
+<title>Gameutils.js: Using GJS.MonospaceBitmapFont</title>
 <meta charset="UTF-8">
 <link rel="stylesheet" type="text/css" href="assets/default.css">
 <script src="../src/sprite.js"></script>
@@ -12,10 +12,10 @@
 var ctx;
 var tester;
 
-Sprite.gfxPath = 'assets/gfx/';
+GJS.Sprite.gfxPath = 'assets/gfx/';
 
 var Tester = function() {
-    this.font = new MonospaceBitmapFont({
+    this.font = new GJS.MonospaceBitmapFont({
         spriteSrc: 'bitmapfont-medium.png',
         characterWidth: 8,
         characterHeight: 13,
@@ -75,7 +75,7 @@ var start = function() {
 </script>
 </head>
 <body onload="start()">
-<h2>Using the MonospaceBitmapFont</h2>
+<h2>Using GJS.MonospaceBitmapFont</h2>
 <p>Compatibility: Chrome 47, Firefox 43, IE 11.</p>
 </body>
 </html>

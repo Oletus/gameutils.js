@@ -1,11 +1,15 @@
 'use strict';
 
+if (typeof GJS === "undefined") {
+    var GJS = {};
+}
+
 /**
  * Bitmap font that uses a simple ISO-8859-1 monospace grid sprite sheet.
  * @param {Object} options Constructor options.
  * @constructor
  */
-var MonospaceBitmapFont = function(options) {
+GJS.MonospaceBitmapFont = function(options) {
     var defaults = {
         spriteSrc: 'bitmapfont-tiny.png',
         characterHeight: 6,
@@ -17,9 +21,9 @@ var MonospaceBitmapFont = function(options) {
     };
     objectUtil.initWithDefaults(this, defaults, options);
     if (this.color !== undefined) {
-        this.sprite = new Sprite(this.spriteSrc, Sprite.turnSolidColored(this.color));
+        this.sprite = new GJS.Sprite(this.spriteSrc, GJS.Sprite.turnSolidColored(this.color));
     } else {
-        this.sprite = new Sprite(this.spriteSrc);
+        this.sprite = new GJS.Sprite(this.spriteSrc);
     }
 };
 
@@ -28,7 +32,7 @@ var MonospaceBitmapFont = function(options) {
  * @param {CanvasRenderingContext2D} ctx Context to draw to.
  * @param {string} A single-character string to draw.
  */
-MonospaceBitmapFont.prototype.drawCharacter = function(ctx, character) {
+GJS.MonospaceBitmapFont.prototype.drawCharacter = function(ctx, character) {
     if (this.sprite.loaded) {
         if (this.charactersPerRow === undefined) {
             this.charactersPerRow = this.sprite.width / this.characterWidth;
@@ -51,7 +55,7 @@ MonospaceBitmapFont.prototype.drawCharacter = function(ctx, character) {
  * @param {number} x Horizontal coordinate.
  * @param {number} y Vertical coordinate.
  */
-MonospaceBitmapFont.prototype.drawText = function(ctx, string, x, y) {
+GJS.MonospaceBitmapFont.prototype.drawText = function(ctx, string, x, y) {
     var drawnWidth = string.length * this.characterWidth;
     var kerningActive = this.closerKerningCharacters.length > 0 && this.kerningAmount != 0;
     var prevCharacterNarrow = false;
