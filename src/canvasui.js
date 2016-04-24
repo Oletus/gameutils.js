@@ -2,11 +2,15 @@
 
 // Requires util2d.js
 
+if (typeof GJS === "undefined") {
+    var GJS = {};
+}
+
 /**
  * Class for rendering and interacting with UI elements on a canvas.
  * @constructor
  */
-var CanvasUI = function(options) {
+GJS.CanvasUI = function(options) {
     var defaults = {
         element: null,
         getCanvasPositionFromEvent: null
@@ -50,7 +54,7 @@ var CanvasUI = function(options) {
  * Update UI element state and animations.
  * @param {number} deltaTime Time passed since the last update in seconds.
  */
-CanvasUI.prototype.update = function(deltaTime) {
+GJS.CanvasUI.prototype.update = function(deltaTime) {
     for (var i = 0; i < this.uiElements.length; ++i) {
         this.uiElements[i].update(deltaTime);
     }
@@ -60,7 +64,7 @@ CanvasUI.prototype.update = function(deltaTime) {
  * Render the UI.
  * @param {CanvasRenderingContext2D} ctx The canvas rendering context to use.
  */
-CanvasUI.prototype.render = function(ctx) {
+GJS.CanvasUI.prototype.render = function(ctx) {
     var draggedElements = [];
     var i;
     for (i = 0; i < this.uiElements.length; ++i) {
@@ -78,7 +82,7 @@ CanvasUI.prototype.render = function(ctx) {
 /**
  * Clear the UI from all elements.
  */
-CanvasUI.prototype.clear = function() {
+GJS.CanvasUI.prototype.clear = function() {
     this.uiElements = [];
     this.cursorX = 0;
     this.cursorY = 0;
@@ -90,7 +94,7 @@ CanvasUI.prototype.clear = function() {
  * @param {Object|Vec2} vec New position to set. Needs to have x and y coordinates. Relative to the canvas coordinate
  * space.
  */
-CanvasUI.prototype.setCursorPosition = function(vec) {
+GJS.CanvasUI.prototype.setCursorPosition = function(vec) {
     this.cursorX = vec.x;
     this.cursorY = vec.y;
     if (this.downButton !== null && this.downButton.draggable) {
@@ -104,7 +108,7 @@ CanvasUI.prototype.setCursorPosition = function(vec) {
  * @param {Object|Vec2} vec New position to set. Needs to have x and y coordinates. Relative to the canvas coordinate
  * space.
  */
-CanvasUI.prototype.down = function(vec) {
+GJS.CanvasUI.prototype.down = function(vec) {
     this.setCursorPosition(vec);
     for (var i = 0; i < this.uiElements.length; ++i) {
         if (this.uiElements[i].active && this.uiElements[i].hitTest(this.cursorX, this.cursorY)) {
@@ -125,7 +129,7 @@ CanvasUI.prototype.down = function(vec) {
  * @param {Object|Vec2=} vec New position to set. Needs to have x and y coordinates. Relative to the canvas coordinate
  * space. May be undefined, in which case the last known position will be used to evaluate the effects.
  */
-CanvasUI.prototype.release = function(vec) {
+GJS.CanvasUI.prototype.release = function(vec) {
     if (vec !== undefined) {
         this.setCursorPosition(vec);
     }
@@ -147,26 +151,26 @@ CanvasUI.prototype.release = function(vec) {
     console.log(this.cursorX, this.cursorY);
 };
 
-CanvasUI.prototype.addElement = function(element) {
+GJS.CanvasUI.prototype.addElement = function(element) {
     this.uiElements.push(element);
 };
 
 /**
  * The default font for UI elements.
  */
-CanvasUI.defaultFont = 'sans-serif';
+GJS.CanvasUI.defaultFont = 'sans-serif';
 
 /**
  * Minimum interval between clicks on the same button in seconds.
  */
-CanvasUI.minimumClickInterval = 0.5;
+GJS.CanvasUI.minimumClickInterval = 0.5;
 
 /**
  * A single UI element to draw on a canvas, typically either a button or a label.
  * Will be rendered with text by default, but can also be drawn with a custom rendering function renderFunc.
  * @constructor
  */
-var CanvasUIElement = function(options) {
+GJS.CanvasUIElement = function(options) {
     var defaults = {
         label: 'Button',
         labelFunc: null, // Function that returns the current text to draw on the element. Overrides label if set.
@@ -181,8 +185,8 @@ var CanvasUIElement = function(options) {
         active: true, // Active elements are visible and can be interacted with. Inactive elements can't be interacted with.
         draggable: false,
         fontSize: 20, // In pixels
-        font: CanvasUI.defaultFont,
-        appearance: undefined // One of CanvasUIElement.Appearance. By default the appearance is determined based on callbacks.
+        font: GJS.CanvasUI.defaultFont,
+        appearance: undefined // One of GJS.CanvasUIElement.Appearance. By default the appearance is determined based on callbacks.
     };
     for(var key in defaults) {
         if (!options.hasOwnProperty(key)) {
@@ -199,14 +203,14 @@ var CanvasUIElement = function(options) {
     this.lastClick = 0;
     if (this.appearance === undefined) {
         if (this.clickCallback !== null) {
-            this.appearance = CanvasUIElement.Appearance.BUTTON;
+            this.appearance = GJS.CanvasUIElement.Appearance.BUTTON;
         } else {
-            this.appearance = CanvasUIElement.Appearance.LABEL;
+            this.appearance = GJS.CanvasUIElement.Appearance.LABEL;
         }
     }
 };
 
-CanvasUIElement.Appearance = {
+GJS.CanvasUIElement.Appearance = {
     BUTTON: 0,
     LABEL: 1
 };
@@ -215,7 +219,7 @@ CanvasUIElement.Appearance = {
  * Update UI element state and animations.
  * @param {number} deltaTime Time passed since the last update in seconds.
  */
-CanvasUIElement.prototype.update = function(deltaTime) {
+GJS.CanvasUIElement.prototype.update = function(deltaTime) {
     this.time += deltaTime;
 };
 
@@ -225,7 +229,7 @@ CanvasUIElement.prototype.update = function(deltaTime) {
  * @param {number} cursorX Cursor horizontal coordinate in the canvas coordinate system.
  * @param {number} cursorY Cursor vertical coordinate in the canvas coordinate system.
  */
-CanvasUIElement.prototype.render = function(ctx, cursorX, cursorY) {
+GJS.CanvasUIElement.prototype.render = function(ctx, cursorX, cursorY) {
     if (!this.active) {
         return;
     }
@@ -238,7 +242,7 @@ CanvasUIElement.prototype.render = function(ctx, cursorX, cursorY) {
         return;
     }
 
-    if (this.appearance === CanvasUIElement.Appearance.BUTTON) {
+    if (this.appearance === GJS.CanvasUIElement.Appearance.BUTTON) {
         var rect = this.getRect();
         ctx.fillStyle = '#000';
         if (pressedExtent > 0) {
@@ -271,7 +275,7 @@ CanvasUIElement.prototype.render = function(ctx, cursorX, cursorY) {
  * @return {number} The horizontal position to draw the element at. May be different from the logical position if the
  * element is being dragged.
  */
-CanvasUIElement.prototype.visualX = function() {
+GJS.CanvasUIElement.prototype.visualX = function() {
     if (this.dragged) {
         return this.draggedX;
     } else {
@@ -283,7 +287,7 @@ CanvasUIElement.prototype.visualX = function() {
  * @return {number} The vertical position to draw the element at. May be different from the logical position if the
  * element is being dragged.
  */
-CanvasUIElement.prototype.visualY = function() {
+GJS.CanvasUIElement.prototype.visualY = function() {
     if (this.dragged) {
         return this.draggedY;
     } else {
@@ -294,7 +298,7 @@ CanvasUIElement.prototype.visualY = function() {
 /**
  * @return {boolean} True when the element is being dragged.
  */
-CanvasUIElement.prototype.isDragged = function() {
+GJS.CanvasUIElement.prototype.isDragged = function() {
     return this.dragged;
 };
 
@@ -303,7 +307,7 @@ CanvasUIElement.prototype.isDragged = function() {
  * @param {number} y Vertical coordinate to test.
  * @return {boolean} Whether the coordinate is within the area of the element.
  */
-CanvasUIElement.prototype.hitTest = function(x, y) {
+GJS.CanvasUIElement.prototype.hitTest = function(x, y) {
     if (this.clickCallback !== null) {
         return this.getRect().containsVec2(new Vec2(x, y));
     }
@@ -314,12 +318,12 @@ CanvasUIElement.prototype.hitTest = function(x, y) {
  * @return boolean True if the element can generate click events right now. False if the click cooldown hasn't
  * completed.
  */
-CanvasUIElement.prototype.canClick = function() {
+GJS.CanvasUIElement.prototype.canClick = function() {
     var sinceClicked = this.time - this.lastClick;
-    return sinceClicked >= CanvasUI.minimumClickInterval;
+    return sinceClicked >= GJS.CanvasUI.minimumClickInterval;
 };
 
-CanvasUIElement.prototype.getRect = function() {
+GJS.CanvasUIElement.prototype.getRect = function() {
     return new Rect(
         this.centerX - this.width * 0.5,
         this.centerX + this.width * 0.5,
@@ -331,7 +335,7 @@ CanvasUIElement.prototype.getRect = function() {
 /**
  * Mark the element as down, for visual purposes only.
  */
-CanvasUIElement.prototype.down = function() {
+GJS.CanvasUIElement.prototype.down = function() {
     this.isDown = true;
     this.lastDownTime = this.time;
 };
@@ -340,7 +344,7 @@ CanvasUIElement.prototype.down = function() {
  * Mark the element as up. Will generate a click event if clicked is true.
  * @param {boolean} clicked True when clicked, false when the cursor position has left the area of the element.
  */
-CanvasUIElement.prototype.release = function(clicked) {
+GJS.CanvasUIElement.prototype.release = function(clicked) {
     this.isDown = false;
     this.lastUpTime = this.time;
     if (!clicked || !this.canClick()) {

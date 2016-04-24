@@ -1,6 +1,6 @@
 <html>
 <head>
-<title>Gameutils.js: Using the CanvasUI/CanvasUIElement classes</title>
+<title>Gameutils.js: Using GJS.CanvasUI and GJS.CanvasUIElement</title>
 <link rel="stylesheet" type="text/css" href="assets/default.css">
 <script src="../src/util2d.js"></script>
 <script src="../src/canvasui.js"></script>
@@ -10,11 +10,11 @@
 var ctx;
 var tester;
 
-CanvasUI.defaultFont = 'monospace';
+GJS.CanvasUI.defaultFont = 'monospace';
 
 var Tester = function(canvas) {
     this.time = 0;
-    this.ui = new CanvasUI({
+    this.ui = new GJS.CanvasUI({
         element: canvas,
         getCanvasPositionFromEvent: function(event) {
             return {x: event.clientX - canvas.getBoundingClientRect().left,
@@ -22,7 +22,7 @@ var Tester = function(canvas) {
         }
     });
 
-    var button = new CanvasUIElement({
+    var button = new GJS.CanvasUIElement({
         centerX: 100,
         centerY: 100,
         width: 120,
@@ -35,14 +35,14 @@ var Tester = function(canvas) {
     });
     this.ui.addElement(button);
 
-    var label = new CanvasUIElement({
+    var label = new GJS.CanvasUIElement({
         centerX: 200,
         centerY: 200,
         label: 'Label'
     });
     this.ui.addElement(label);
     
-    var customButton = new CanvasUIElement({
+    var customButton = new GJS.CanvasUIElement({
         centerX: 300,
         centerY: 100,
         width: 120,
@@ -96,7 +96,7 @@ var start = function() {
 </script>
 </head>
 <body onload="start()">
-<h2>Using the CanvasUI/CanvasUIElement classes</h2>
+<h2>Using GJS.CanvasUI and GJS.CanvasUIElement</h2>
 <p>Compatibility: Chrome 41, Firefox 36, IE 11.</p>
 </body>
 </html>
