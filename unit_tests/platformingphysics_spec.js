@@ -2,7 +2,7 @@
 
 describe('PlatformingPhysics', function() {
     var testCollider = function(options) {
-        var c = new PlatformingObject();
+        var c = new GJS.PlatformingObject();
         c.init(options);
         if (options.hasOwnProperty('dx')) {
             var dx = options.dx;
@@ -79,7 +79,7 @@ describe('PlatformingPhysics', function() {
         var initParams = {
             width: 4,
             height: 3,
-            initTile: PlatformingPhysics.initFromData(
+            initTile: GJS.PlatformingPhysics.initFromData(
                 [
                     '    ',
                     '    ',
@@ -93,7 +93,7 @@ describe('PlatformingPhysics', function() {
         var initParams = {
             width: 4,
             height: 3,
-            initTile: PlatformingPhysics.initFromData(
+            initTile: GJS.PlatformingPhysics.initFromData(
                 [
                     '  x ',
                     '  x ',
@@ -107,7 +107,7 @@ describe('PlatformingPhysics', function() {
         var initParams = {
             width: 4,
             height: 3,
-            initTile: PlatformingPhysics.initFromData(
+            initTile: GJS.PlatformingPhysics.initFromData(
                 [
                     '   x',
                     ' xx ',
@@ -121,7 +121,7 @@ describe('PlatformingPhysics', function() {
         var initParams = {
             width: 4,
             height: 3,
-            initTile: PlatformingPhysics.initFromData(
+            initTile: GJS.PlatformingPhysics.initFromData(
                 [
                     '   /',
                     '  /x',
@@ -135,7 +135,7 @@ describe('PlatformingPhysics', function() {
         var initParams = {
             width: 4,
             height: 3,
-            initTile: PlatformingPhysics.initFromData(
+            initTile: GJS.PlatformingPhysics.initFromData(
                 [
                     '.   ',
                     'x.  ',
@@ -149,7 +149,7 @@ describe('PlatformingPhysics', function() {
         var initParams = {
             width: 4,
             height: 3,
-            initTile: PlatformingPhysics.initFromData(
+            initTile: GJS.PlatformingPhysics.initFromData(
                 [
                     '    ',
                     '    ',
@@ -159,16 +159,16 @@ describe('PlatformingPhysics', function() {
         return testPlatformingTileMap(options, initParams);
     };
 
-    describe('PlatformingObject', function() {
+    describe('GJS.PlatformingObject', function() {
         it('initializes', function() {
-            var c = new PlatformingObject();
+            var c = new GJS.PlatformingObject();
             c.init({x: 12, y: 3});
             expect(c.x).toBe(12);
             expect(c.y).toBe(3);
         });
 
         it('has a default collision rectangle', function() {
-            var c = new PlatformingObject();
+            var c = new GJS.PlatformingObject();
             c.init({x: 12, y: 3});
             var rect = c.getCollisionRect();
             expect(rect.left).toBe(11.5);
