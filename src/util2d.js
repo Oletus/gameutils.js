@@ -535,7 +535,22 @@ mathUtil.bezierLength = function(x0, y0, x1, y1, x2, y2, steps) {
  * @return {number} Random integer between 0 and max, inclusive.
  */
 mathUtil.randomInt = function(max) {
-    return Math.floor(Math.random() * (max + 1));
+    if (mathUtil.random) {
+        return Math.floor(mathUtil.random() * (max + 1));
+    } else {
+        return Math.floor(Math.random() * (max + 1));
+    }
+};
+
+/**
+ * @param {number} n Positive integer.
+ * @return {number} Factorial of n.
+ */
+mathUtil.factorial = function(n) {
+    if (n <= 1) {
+        return 1;
+    }
+    return n * mathUtil.factorial(n - 1);
 };
 
 /**
