@@ -406,6 +406,18 @@ mathUtil.mix = function(a, b, f) {
 };
 
 /**
+ * Smooth interpolation of a and b by weight f
+ * @param {number} a Value a, if f == 0.0, a is returned
+ * @param {number} b Value b, if f == 1.0, b is returned
+ * @param {number} f Interpolation weight
+ * @return {number} Interpolated value between a and b
+ */
+mathUtil.mixSmooth = function(a, b, f) {
+   var f2 = (1 - Math.cos(f * Math.PI)) / 2;
+   return mathUtil.mix(a, b, f2);
+};
+
+/**
  * Modulus for floating point numbers.
  * @param {number} a Dividend
  * @param {number} b Divisor
