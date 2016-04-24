@@ -1,5 +1,9 @@
 "use strict";
 
+if (typeof GJS === "undefined") {
+    var GJS = {};
+}
+
 /**
  * Mapper that automatically maps keyboard / gamepad input to different player numbers.
  * This can be used to implement keyboard / gamepad controls for a single player or a local
@@ -10,8 +14,8 @@
  * @param {number} maxPlayers Maximum number of players. If there are more active controllers
  * than this, then two controllers may be mapped to the same player.
  */
-var InputMapper = function(callbackObj, maxPlayers) {
-    this.gamepads = new Gamepad(this);
+GJS.InputMapper = function(callbackObj, maxPlayers) {
+    this.gamepads = new GJS.Gamepad(this);
     this.callbackObj = callbackObj;
     this.maxPlayers = maxPlayers;
     this.resetPlayerMap();
@@ -19,21 +23,21 @@ var InputMapper = function(callbackObj, maxPlayers) {
     this.callbacks = []; // Callback information for mapping callbacks back to buttons
     this.upCallbacksForKey = {}; // Map from keys to lists of callbacks, so each key can have multiple callbacks
     this.downCallbacksForKey = {}; // Map from keys to lists of callbacks, so each key can have multiple callbacks
-    this._defaultController = new InputMapper.Controller(InputMapper.GAMEPAD, 0);
+    this._defaultController = new GJS.InputMapper.Controller(GJS.InputMapper.GAMEPAD, 0);
 };
 
 // Controller types
-InputMapper.GAMEPAD = 0;
-InputMapper.KEYBOARD = 1;
+GJS.InputMapper.GAMEPAD = 0;
+GJS.InputMapper.KEYBOARD = 1;
 
 /**
  * Helper class to store the controller config each player has.
  * @constructor
- * @param {number} controllerType Controller type: either InputMapper.GAMEPAD or InputMapper.KEYBOARD
+ * @param {number} controllerType Controller type: either GJS.InputMapper.GAMEPAD or GJS.InputMapper.KEYBOARD
  * @param {number} controllerIndex Controller index: in case of keyboard, index into the array of keyboard keys given
  * to addListener. In case of gamepad, index of the gamepad.
  */
-InputMapper.Controller = function(controllerType, controllerIndex) {
+GJS.InputMapper.Controller = function(controllerType, controllerIndex) {
     this.controllerType = controllerType;
     this.controllerIndex = controllerIndex;
     this.lastUsed = 0; // A timestamp for when this controller was last used
@@ -43,7 +47,7 @@ InputMapper.Controller = function(controllerType, controllerIndex) {
  * Reset the map between controllers and player numbers.
  * @param {number?} maxPlayers Maximum player count. Default is to keep existing value.
  */
-InputMapper.prototype.resetPlayerMap = function(maxPlayers) {
+GJS.InputMapper.prototype.resetPlayerMap = function(maxPlayers) {
     if (maxPlayers !== undefined) {
         this.maxPlayers = maxPlayers;
     }
@@ -56,17 +60,17 @@ InputMapper.prototype.resetPlayerMap = function(maxPlayers) {
 /**
  * Update the controller state and call listeners based on that.
  */
-InputMapper.prototype.update = function() {
+GJS.InputMapper.prototype.update = function() {
     this.gamepads.update();
 };
 
 /**
  * Return a player index for a player using a given controller.
- * @param {number} controllerType Controller type: either InputMapper.GAMEPAD or InputMapper.KEYBOARD
+ * @param {number} controllerType Controller type: either GJS.InputMapper.GAMEPAD or GJS.InputMapper.KEYBOARD
  * @param {number} controllerIndex Controller index: in case of keyboard, index into the array of keyboard keys given
  * to addListener. In case of gamepad, index of the gamepad.
  */
-InputMapper.prototype.getPlayerIndex = function(controllerType, controllerIndex) {
+GJS.InputMapper.prototype.getPlayerIndex = function(controllerType, controllerIndex) {
     for (var i = 0; i < this.players.length; ++i) {
         var player = this.players[i];
         for (var j = 0; j < player.length; ++j) {
@@ -76,7 +80,7 @@ InputMapper.prototype.getPlayerIndex = function(controllerType, controllerIndex)
             }
         }
     }
-    var controller = new InputMapper.Controller(controllerType, controllerIndex);
+    var controller = new GJS.InputMapper.Controller(controllerType, controllerIndex);
     controller.lastUsed = Date.now();
     // Map the controller for a player without a controller if there is one
     for (var i = 0; i < this.players.length; ++i) {
@@ -106,20 +110,20 @@ InputMapper.prototype.getPlayerIndex = function(controllerType, controllerIndex)
 };
 
 /**
- * @param {number} gamepadButton A button from Gamepad.BUTTONS
+ * @param {number} gamepadButton A button from GJS.Gamepad.BUTTONS
  * @param {Array} keyboardBindings List of bindings for different players, for example ['up', 'w']
  * @param {function=} downCallback Callback when the button is pressed down, that takes a player number as a parameter.
  * @param {function=} upCallback Callback when the button is released, that takes a player number as a parameter.
  */
-InputMapper.prototype.addListener = function(gamepadButton, keyboardButtons, downCallback, upCallback) {
+GJS.InputMapper.prototype.addListener = function(gamepadButton, keyboardButtons, downCallback, upCallback) {
     var gamepadDownCallback = function(gamepadNumber) {
-        var player = this.getPlayerIndex(InputMapper.GAMEPAD, gamepadNumber);
+        var player = this.getPlayerIndex(GJS.InputMapper.GAMEPAD, gamepadNumber);
         if (downCallback !== undefined) {
             downCallback.call(this.callbackObj, player);
         }
     };
     var gamepadUpCallback = function(gamepadNumber) {
-        var player = this.getPlayerIndex(InputMapper.GAMEPAD, gamepadNumber);
+        var player = this.getPlayerIndex(GJS.InputMapper.GAMEPAD, gamepadNumber);
         if (upCallback !== undefined) {
             upCallback.call(this.callbackObj, player);
         }
@@ -129,16 +133,16 @@ InputMapper.prototype.addListener = function(gamepadButton, keyboardButtons, dow
     var gamepadInstruction;
     
     if (gamepadButton < 100) {
-        gamepadInstruction = Gamepad.BUTTON_INSTRUCTION[gamepadButton];
+        gamepadInstruction = GJS.Gamepad.BUTTON_INSTRUCTION[gamepadButton];
     } else {
-        gamepadInstruction = Gamepad.BUTTON_INSTRUCTION[gamepadButton - 100];
+        gamepadInstruction = GJS.Gamepad.BUTTON_INSTRUCTION[gamepadButton - 100];
     }
     
     if (downCallback !== undefined) {
-        this.callbacks.push({key: gamepadInstruction, callback: downCallback, controllerType: InputMapper.GAMEPAD});
+        this.callbacks.push({key: gamepadInstruction, callback: downCallback, controllerType: GJS.InputMapper.GAMEPAD});
     }
     if (upCallback !== undefined) {
-        this.callbacks.push({key: gamepadInstruction, callback: upCallback, controllerType: InputMapper.GAMEPAD});
+        this.callbacks.push({key: gamepadInstruction, callback: upCallback, controllerType: GJS.InputMapper.GAMEPAD});
     }
 
     var that = this;
@@ -149,7 +153,7 @@ InputMapper.prototype.addListener = function(gamepadButton, keyboardButtons, dow
                 that.downCallbacksForKey[keyboardButtons[kbIndex]] = [];
                 that.upCallbacksForKey[keyboardButtons[kbIndex]] = [];
                 var keyDownCallback = function(e) {
-                    var player = that.getPlayerIndex(InputMapper.KEYBOARD, kbIndex);
+                    var player = that.getPlayerIndex(GJS.InputMapper.KEYBOARD, kbIndex);
                     // Down events get generated multiple times while a key is down. Work around this.
                     if (!that.keysDown[keyboardButtons[kbIndex]]) {
                         that.keysDown[keyboardButtons[kbIndex]] = true;
@@ -161,7 +165,7 @@ InputMapper.prototype.addListener = function(gamepadButton, keyboardButtons, dow
                     e.preventDefault();
                 };
                 var keyUpCallback = function(e) {
-                    var player = that.getPlayerIndex(InputMapper.KEYBOARD, kbIndex);
+                    var player = that.getPlayerIndex(GJS.InputMapper.KEYBOARD, kbIndex);
                     that.keysDown[keyboardButtons[kbIndex]] = false;
                     var callbacksToCall = that.upCallbacksForKey[keyboardButtons[kbIndex]];
                     for (var i = 0; i < callbacksToCall.length; ++i) {
@@ -180,10 +184,10 @@ InputMapper.prototype.addListener = function(gamepadButton, keyboardButtons, dow
             }
         })(i);
         if (downCallback !== undefined) {
-            this.callbacks.push({key: keyboardButtons[i], callback: downCallback, controllerType: InputMapper.KEYBOARD, kbIndex: i});
+            this.callbacks.push({key: keyboardButtons[i], callback: downCallback, controllerType: GJS.InputMapper.KEYBOARD, kbIndex: i});
         }
         if (upCallback !== undefined) {
-            this.callbacks.push({key: keyboardButtons[i], callback: upCallback, controllerType: InputMapper.KEYBOARD, kbIndex: i});
+            this.callbacks.push({key: keyboardButtons[i], callback: upCallback, controllerType: GJS.InputMapper.KEYBOARD, kbIndex: i});
         }
     }
 };
@@ -191,13 +195,13 @@ InputMapper.prototype.addListener = function(gamepadButton, keyboardButtons, dow
 /**
  * Check if a given callback uses a given type of controller. Doesn't care about gamepad indices.
  * @protected
- * @param {InputMapper.Controller} controller
+ * @param {GJS.InputMapper.Controller} controller
  * @param {Object} cbInfo Information on the callback, with keys controllerType and kbIndex in case of a keyboard.
  * @return {boolean} True if the given callback uses the given type of a controller.
  */
-InputMapper._usesController = function(controller, cbInfo) {
+GJS.InputMapper._usesController = function(controller, cbInfo) {
     if (cbInfo.controllerType === controller.controllerType) {
-        if (cbInfo.controllerType === InputMapper.KEYBOARD && controller.controllerIndex !== cbInfo.kbIndex) {
+        if (cbInfo.controllerType === GJS.InputMapper.KEYBOARD && controller.controllerIndex !== cbInfo.kbIndex) {
             // Each keyboard "controller" has different key bindings.
             return false;
         }
@@ -208,10 +212,10 @@ InputMapper._usesController = function(controller, cbInfo) {
 /**
  * From an array of controllers, determine the one that was most recently used.
  * @protected
- * @param {Array.<InputMapper.Controller>} player Array of controllers to check.
- * @return {InputMapper.Controller} The most recently used controller.
+ * @param {Array.<GJS.InputMapper.Controller>} player Array of controllers to check.
+ * @return {GJS.InputMapper.Controller} The most recently used controller.
  */
-InputMapper.prototype._getLastUsedController = function(player) {
+GJS.InputMapper.prototype._getLastUsedController = function(player) {
     var controller;
     var lastUsed = 0;
     for (var j = 0; j < player.length; ++j) {
@@ -226,11 +230,11 @@ InputMapper.prototype._getLastUsedController = function(player) {
 /**
  * Cycle the controller that is used for showing instructions by default.
  */
-InputMapper.prototype.cycleDefaultControllerForInstruction = function() {
-    if (this._defaultController.controllerType === InputMapper.KEYBOARD) {
-        this._defaultController = new InputMapper.Controller(InputMapper.GAMEPAD, 0);
+GJS.InputMapper.prototype.cycleDefaultControllerForInstruction = function() {
+    if (this._defaultController.controllerType === GJS.InputMapper.KEYBOARD) {
+        this._defaultController = new GJS.InputMapper.Controller(GJS.InputMapper.GAMEPAD, 0);
     } else {
-        this._defaultController = new InputMapper.Controller(InputMapper.KEYBOARD, 0);
+        this._defaultController = new GJS.InputMapper.Controller(GJS.InputMapper.KEYBOARD, 0);
     }
 };
 
@@ -242,13 +246,13 @@ InputMapper.prototype.cycleDefaultControllerForInstruction = function() {
  * about the player number.
  * @return {string} String identifying the button for the player.
  */
-InputMapper.prototype.getKeyInstruction = function(callback, playerIndex) {
+GJS.InputMapper.prototype.getKeyInstruction = function(callback, playerIndex) {
     var controller;
     if (playerIndex !== undefined && this.players.length > playerIndex) {
         if (this.players[playerIndex].length > 0) {
             controller = this._getLastUsedController(this.players[playerIndex]);
         } else {
-            // Gamepad instructions by default
+            // GJS.Gamepad instructions by default
             controller = this._defaultController;
         }
     }
@@ -261,7 +265,7 @@ InputMapper.prototype.getKeyInstruction = function(callback, playerIndex) {
                 // Determine all keys mapped to that callback from different controllers.
                 for (var j = 0; j < this.players.length; ++j) {
                     for (var k = 0; k < this.players[j].length; ++k) {
-                        if (InputMapper._usesController(this.players[j][k], cbInfo)) {
+                        if (GJS.InputMapper._usesController(this.players[j][k], cbInfo)) {
                             var hasInstruction = false;
                             var instruction = cbInfo.key.toUpperCase();
                             for (var l = 0; l < returnStr.length; ++l) {
@@ -276,7 +280,7 @@ InputMapper.prototype.getKeyInstruction = function(callback, playerIndex) {
                     }
                 }
             } else {
-                if (InputMapper._usesController(controller, cbInfo)) {
+                if (GJS.InputMapper._usesController(controller, cbInfo)) {
                     return cbInfo.key.toUpperCase();
                 }
             }

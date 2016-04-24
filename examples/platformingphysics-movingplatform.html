@@ -20,9 +20,9 @@ var ctx;
 var tester;
 
 var Tester = function() {
-    this.input = new InputMapper(this, 1);
-    this.input.addListener(Gamepad.BUTTONS.LEFT_OR_ANALOG_LEFT, ['left', 'a'], this.leftPress, this.leftRelease);
-    this.input.addListener(Gamepad.BUTTONS.RIGHT_OR_ANALOG_RIGHT, ['right', 'd'], this.rightPress, this.rightRelease);
+    this.input = new GJS.InputMapper(this, 1);
+    this.input.addListener(GJS.Gamepad.BUTTONS.LEFT_OR_ANALOG_LEFT, ['left', 'a'], this.leftPress, this.leftRelease);
+    this.input.addListener(GJS.Gamepad.BUTTONS.RIGHT_OR_ANALOG_RIGHT, ['right', 'd'], this.rightPress, this.rightRelease);
 
     this.physicsLevel = new PlatformingLevel();
     this.physicsLevel.init();

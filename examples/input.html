@@ -15,8 +15,8 @@ var tester;
 var Tester = function() {
     this.playerPositions = [0, 0];
     this.goingDown = [false, false];
-    this.input = new InputMapper(this, 2);
-    this.input.addListener(Gamepad.BUTTONS.A, ['down', 's'], this.downPressed, this.downReleased);
+    this.input = new GJS.InputMapper(this, 2);
+    this.input.addListener(GJS.Gamepad.BUTTONS.A, ['down', 's'], this.downPressed, this.downReleased);
     this.untilCycleDefaultController = 2;
 };
 
@@ -66,7 +66,7 @@ var start = function() {
 </script>
 </head>
 <body onload="start()">
-<h2>Handling key/gamepad input with InputMapper</h2>
+<h2>Handling key/gamepad input with GJS.InputMapper</h2>
 <p>Try pressing A on the gamepad, or down/S on the keyboard.</p>
 <p>Compatibility: Chrome 41 (keyboard and gamepad), Firefox 36 (keyboard and gamepad), IE 11 (keyboard only).</p>
 </body>

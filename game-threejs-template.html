@@ -58,9 +58,9 @@ var Game = function(resizer, renderer) {
     this.time = 0;
 
     var numPlayers = 1;
-    this.input = new InputMapper(this, numPlayers);
-    // Example usage of InputMapper
-    //this.input.addListener(Gamepad.BUTTONS.UP_OR_ANALOG_UP, ['up', 'w'], this.upPress, this.upRelease);
+    this.input = new GJS.InputMapper(this, numPlayers);
+    // Example usage of GJS.InputMapper
+    //this.input.addListener(GJS.Gamepad.BUTTONS.UP_OR_ANALOG_UP, ['up', 'w'], this.upPress, this.upRelease);
 };
 
 Game.prototype.render = function() {
