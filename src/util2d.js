@@ -383,6 +383,7 @@ colorUtil.blendLinearDodge = function(a, b) {
 
 var mathUtil = {
     mix: null,
+    mixSmooth: null,
     fmod: null,
     mixAngles: null,
     angleDifference: null,
