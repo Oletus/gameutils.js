@@ -50,18 +50,25 @@ var Game = function(resizer, renderer) {
     this.camera = new THREE.PerspectiveCamera( 75, resizer.canvas.width / resizer.canvas.height, 1, 10000 );
     this.camera.position.z = 1000;
     
-    // Test geometry
-    var geometry = new THREE.BoxGeometry( 200, 200, 200 );
-    var material = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe: true } );
-    this.mesh = new THREE.Mesh( geometry, material );
-    this.scene.add(this.mesh);
-    
     this.time = 0;
+    
+    this.loadingBar = new GJS.LoadingBar();
+    this.initializedAfterLoad = false;
 
     var numPlayers = 1;
     this.input = new GJS.InputMapper(this, numPlayers);
     // Example usage of GJS.InputMapper
     //this.input.addListener(GJS.Gamepad.BUTTONS.UP_OR_ANALOG_UP, ['up', 'w'], this.upPress, this.upRelease);
+};
+
+Game.prototype.loadedInit = function() {
+    // Called after all the assets like 3D models and fonts have been loaded.
+
+    // Test geometry
+    var geometry = new THREE.BoxGeometry( 200, 200, 200 );
+    var material = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe: true } );
+    this.mesh = new THREE.Mesh( geometry, material );
+    this.scene.add(this.mesh);
 };
 
 Game.prototype.render = function() {
@@ -72,10 +79,18 @@ Game.prototype.update = function(deltaTime) {
     this.time += deltaTime;
     this.input.update();
     // Update your level here
-    this.mesh.rotation.x += 0.01;
-    this.mesh.rotation.y += 0.02;
+    if (this.mesh) {
+        this.mesh.rotation.x += 0.01;
+        this.mesh.rotation.y += 0.02;
+    }
     
     GJS.Audio.muteAll(Game.parameters.get('muteAudio'));
+
+    // Call initialization function after all model assets have been loaded.
+    if (this.loadingBar.update(deltaTime) && !this.initializedAfterLoad) {
+        this.loadedInit();
+        this.initializedAfterLoad = true;
+    }
 };
 
 

@@ -19,6 +19,9 @@ GJS.LoadingBar = function(objectsToPoll) {
         if (typeof GJS.Audio !== 'undefined') {
             objectsToPoll.push(GJS.Audio);
         }
+        if (typeof GJS.utilTHREE !== 'undefined') {
+            objectsToPoll.push(GJS.utilTHREE);
+        }
     }
     this.objectsToPoll = objectsToPoll;
     this.loadedFraction = 0;

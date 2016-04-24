@@ -252,6 +252,9 @@ GJS.Sprite.loadedCount = 0;
  * Name specified as string to support Closure compiler together with loadingbar.js.
  */
 GJS.Sprite['loadedFraction'] = function() {
+    if (GJS.Sprite.createdCount === 0) {
+        return 1.0;
+    }
     return GJS.Sprite.loadedCount / GJS.Sprite.createdCount;
 };
 
