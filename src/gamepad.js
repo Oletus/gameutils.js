@@ -85,7 +85,8 @@ GJS.Gamepad.prototype.update = function() {
                 } catch(e) {
                     // Accessing pad.buttons seems to randomly fail in Firefox after long uptime sometimes.
                     if (GJS.Gamepad.debugLogEnabled) {
-                        console.log('Accessing pad.buttons failed, pad.buttons is: ', pad.buttons);
+                        console.log(e);
+                        console.log('Accessing pad.buttons with number', buttonNumber, 'failed, pad.buttons is: ', pad.buttons);
                     }
                     continue;
                 }

@@ -116,33 +116,35 @@ GJS.InputMapper.prototype.getPlayerIndex = function(controllerType, controllerIn
  * @param {function=} upCallback Callback when the button is released, that takes a player number as a parameter.
  */
 GJS.InputMapper.prototype.addListener = function(gamepadButton, keyboardButtons, downCallback, upCallback) {
-    var gamepadDownCallback = function(gamepadNumber) {
-        var player = this.getPlayerIndex(GJS.InputMapper.GAMEPAD, gamepadNumber);
+    if (gamepadButton !== undefined) {
+        var gamepadDownCallback = function(gamepadNumber) {
+            var player = this.getPlayerIndex(GJS.InputMapper.GAMEPAD, gamepadNumber);
+            if (downCallback !== undefined) {
+                downCallback.call(this.callbackObj, player);
+            }
+        };
+        var gamepadUpCallback = function(gamepadNumber) {
+            var player = this.getPlayerIndex(GJS.InputMapper.GAMEPAD, gamepadNumber);
+            if (upCallback !== undefined) {
+                upCallback.call(this.callbackObj, player);
+            }
+        };
+        this.gamepads.addButtonChangeListener(gamepadButton, gamepadDownCallback, gamepadUpCallback);
+        
+        var gamepadInstruction = "";
+        
+        if (gamepadButton < 100) {
+            gamepadInstruction = GJS.Gamepad.BUTTON_INSTRUCTION[gamepadButton];
+        } else {
+            gamepadInstruction = GJS.Gamepad.BUTTON_INSTRUCTION[gamepadButton - 100];
+        }
+        
         if (downCallback !== undefined) {
-            downCallback.call(this.callbackObj, player);
+            this.callbacks.push({key: gamepadInstruction, callback: downCallback, controllerType: GJS.InputMapper.GAMEPAD});
         }
-    };
-    var gamepadUpCallback = function(gamepadNumber) {
-        var player = this.getPlayerIndex(GJS.InputMapper.GAMEPAD, gamepadNumber);
         if (upCallback !== undefined) {
-            upCallback.call(this.callbackObj, player);
+            this.callbacks.push({key: gamepadInstruction, callback: upCallback, controllerType: GJS.InputMapper.GAMEPAD});
         }
-    };
-    this.gamepads.addButtonChangeListener(gamepadButton, gamepadDownCallback, gamepadUpCallback);
-
-    var gamepadInstruction;
-    
-    if (gamepadButton < 100) {
-        gamepadInstruction = GJS.Gamepad.BUTTON_INSTRUCTION[gamepadButton];
-    } else {
-        gamepadInstruction = GJS.Gamepad.BUTTON_INSTRUCTION[gamepadButton - 100];
-    }
-    
-    if (downCallback !== undefined) {
-        this.callbacks.push({key: gamepadInstruction, callback: downCallback, controllerType: GJS.InputMapper.GAMEPAD});
-    }
-    if (upCallback !== undefined) {
-        this.callbacks.push({key: gamepadInstruction, callback: upCallback, controllerType: GJS.InputMapper.GAMEPAD});
     }
 
     var that = this;
