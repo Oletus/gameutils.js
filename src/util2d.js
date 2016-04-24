@@ -390,7 +390,8 @@ var mathUtil = {
     ease: null,
     clamp: null,
     bezierLength: null,
-    randomInt: null
+    randomInt: null,
+    factorial: null
 };
 
 /**
