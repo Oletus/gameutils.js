@@ -77,6 +77,40 @@ Game.prototype.update = function(deltaTime) {
     GJS.Audio.muteAll(Game.parameters.get('muteAudio'));
 };
 
+
+/**
+ * Mouse/touch handler for pressing down a mouse button or touch.
+ * @param {Object} event With following keys:
+ *   current: Vec2 with current pointer coordinates in the canvas coordinate system.
+ *   lastDown: Vec2 with coordinates of the latest press event in the canvas coordinate system.
+ *   isDown: Boolean telling if the pointer is down.
+ *   index: Integer index of the pointer being tracked.
+ */
+Game.prototype.canvasPress = function(event) {
+};
+
+/**
+ * Mouse/touch handler for releasing a mouse button or touch.
+ * @param {Object} event With following keys:
+ *   current: Vec2 with current pointer coordinates in the canvas coordinate system.
+ *   lastDown: Vec2 with coordinates of the latest press event in the canvas coordinate system.
+ *   isDown: Boolean telling if the pointer is down.
+ *   index: Integer index of the pointer being tracked.
+ */
+Game.prototype.canvasRelease = function(event) {
+};
+
+/**
+ * Mouse/touch handler when a pointer is being moved.
+ * @param {Object} event With following keys:
+ *   current: Vec2 with current pointer coordinates in the canvas coordinate system.
+ *   lastDown: Vec2 with coordinates of the latest press event in the canvas coordinate system.
+ *   isDown: Boolean telling if the pointer is down.
+ *   index: Integer index of the pointer being tracked.
+ */
+Game.prototype.canvasMove = function(event) {
+};
+
 // Parameters added here can be tuned at run time when in developer mode
 Game.parameters = new GameParameters({
     'muteAudio': {initial: false}
@@ -95,8 +129,8 @@ window['start'] = function() {
     
     var game;
     
-    var resizer = new CanvasResizer({
-        mode: CanvasResizer.Mode.FIXED_ASPECT_RATIO,
+    var resizer = new GJS.CanvasResizer({
+        mode: GJS.CanvasResizer.Mode.FIXED_ASPECT_RATIO,
         canvas: renderer.domElement,
         width: 16,
         height: 9,
@@ -109,6 +143,10 @@ window['start'] = function() {
         }
     });
     game = new Game(resizer, renderer);
+    
+    // Create event handlers for mouse and touch based input that will call on the canvas* members of game.
+    resizer.createPointerEventListener(game, true);
+    
     startMainLoop([resizer, game, resizer.pixelator()], {debugMode: DEBUG_MAIN_LOOP});
 };
 </script>

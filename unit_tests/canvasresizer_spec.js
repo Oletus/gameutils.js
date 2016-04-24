@@ -37,7 +37,7 @@ describe('CanvasResizer', function() {
             clientWidth: 16,
             clientHeight: 9
         };
-        var resizer = new CanvasResizer({
+        var resizer = new GJS.CanvasResizer({
             parentElement: parentElement
         });
         resizer._getCanvasBoundingClientRect = function() {

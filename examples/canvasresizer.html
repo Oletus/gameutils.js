@@ -1,6 +1,6 @@
 <html>
 <head>
-<title>Gameutils.js: Using the CanvasResizer class to manage canvas size</title>
+<title>Gameutils.js: Using the GJS.CanvasResizer class to manage canvas size</title>
 <link rel="stylesheet" type="text/css" href="assets/default.css">
 <script src="../src/canvasresizer.js"></script>
 <script src="../src/sprite.js"></script>
@@ -38,22 +38,32 @@ var frame = function() {
     requestAnimationFrame(frame);
 };
 
-var eventListener = function(event) {
-    pos = resizer.getCanvasPosition(event);
+var Listener = function() {
+};
+
+Listener.prototype.canvasPress = function(event) {
+    pos.x = event.current.x;
+    pos.y = event.current.y;
+};
+
+Listener.prototype.canvasRelease = function(event) {
+};
+
+Listener.prototype.canvasMove = function(event) {
 };
 
 var start = function() {
     var parent = document.getElementById('canvasContainer');
-    resizer = new CanvasResizer({
-        mode: CanvasResizer.Mode.FIXED_RESOLUTION,
+    resizer = new GJS.CanvasResizer({
+        mode: GJS.CanvasResizer.Mode.FIXED_RESOLUTION,
         width: 320,
         height: 180,
         parentElement: parent
     });
     var canvas = resizer.getCanvas();
     realCtx = canvas.getContext('2d');
-    canvas.addEventListener('click', eventListener);
-    canvas.addEventListener('touchmove', eventListener);
+    var listener = new Listener();
+    resizer.createPointerEventListener(listener, true); // Listen to mouse/touch events on the canvas element
     pixelator = resizer.pixelator(); // Needed to support pixelation on IE
     frame();
 };
@@ -61,8 +71,8 @@ var start = function() {
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
 </head>
 <body onload="start()">
-<h2>Using the CanvasResizer class to manage canvas size</h2>
-<p>With the CanvasResizer, you can set the canvas size several ways:</p>
+<h2>Using the GJS.CanvasResizer class to manage canvas size</h2>
+<p>With the GJS.CanvasResizer, you can set the canvas size several ways:</p>
 <ul>
 <li>FIXED_RESOLUTION: Forces an integer scaling ratio like 2:1 or 3:1, perfect for pixel art based graphics.
 Pixel-perfect rendering of this mode uses "imageRendering" style property when possible, and otherwise falls back
@@ -83,21 +93,21 @@ in effect a better-quality version of FIXED_RESOLUTION_INTERPOLATED that works o
 <div id="canvasContainer" style="width: 90%; height: 600px; background: #000; border: 3px solid #08d;"></div>
 <p>
 <input type="button" value="Set mode to FIXED_RESOLUTION"
-    onclick="resizer.changeMode(CanvasResizer.Mode.FIXED_RESOLUTION)"></input>
+    onclick="resizer.changeMode(GJS.CanvasResizer.Mode.FIXED_RESOLUTION)"></input>
 <input type="button" value="Set mode to FIXED_RESOLUTION_INTERPOLATED"
-    onclick="resizer.changeMode(CanvasResizer.Mode.FIXED_RESOLUTION_INTERPOLATED)"></input>
+    onclick="resizer.changeMode(GJS.CanvasResizer.Mode.FIXED_RESOLUTION_INTERPOLATED)"></input>
 <input type="button" value="Set mode to FIXED_COORDINATE_SYSTEM"
-    onclick="resizer.changeMode(CanvasResizer.Mode.FIXED_COORDINATE_SYSTEM)"></input>
+    onclick="resizer.changeMode(GJS.CanvasResizer.Mode.FIXED_COORDINATE_SYSTEM)"></input>
 <input type="button" value="Set mode to FIXED_ASPECT_RATIO"
-    onclick="resizer.changeMode(CanvasResizer.Mode.FIXED_ASPECT_RATIO)"></input>
+    onclick="resizer.changeMode(GJS.CanvasResizer.Mode.FIXED_ASPECT_RATIO)"></input>
 <input type="button" value="Set mode to DYNAMIC"
-    onclick="resizer.changeMode(CanvasResizer.Mode.DYNAMIC)"></input>
+    onclick="resizer.changeMode(GJS.CanvasResizer.Mode.DYNAMIC)"></input>
 <input type="button" value="Set mode to MINIMUM_RESOLUTION"
-    onclick="resizer.changeMode(CanvasResizer.Mode.MINIMUM_RESOLUTION)"></input>
+    onclick="resizer.changeMode(GJS.CanvasResizer.Mode.MINIMUM_RESOLUTION)"></input>
 <input type="button" value="Set mode to MINIMUM_HEIGHT"
-    onclick="resizer.changeMode(CanvasResizer.Mode.MINIMUM_HEIGHT)"></input>
+    onclick="resizer.changeMode(GJS.CanvasResizer.Mode.MINIMUM_HEIGHT)"></input>
 <input type="button" value="Set mode to MINIMUM_WIDTH"
-    onclick="resizer.changeMode(CanvasResizer.Mode.MINIMUM_WIDTH)"></input>
+    onclick="resizer.changeMode(GJS.CanvasResizer.Mode.MINIMUM_WIDTH)"></input>
 
 <input type="button" value="Set width / height to 320 / 180"
     onclick="resizer.changeCanvasDimensions(320, 180)"></input>
