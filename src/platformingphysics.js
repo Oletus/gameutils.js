@@ -1,16 +1,20 @@
 'use strict';
 
+if (typeof GJS === "undefined") {
+    var GJS = {};
+}
+
 /**
  * Helpers for doing platforming physics, including tile classes and a function to evaluate movement with collisions.
  * Using the platforming physics classes requires TileMap.
  */
-var PlatformingPhysics = {};
+GJS.PlatformingPhysics = {};
 
 /**
  * A character that moves in the platforming level, colliding into other objects and tile maps.
  * @constructor
  */
-var PlatformingObject = function() {
+GJS.PlatformingObject = function() {
 };
 
 /**
@@ -19,7 +23,7 @@ var PlatformingObject = function() {
  *   x: number
  *   y: number
  */
-PlatformingObject.prototype.init = function(options) {
+GJS.PlatformingObject.prototype.init = function(options) {
     var defaults = {
         x: 0,
         y: 0,
@@ -40,7 +44,7 @@ PlatformingObject.prototype.init = function(options) {
     this.resetMovement();
 };
 
-PlatformingObject.prototype.resetMovement = function() {
+GJS.PlatformingObject.prototype.resetMovement = function() {
     this.lastX = this.x;
     this.lastY = this.y;
     this.lastYAfterUpwardSlopes = this.y;
@@ -62,24 +66,24 @@ PlatformingObject.prototype.resetMovement = function() {
  * Override this to control the this.dx value that the character uses on each frame.
  * @param {number} deltaTime
  */
-PlatformingObject.prototype.decideDx = function(deltaTime) {
+GJS.PlatformingObject.prototype.decideDx = function(deltaTime) {
 };
 
 /**
  * Override this to perform custom per-frame changes to this.x instead of the normal dx/dy dependent behavior.
  * @param {number} deltaTime
- * @param {Array.<PlatformingObject>} colliders Objects to collide against.
+ * @param {Array.<GJS.PlatformingObject>} colliders Objects to collide against.
  */
-PlatformingObject.prototype.moveX = function(deltaTime, colliders) {
-    PlatformingPhysics.moveAndCollide(this, deltaTime, 'x', colliders);
+GJS.PlatformingObject.prototype.moveX = function(deltaTime, colliders) {
+    GJS.PlatformingPhysics.moveAndCollide(this, deltaTime, 'x', colliders);
 };
 
 /**
  * Update the x value and do some related bookkeeping.
  * @param {number} deltaTime
- * @param {Array.<PlatformingObject>} colliders Objects to collide against.
+ * @param {Array.<GJS.PlatformingObject>} colliders Objects to collide against.
  */
-PlatformingObject.prototype.updateX = function(deltaTime, colliders) {
+GJS.PlatformingObject.prototype.updateX = function(deltaTime, colliders) {
     this.lastDeltaTime = deltaTime;
     this.moveX(deltaTime, colliders);
     var prevFrameDeltaX = this.frameDeltaX;
@@ -98,25 +102,25 @@ PlatformingObject.prototype.updateX = function(deltaTime, colliders) {
  * Override this to control the this.dy value that the character uses on each frame.
  * @param {number} deltaTime
  */
-PlatformingObject.prototype.decideDy = function(deltaTime) {
+GJS.PlatformingObject.prototype.decideDy = function(deltaTime) {
     this.dy += 5.0 * deltaTime;
 };
 
 /**
  * Override this to perform custom per-frame changes to this.y instead of the normal dx/dy dependent behavior.
  * @param {number} deltaTime
- * @param {Array.<PlatformingObject>} colliders Objects to collide against.
+ * @param {Array.<GJS.PlatformingObject>} colliders Objects to collide against.
  */
-PlatformingObject.prototype.moveY = function(deltaTime, colliders) {
-    PlatformingPhysics.moveAndCollide(this, deltaTime, 'y', colliders);
+GJS.PlatformingObject.prototype.moveY = function(deltaTime, colliders) {
+    GJS.PlatformingPhysics.moveAndCollide(this, deltaTime, 'y', colliders);
 };
 
 /**
  * Update the y value and do some related bookkeeping.
  * @param {number} deltaTime
- * @param {Array.<PlatformingObject>} colliders Objects to collide against.
+ * @param {Array.<GJS.PlatformingObject>} colliders Objects to collide against.
  */
-PlatformingObject.prototype.updateY = function(deltaTime, colliders) {
+GJS.PlatformingObject.prototype.updateY = function(deltaTime, colliders) {
     this.onGround = false;
     this.groundPlatform = null;
     this.moveY(deltaTime, colliders);
@@ -139,9 +143,9 @@ PlatformingObject.prototype.updateY = function(deltaTime, colliders) {
 
 /**
  * Callback when the character touches ground.
- * @param {PlatformingObject} collisionObject Object that was collided with.
+ * @param {GJS.PlatformingObject} collisionObject Object that was collided with.
  */
-PlatformingObject.prototype._touchGround = function(collisionObject) {
+GJS.PlatformingObject.prototype._touchGround = function(collisionObject) {
     this.onGround = true;
     this.groundPlatform = collisionObject;
     if (!this.touchGround(collisionObject)) {
@@ -151,18 +155,18 @@ PlatformingObject.prototype._touchGround = function(collisionObject) {
 
 /**
  * Prefer overriding this if you need to trigger behaviors when touching ground.
- * @param {PlatformingObject} collisionObject Object that was collided with.
+ * @param {GJS.PlatformingObject} collisionObject Object that was collided with.
  * @return {boolean} Return true to override changes to dy that are done by default when touching ground.
  */
-PlatformingObject.prototype.touchGround = function(collisionObject) {
+GJS.PlatformingObject.prototype.touchGround = function(collisionObject) {
     return false;
 };
 
 /**
  * Callback when the character touches the ceiling.
- * @param {PlatformingObject} collisionObject Object that was collided with.
+ * @param {GJS.PlatformingObject} collisionObject Object that was collided with.
  */
-PlatformingObject.prototype._touchCeiling = function(collisionObject) {
+GJS.PlatformingObject.prototype._touchCeiling = function(collisionObject) {
     if (!this.touchCeiling(collisionObject)) {
         this.dy = (this.y - this.lastY) / this.lastDeltaTime;
     }
@@ -170,10 +174,10 @@ PlatformingObject.prototype._touchCeiling = function(collisionObject) {
 
 /**
  * Prefer overriding this if you need to trigger behaviors when touching ceiling.
- * @param {PlatformingObject} collisionObject Object that was collided with.
+ * @param {GJS.PlatformingObject} collisionObject Object that was collided with.
  * @return {boolean} Return true to override changes to dy that are done by default when touching the ceiling.
  */
-PlatformingObject.prototype.touchCeiling = function(collisionObject) {
+GJS.PlatformingObject.prototype.touchCeiling = function(collisionObject) {
     return false;
 };
 
@@ -181,7 +185,7 @@ PlatformingObject.prototype.touchCeiling = function(collisionObject) {
  * Debug rendering of the character.
  * @param {CanvasRenderingContext2D} ctx Context to draw to.
  */
-PlatformingObject.prototype.render = function(ctx) {
+GJS.PlatformingObject.prototype.render = function(ctx) {
     ctx.fillStyle = this.color;
     var rect = this.getCollisionRect();
     ctx.fillRect(rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top);
@@ -194,7 +198,7 @@ PlatformingObject.prototype.render = function(ctx) {
  * @param {number} y Vertical position.
  * @return {Rect} Collision rectangle.
  */
-PlatformingObject.prototype.getPositionedCollisionRect = function(x, y) {
+GJS.PlatformingObject.prototype.getPositionedCollisionRect = function(x, y) {
     var width = 1.0;
     var height = 2.0;
     return new Rect(x - width * 0.5, x + width * 0.5,
@@ -206,7 +210,7 @@ PlatformingObject.prototype.getPositionedCollisionRect = function(x, y) {
  * @return {Rect} Collision rectangle.
  * @final
  */
-PlatformingObject.prototype.getCollisionRect = function() {
+GJS.PlatformingObject.prototype.getCollisionRect = function() {
     return this.getPositionedCollisionRect(this.x, this.y);
 };
 
@@ -215,7 +219,7 @@ PlatformingObject.prototype.getCollisionRect = function() {
  * @return {Rect} Collision rectangle.
  * @final
  */
-PlatformingObject.prototype.getLastCollisionRect = function() {
+GJS.PlatformingObject.prototype.getLastCollisionRect = function() {
     return this.getPositionedCollisionRect(this.lastX, this.lastY);
 };
 
@@ -226,7 +230,7 @@ PlatformingObject.prototype.getLastCollisionRect = function() {
 var PlatformingTileMap = function() {
 };
 
-PlatformingTileMap.prototype = new PlatformingObject();
+PlatformingTileMap.prototype = new GJS.PlatformingObject();
 
 /**
  * Initialize the tilemap.
@@ -236,7 +240,7 @@ PlatformingTileMap.prototype = new PlatformingObject();
  *   y: number
  */
 PlatformingTileMap.prototype.init = function(options) {
-    PlatformingObject.prototype.init.call(this, options);
+    GJS.PlatformingObject.prototype.init.call(this, options);
     var defaults = {
         tileMap: null,
         tilesAffectMovingTilemaps: false,
@@ -349,7 +353,7 @@ PlatformingLevel.resolveSort = function(a, b) {
 
 /**
  * Add an object to the level.
- * @param {PlatformingObject} object Object to add.
+ * @param {GJS.PlatformingObject} object Object to add.
  * @param {Array.<string>} collisionGroups Collision groups to add the object to. Will automatically be added to
  *     the "_all" collision group.
  */
@@ -371,7 +375,7 @@ PlatformingLevel.prototype.pushObject = function(object, collisionGroups) {
 
 /**
  * Remove an object from the level.
- * @param {PlatformingObject} object Object to remove.
+ * @param {GJS.PlatformingObject} object Object to remove.
  */
 PlatformingLevel.prototype.removeObject = function(object) {
     this._objects.splice(this._objects.indexOf(object), 1);
@@ -573,7 +577,7 @@ WallTile.prototype.isWallUp = function() {
  * @param {boolean?} flippedX Set to true to flip the data in the x direction.
  * @return {function} Function that will initialize a TileMap with PlatformingTiles.
  */
-PlatformingPhysics.initFromData = function(data, flippedX) {
+GJS.PlatformingPhysics.initFromData = function(data, flippedX) {
     if (flippedX === undefined) {
         flippedX = false;
     }
@@ -623,10 +627,10 @@ PlatformingPhysics.initFromData = function(data, flippedX) {
  *   touchGround(), touchCeiling()
  * @param {number} deltaTime Time step to use to move the object.
  * @param {string} dim Either 'x' or 'y' to move the object horizontally or vertically.
- * @param {Array.<PlatformingObject>?} colliders List of objects to collide against. The moved object is
+ * @param {Array.<GJS.PlatformingObject>?} colliders List of objects to collide against. The moved object is
  * automatically excluded in case it is in this array. Colliders must report coordinates relative to the world.
  */
-PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, colliders) {
+GJS.PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, colliders) {
     var maxStepUp = 0.1;
     var isWall = function(tile) {
         return tile.isWall();
@@ -885,7 +889,7 @@ PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, collider
                     // xl
                     // Could be solved something like this:
                     /*var relativeDelta = delta - wallDownObject.frameDeltaY;
-                    if (PlatformingPhysics.isContinuousFloorSlope(movingObj.lastWallDownX - wallDownObject.lastX,
+                    if (GJS.PlatformingPhysics.isContinuousFloorSlope(movingObj.lastWallDownX - wallDownObject.lastX,
                                                                   movingObj.lastY + rectBottomHalfHeight - wallDownObject.lastY,
                                                                   wallDownX - wallDownObject.x,
                                                                   wallYDown - wallDownObject.y)) {

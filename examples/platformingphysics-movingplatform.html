@@ -1,6 +1,6 @@
 <html>
 <head>
-<title>Gameutils.js: Using the PlatformingPhysics classes to implement a moving platform</title>
+<title>Gameutils.js: Using the GJS.PlatformingPhysics classes to implement a moving platform</title>
 <meta charset="UTF-8">
 <link rel="stylesheet" type="text/css" href="assets/default.css">
 <script src="../src/utiljs.js"></script>
@@ -31,7 +31,7 @@ var Tester = function() {
     var tileMapInitParams = {
         width: 6,
         height: 3,
-        initTile: PlatformingPhysics.initFromData(
+        initTile: GJS.PlatformingPhysics.initFromData(
             [
                 '      ',
                 'l    r',
@@ -56,7 +56,7 @@ var Tester = function() {
         this.dy = -Math.cos(this.decisionTime * 3.0) * 3.0 * that.platformFlingSpeed;
     };
 
-    this.character = new PlatformingObject();
+    this.character = new GJS.PlatformingObject();
     this.character.init({
         x: 8,
         y: 10
@@ -140,7 +140,7 @@ var start = function() {
 </script>
 </head>
 <body onload="start()">
-<h2>Using the PlatformingPhysics classes to implement a moving platform</h2>
+<h2>Using the GJS.PlatformingPhysics classes to implement a moving platform</h2>
 <p>Compatibility: Chrome 47, Firefox 43, IE 11.</p>
 <input type="button" value="Fling character" onclick="tester.platformFlingSpeed = 5.0;"></input>
 <br />
