@@ -1,7 +1,7 @@
 'use strict';
 
-if (window.GJS === undefined) {
-    window.GJS = {};
+if (typeof GJS === "undefined") {
+    var GJS = {};
 }
 
 /**
