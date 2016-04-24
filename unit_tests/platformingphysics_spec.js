@@ -63,7 +63,7 @@ describe('PlatformingPhysics', function() {
         c.init({
             x: x,
             y: y,
-            tileMap: new TileMap(initParams)
+            tileMap: new GJS.TileMap(initParams)
         });
         if (options.hasOwnProperty('collisionGroup')) {
             c.collisionGroup = options.collisionGroup;

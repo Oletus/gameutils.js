@@ -6,7 +6,7 @@ if (typeof GJS === "undefined") {
 
 /**
  * Helpers for doing platforming physics, including tile classes and a function to evaluate movement with collisions.
- * Using the platforming physics classes requires TileMap.
+ * Using the platforming physics classes requires GJS.TileMap.
  */
 GJS.PlatformingPhysics = {};
 
@@ -235,7 +235,7 @@ PlatformingTileMap.prototype = new GJS.PlatformingObject();
 /**
  * Initialize the tilemap.
  * @param {Object} options Options for the tilemap. May contain:
- *   tileMap: TileMap. Mandatory.
+ *   tileMap: GJS.TileMap. Mandatory.
  *   x: number
  *   y: number
  */
@@ -575,7 +575,7 @@ WallTile.prototype.isWallUp = function() {
  *          : empty space.
  *
  * @param {boolean?} flippedX Set to true to flip the data in the x direction.
- * @return {function} Function that will initialize a TileMap with PlatformingTiles.
+ * @return {function} Function that will initialize a GJS.TileMap with PlatformingTiles.
  */
 GJS.PlatformingPhysics.initFromData = function(data, flippedX) {
     if (flippedX === undefined) {
@@ -615,7 +615,7 @@ GJS.PlatformingPhysics.initFromData = function(data, flippedX) {
         }
         transformedData.push(transformedRow);
     }
-    return TileMap.initFromData(transformedData, flippedX);
+    return GJS.TileMap.initFromData(transformedData, flippedX);
 };
 
 
@@ -677,7 +677,7 @@ GJS.PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, coll
                     }
                 }
             }
-            var slopeFloorY = movingObj.y + rectBottomHalfHeight + TileMap.epsilon * 2;
+            var slopeFloorY = movingObj.y + rectBottomHalfHeight + GJS.TileMap.epsilon * 2;
 
             var wallXRight = Number.MAX_VALUE;
             var slopeEndXRight = wallXRight;
@@ -755,28 +755,28 @@ GJS.PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, coll
                 }
             }
             
-            if (movingObj.x > slopeEndXRight - rectRightHalfWidth + TileMap.epsilon * 2) {
+            if (movingObj.x > slopeEndXRight - rectRightHalfWidth + GJS.TileMap.epsilon * 2) {
                 var afterOriginalMove = movingObj.x;
-                movingObj.x = slopeEndXRight - rectRightHalfWidth + TileMap.epsilon * 2;
+                movingObj.x = slopeEndXRight - rectRightHalfWidth + GJS.TileMap.epsilon * 2;
                 delta = afterOriginalMove - movingObj.x;
                 // Finish this iteration on the tile boundary and continue movement on the next slope tile.
-                if (delta > TileMap.epsilon * 2 && delta < lastDelta) {
+                if (delta > GJS.TileMap.epsilon * 2 && delta < lastDelta) {
                     done = false;
                     lastDelta = delta;
                 }
             }
-            if (movingObj.x < slopeEndXLeft + rectLeftHalfWidth - TileMap.epsilon * 2) {
+            if (movingObj.x < slopeEndXLeft + rectLeftHalfWidth - GJS.TileMap.epsilon * 2) {
                 var afterOriginalMove = movingObj.x;
-                movingObj.x = slopeEndXLeft + rectLeftHalfWidth - TileMap.epsilon * 2;
+                movingObj.x = slopeEndXLeft + rectLeftHalfWidth - GJS.TileMap.epsilon * 2;
                 delta = afterOriginalMove - movingObj.x;
                 // Finish this iteration on the tile boundary and continue movement on the next slope tile.
-                if (delta < -TileMap.epsilon * 2 && delta > lastDelta) {
+                if (delta < -GJS.TileMap.epsilon * 2 && delta > lastDelta) {
                     done = false;
                     lastDelta = delta;
                 }
             }
-            if (movingObj.y > slopeFloorY - rectBottomHalfHeight - TileMap.epsilon) {
-                movingObj.y = slopeFloorY - rectBottomHalfHeight - TileMap.epsilon;
+            if (movingObj.y > slopeFloorY - rectBottomHalfHeight - GJS.TileMap.epsilon) {
+                movingObj.y = slopeFloorY - rectBottomHalfHeight - GJS.TileMap.epsilon;
             }
             
             // Apply walls only when movement is done. When moving along a slope, the code may have placed
@@ -787,11 +787,11 @@ GJS.PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, coll
             //
             // .
             // x. <- obj
-            if (movingObj.x > wallXRight - rectRightHalfWidth - TileMap.epsilon && done) {
-                movingObj.x = wallXRight - rectRightHalfWidth - TileMap.epsilon;
+            if (movingObj.x > wallXRight - rectRightHalfWidth - GJS.TileMap.epsilon && done) {
+                movingObj.x = wallXRight - rectRightHalfWidth - GJS.TileMap.epsilon;
             }
-            if (movingObj.x < wallXLeft + rectLeftHalfWidth + TileMap.epsilon && done) {
-                movingObj.x = wallXLeft + rectLeftHalfWidth + TileMap.epsilon;
+            if (movingObj.x < wallXLeft + rectLeftHalfWidth + GJS.TileMap.epsilon && done) {
+                movingObj.x = wallXLeft + rectLeftHalfWidth + GJS.TileMap.epsilon;
             }
         } // dim == 'x'
         if (dim == 'y') {
@@ -877,13 +877,13 @@ GJS.PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, coll
                 }
             }
 
-            if (movingObj.y > wallYDown - rectBottomHalfHeight - TileMap.epsilon) {
-                movingObj.y = wallYDown - rectBottomHalfHeight - TileMap.epsilon;
+            if (movingObj.y > wallYDown - rectBottomHalfHeight - GJS.TileMap.epsilon) {
+                movingObj.y = wallYDown - rectBottomHalfHeight - GJS.TileMap.epsilon;
                 movingObj._touchGround(wallDownObject);
             } else if (movingObj.lastGroundPlatform === wallDownObject && wallDownObject !== null) {
                 var relativeDeltaX = movingObj.frameDeltaX - wallDownObject.frameDeltaX;
                 var maxStickToGroundDistance = Math.min(movingObj.maxStickToGroundDistance, Math.abs(relativeDeltaX));
-                if (movingObj.y > wallYDown - rectBottomHalfHeight - TileMap.epsilon - maxStickToGroundDistance) {
+                if (movingObj.y > wallYDown - rectBottomHalfHeight - GJS.TileMap.epsilon - maxStickToGroundDistance) {
                     // TODO: There's still a bug where the character teleports downwards when there's a slope like this:
                     // .
                     // xl
@@ -893,15 +893,15 @@ GJS.PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, coll
                                                                   movingObj.lastY + rectBottomHalfHeight - wallDownObject.lastY,
                                                                   wallDownX - wallDownObject.x,
                                                                   wallYDown - wallDownObject.y)) {
-                        movingObj.y = wallYDown - rectBottomHalfHeight - TileMap.epsilon;
+                        movingObj.y = wallYDown - rectBottomHalfHeight - GJS.TileMap.epsilon;
                         movingObj._touchGround(wallDownObject, wallDownX);
                     }*/
-                    movingObj.y = wallYDown - rectBottomHalfHeight - TileMap.epsilon;
+                    movingObj.y = wallYDown - rectBottomHalfHeight - GJS.TileMap.epsilon;
                     movingObj._touchGround(wallDownObject);
                 }
             }
-            if (movingObj.y < wallYUp + rectTopHalfHeight + TileMap.epsilon) {
-                movingObj.y = wallYUp + rectTopHalfHeight + TileMap.epsilon;
+            if (movingObj.y < wallYUp + rectTopHalfHeight + GJS.TileMap.epsilon) {
+                movingObj.y = wallYUp + rectTopHalfHeight + GJS.TileMap.epsilon;
                 movingObj._touchCeiling(wallUpObject);
             }
         }
