@@ -1,6 +1,6 @@
 <html>
 <head>
-<title>Gameutils.js: Using HitBox</title>
+<title>Gameutils.js: Using GJS.HitBox</title>
 <link rel="stylesheet" type="text/css" href="assets/default.css">
 <script src="../src/util2d.js"></script>
 <script src="../src/hitbox.js"></script>
@@ -21,7 +21,7 @@ var Tester = function() {
     for (var i = 0; i < BOXES; ++i) {
         this.positions.push(new Vec2(Math.random() * ctx.canvas.width, Math.random() * ctx.canvas.height));
         this.velocities.push(new Vec2(Math.random(), Math.random()));
-        this.hitboxes.push(new HitBox());
+        this.hitboxes.push(new GJS.HitBox());
     }
 };
 

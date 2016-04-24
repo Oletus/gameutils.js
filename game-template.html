@@ -129,7 +129,7 @@ window['start'] = function() {
     // Create event handlers for mouse and touch based input that will call on the canvas* members of game.
     resizer.createPointerEventListener(game, true);
 
-    startMainLoop([resizer, game, new LoadingBar(), resizer.pixelator()], {debugMode: DEBUG_MAIN_LOOP});
+    startMainLoop([resizer, game, new GJS.LoadingBar(), resizer.pixelator()], {debugMode: DEBUG_MAIN_LOOP});
 };
 </script>
 </head>

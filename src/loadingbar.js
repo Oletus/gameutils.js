@@ -10,7 +10,7 @@ if (typeof GJS === "undefined") {
  * function that returns 1 when the object is fully loaded.
  * @constructor
  */
-var LoadingBar = function(objectsToPoll) {
+GJS.LoadingBar = function(objectsToPoll) {
     if (objectsToPoll === undefined) {
         objectsToPoll = [];
         if (typeof GJS.Sprite !== 'undefined') {
@@ -31,7 +31,7 @@ var LoadingBar = function(objectsToPoll) {
  * @param {number} deltaTime Time passed from the last frame.
  * @return {boolean} True when fully loaded.
  */
-LoadingBar.prototype.update = function(deltaTime) {
+GJS.LoadingBar.prototype.update = function(deltaTime) {
     this.sinceStarted += deltaTime;
     if (this.allLoaded) {
         this.sinceLoaded += deltaTime;
@@ -53,7 +53,7 @@ LoadingBar.prototype.update = function(deltaTime) {
 /**
  * @return {boolean} True when fully loaded.
  */
-LoadingBar.prototype.finished = function() {
+GJS.LoadingBar.prototype.finished = function() {
     return this.allLoaded;
 };
 
@@ -61,7 +61,7 @@ LoadingBar.prototype.finished = function() {
  * Draw the loading bar.
  * @param {CanvasRenderingContext2D} ctx Context to draw the loading bar to.
  */
-LoadingBar.prototype.render = function(ctx) {
+GJS.LoadingBar.prototype.render = function(ctx) {
     if (this.sinceLoaded < 1.0) {
         var barWidth = Math.min(ctx.canvas.width - 40, 200);
         ctx.save();

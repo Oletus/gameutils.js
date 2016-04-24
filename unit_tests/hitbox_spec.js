@@ -7,9 +7,9 @@
 describe('HitBox', function() {
     describe('circle', function() {
         it('tests intersection with a segment', function() {
-            var hb1 = new HitBox();
+            var hb1 = new GJS.HitBox();
             hb1.setCircle(new Vec2(0, 0), 10);
-            var hb2 = new HitBox();
+            var hb2 = new GJS.HitBox();
             hb2.setSegment(new Vec2(0, -19), 10, 3.5, 6.1);
             expect(hb2.intersects(hb1)).toBe(false);
             expect(hb1.intersects(hb2)).toBe(false);

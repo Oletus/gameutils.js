@@ -1,6 +1,6 @@
 <html>
 <head>
-<title>Gameutils.js: Using the startMainLoop function and LoadingBar class</title>
+<title>Gameutils.js: Using the startMainLoop function and GJS.LoadingBar class</title>
 <link rel="stylesheet" type="text/css" href="assets/default.css">
 <script src="../src/mainloop.js"></script>
 <script src="../src/loadingbar.js"></script>
@@ -49,7 +49,7 @@ GameExample.prototype.update = function(deltaTime) {
 };
 
 /**
- * Mock loadedFraction function to demonstrate the LoadingBar class.
+ * Mock loadedFraction function to demonstrate the GJS.LoadingBar class.
  * In an actual game, you don't need to define this function yourself if you use
  * the GJS.Sprite and/or GJS.Audio classes for loading assets.
  */
@@ -59,15 +59,15 @@ GameExample.prototype.loadedFraction = function() {
 
 var start = function() {
     var game = new GameExample();
-    // Pass the game to LoadingBar since in this example the Game class
+    // Pass the game to GJS.LoadingBar since in this example the Game class
     // implements loadedFraction().
-    game.loadingBar = new LoadingBar([game]);
+    game.loadingBar = new GJS.LoadingBar([game]);
     startMainLoop([game, game.loadingBar], {debugMode: true, frameLog: true});
 };
 </script>
 </head>
 <body onload="start();">
-<h2>Using the startMainLoop function and LoadingBar class</h2>
+<h2>Using the startMainLoop function and GJS.LoadingBar</h2>
 <p>The optional debug mode bar on the top shows a log of render/update frames the main loop has processed.</p>
 <ul>
 <li>Green lines are updates which were rendered to the screen.</li>
