@@ -1,8 +1,8 @@
 <html>
 <head>
-<title>Gameutils.js: Using the ParticleEngine</title>
+<title>Gameutils.js: Using GJS.ParticleEngine</title>
 <link rel="stylesheet" type="text/css" href="assets/default.css">
-<script src="../src/sprite.js"></script><!-- required for Particle.prerenderedCircleAppearance -->
+<script src="../src/sprite.js"></script><!-- required for GJS.Particle.prerenderedCircleAppearance -->
 <script src="../src/particle.js"></script>
 <script>
 'use strict';
@@ -12,12 +12,12 @@ var tester;
 
 var Tester = function() {
     this.time = 0;
-    this.particles = new ParticleEngine({gravityY: 100});
-    this.emitter = new ParticleEmitter({
+    this.particles = new GJS.ParticleEngine({gravityY: 100});
+    this.emitter = new GJS.ParticleEmitter({
         minVelocity: 10,
         maxVelocity: 80,
         positionSpread: 10,
-        appearance: Particle.prerenderedCircleAppearance('#4fd', 8, {})
+        appearance: GJS.Particle.prerenderedCircleAppearance('#4fd', 8, {})
     });
 };
 
@@ -60,7 +60,7 @@ var start = function() {
 </script>
 </head>
 <body onload="start()">
-<h2>Using the ParticleEngine</h2>
+<h2>Using the GJS.ParticleEngine</h2>
 <p>Compatibility: Chrome 41, Firefox 36, IE 11.</p>
 </body>
 </html>

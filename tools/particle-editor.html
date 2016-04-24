@@ -36,7 +36,7 @@
     margin: 5px 0;
 }
 </style>
-<script src="../src/sprite.js"></script><!-- required for Particle.prerenderedCircleAppearance -->
+<script src="../src/sprite.js"></script><!-- required for GJS.Particle.prerenderedCircleAppearance -->
 <script src="../src/particle.js"></script>
 <script src="../src/lib/dat.gui.js"></script>
 <script src="../src/lib/tween.min.js"></script>
@@ -66,7 +66,7 @@ var loadSpriteFromFileInput = function() {
 var loadBGFromFileInput = function() {
     var fileInput = document.getElementById('bgFile');
     loadFileInput(fileInput, function(fileSrc) {
-        editor.bg = new Sprite(fileSrc);
+        editor.bg = new GJS.Sprite(fileSrc);
     });
 };
 
@@ -79,15 +79,15 @@ var AppearanceOptionSet = function() {
     this.options = {
         size: 10,
         opacity: 1,
-        sizeFunc: Particle.fadeOutLinear,
-        opacityFunc: Particle.fastAppearSlowDisappear
+        sizeFunc: GJS.Particle.fadeOutLinear,
+        opacityFunc: GJS.Particle.fastAppearSlowDisappear
     };
     this.loadedOptions = {};
     this.loadedSpriteURL = '';
 };
 
 var Editor = function() {
-    this.particles = new ParticleEngine({});
+    this.particles = new GJS.ParticleEngine({});
     this.editEmitterIndex = 0;
     this.emitters = [];
     this.timedEmitters = [];
@@ -171,8 +171,8 @@ var reverseEnum = function(enumr) {
     return arr;
 };
 
-Editor.ReverseRotationMode = reverseEnum(Particle.RotationMode);
-Editor.ReverseDirectionMode = reverseEnum(ParticleTimedEmitter.DirectionMode);
+Editor.ReverseRotationMode = reverseEnum(GJS.Particle.RotationMode);
+Editor.ReverseDirectionMode = reverseEnum(GJS.ParticleTimedEmitter.DirectionMode);
 
 Editor.prototype.restartEffect = function() {
     this.time = 0;
@@ -181,9 +181,9 @@ Editor.prototype.restartEffect = function() {
         var x = this.effect.emitters[0].x;
         var y = this.effect.emitters[0].y;
         this.particles.addEffect(this.effect);
-        this.effect = new ParticleEffect();
+        this.effect = new GJS.ParticleEffect();
         for (var i = 0; i < this.emitters.length; ++i) {
-            this.timedEmitters[i] = new ParticleTimedEmitter({
+            this.timedEmitters[i] = new GJS.ParticleTimedEmitter({
                 emitter: this.emitters[i],
                 engine: this.particles,
                 x: x,
@@ -196,7 +196,7 @@ Editor.prototype.restartEffect = function() {
             });
         }
     } else {
-        this.effect = new ParticleEffect();
+        this.effect = new GJS.ParticleEffect();
     }
     for (var i = 0; i < this.timedEmitters.length; ++i) {
         this.timedEmitters[i].restart();
@@ -220,7 +220,7 @@ Editor.prototype.addEmitter = function(x, y) {
     var index = this.emitters.length;
 
     this.appearanceOptions.push(new AppearanceOptionSet());
-    this.emitters.push(new ParticleEmitter({}));
+    this.emitters.push(new GJS.ParticleEmitter({}));
     var posX = x;
     var posY = y;
     if (this.positionMode === Editor.PositionMode.FOLLOW) {
@@ -231,7 +231,7 @@ Editor.prototype.addEmitter = function(x, y) {
     }
 
     this.timedEmitters.push(
-        new ParticleTimedEmitter({
+        new GJS.ParticleTimedEmitter({
             emitter: this.emitters[index],
             engine: this.particles,
             x: posX,
@@ -340,7 +340,7 @@ Editor.prototype.generateCode = function() {
 
     code.push('(function() {');
     pushIndent();
-    code.push('var drawScale = ParticleEngine.defaultEditorEffectScale;');
+    code.push('var drawScale = GJS.ParticleEngine.defaultEditorEffectScale;');
     
     var specialEmitterKeys = {'x': false, 'y': false, 'appearance': false};
     for (var i = 0; i < this.emitters.length; ++i) {
@@ -348,7 +348,7 @@ Editor.prototype.generateCode = function() {
             code.push(this.appearanceOptions[i].codePrefix);
         }
         code.push('var appearance' + i + ' = ' + this.appearanceOptions[i].code + ';');
-        code.push('var emitter' + i + ' = new ParticleEmitter({');
+        code.push('var emitter' + i + ' = new GJS.ParticleEmitter({');
         pushIndent();
         for (var key in this.emitters[i].options) {
             if (this.emitters[i].options.hasOwnProperty(key) && !specialEmitterKeys.hasOwnProperty(key)) {
@@ -369,9 +369,9 @@ Editor.prototype.generateCode = function() {
     }
     code.push('return function(engine) {');
     pushIndent();
-    code.push('var effect = new ParticleEffect();');
+    code.push('var effect = new GJS.ParticleEffect();');
     for (var i = 0; i < this.emitters.length; ++i) {
-        code.push('var timedEmitter' + i + ' = new ParticleTimedEmitter({');
+        code.push('var timedEmitter' + i + ' = new GJS.ParticleTimedEmitter({');
         pushIndent();
         code.push('emitter: emitter' + i + ',');
         code.push('engine: engine,');
@@ -446,8 +446,8 @@ Editor.prototype.updateEmitterFromUI = function(index) {
             this.emitters[index].options[key] = this.parameters.get(key);
         }
     }
-    this.emitters[index].options.rotationMode = Particle.RotationMode[this.parameters.get('rotationMode')];
-    this.timedEmitters[index].directionMode = ParticleTimedEmitter.DirectionMode[this.parameters.get('directionMode')];
+    this.emitters[index].options.rotationMode = GJS.Particle.RotationMode[this.parameters.get('rotationMode')];
+    this.timedEmitters[index].directionMode = GJS.ParticleTimedEmitter.DirectionMode[this.parameters.get('directionMode')];
     this.timedEmitters[index].particleInterval = this.parameters.get('particleInterval');
     this.timedEmitters[index].maxParticleCount = this.parameters.get('limit particle count') ? this.parameters.get('maxParticleCount') : -1;
     if (this.timedEmitters[index].maxParticleCount < 0 && this.timedEmitters[index].particleInterval === 0) {
@@ -506,24 +506,24 @@ Editor.prototype.updateAppearanceFromUI = function(index) {
     appearanceOptionsString += '}';
     if (this.parameters.get('spriteURL') !== '') {
         if (optionSet.sprite === null || optionSet.sprite.filename !== this.parameters.get('spriteURL')) {
-            optionSet.sprite = new Sprite(this.parameters.get('spriteURL'));
+            optionSet.sprite = new GJS.Sprite(this.parameters.get('spriteURL'));
         }
         if (optionSet.sprite.loaded) {
             if (colorSprite) {
-                var coloredSprite = new Sprite(optionSet.sprite.filename, Sprite.turnSolidColored(color));
-                updatedAppearance = Particle.spriteAppearance(coloredSprite, optionsCopy);
-                optionSet.codePrefix = 'var sprite' + index + ' = new Sprite("' + optionSet.sprite.filename + '", Sprite.turnSolidColored("' + color + '"));';
-                optionSet.code = 'Particle.spriteAppearance(sprite' + index + ', ' + appearanceOptionsString + ')';
+                var coloredSprite = new GJS.Sprite(optionSet.sprite.filename, GJS.Sprite.turnSolidColored(color));
+                updatedAppearance = GJS.Particle.spriteAppearance(coloredSprite, optionsCopy);
+                optionSet.codePrefix = 'var sprite' + index + ' = new GJS.Sprite("' + optionSet.sprite.filename + '", GJS.Sprite.turnSolidColored("' + color + '"));';
+                optionSet.code = 'GJS.Particle.spriteAppearance(sprite' + index + ', ' + appearanceOptionsString + ')';
             } else {
-                updatedAppearance = Particle.spriteAppearance(optionSet.sprite, optionsCopy);
-                optionSet.codePrefix = 'var sprite' + index + ' = new Sprite("' + optionSet.sprite.filename + '");';
-                optionSet.code = 'Particle.spriteAppearance(sprite' + index + ', ' + appearanceOptionsString + ')';
+                updatedAppearance = GJS.Particle.spriteAppearance(optionSet.sprite, optionsCopy);
+                optionSet.codePrefix = 'var sprite' + index + ' = new GJS.Sprite("' + optionSet.sprite.filename + '");';
+                optionSet.code = 'GJS.Particle.spriteAppearance(sprite' + index + ', ' + appearanceOptionsString + ')';
             }
         }
     } else {
         var resolution = Math.max(1, Math.pow(2, Math.floor(Math.log(optionSet.options.size) / Math.LN2 + 0.2)));
-        updatedAppearance = Particle.prerenderedCircleAppearance(color, resolution, optionSet.options);
-        optionSet.code = 'Particle.prerenderedCircleAppearance("' + color + '", ' + resolution + ', ' + appearanceOptionsString + ')';
+        updatedAppearance = GJS.Particle.prerenderedCircleAppearance(color, resolution, optionSet.options);
+        optionSet.code = 'GJS.Particle.prerenderedCircleAppearance("' + color + '", ' + resolution + ', ' + appearanceOptionsString + ')';
     }
 
     if (updatedAppearance !== undefined) {
@@ -550,7 +550,7 @@ Editor.functionCode = function(func) {
 };
 
 Editor.easingFunctions = function() {
-    var functions = ['Particle.fastAppearSlowDisappear', 'Particle.constant'];
+    var functions = ['GJS.Particle.fastAppearSlowDisappear', 'GJS.Particle.constant'];
     for (var key in TWEEN.Easing) {
         if (TWEEN.Easing.hasOwnProperty(key)) {
             if (TWEEN.Easing[key].hasOwnProperty('None')) {
