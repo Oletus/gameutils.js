@@ -250,6 +250,7 @@ objectUtil.wrap = function(toWrap, excludeFromForwarding) {
 
 /**
  * Request fullscreen on a given element.
+ * @param {HTMLElement} elem Element to make fullscreen.
  */
 GJS.requestFullscreen = function(elem) {
     if (elem.requestFullscreen) {
@@ -263,6 +264,9 @@ GJS.requestFullscreen = function(elem) {
     }
 };
 
+/**
+ * Exit fullscreen.
+ */
 GJS.exitFullscreen = function() {
     if(document.exitFullscreen) {
         document.exitFullscreen();
