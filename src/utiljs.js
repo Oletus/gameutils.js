@@ -278,6 +278,29 @@ GJS.exitFullscreen = function() {
 };
 
 /**
+ * @param {function} listener Listener to call when fullscreen state changes.
+ */
+GJS.addFullscreenChangeListener = function(listener) {
+    document.addEventListener('fullscreenchange', listener);
+    document.addEventListener('mozfullscreenchange', listener);
+    document.addEventListener('webkitfullscreenchange', listener);
+};
+
+/**
+ * @return {boolean} True if document is currently fullscreen.
+ */
+GJS.isFullscreen = function() {
+    if (document.fullscreenElement ||
+        document.webkitFullscreenElement ||
+        document.mozFullScreenElement ||
+        document.webkitCurrentFullScreenElement)
+    {
+        return true;
+    }
+    return false;
+};
+
+/**
  * Change a value towards zero by a certain delta value.
  * @param {number} value Value to change.
  * @param {number} delta How much to change the value.

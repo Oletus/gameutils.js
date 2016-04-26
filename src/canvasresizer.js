@@ -336,6 +336,7 @@ GJS.CanvasResizer.prototype.render = function() {
             this.wrapperElement.style.height = this.canvas.style.height;
             this.wrapperElement.style.marginTop = this.canvas.style.marginTop;
             this.wrapperElement.style.marginLeft = this.canvas.style.marginLeft;
+            this.wrapperElement.style.position = 'relative';
             this.canvas.style.marginTop = '0';
             this.canvas.style.marginLeft = '0';
         }

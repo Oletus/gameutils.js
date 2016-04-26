@@ -14,6 +14,7 @@
 <script src="src/loadingbar.js"></script>
 <script src="src/particle.js"></script>
 <script src="src/canvasui.js"></script>
+<script src="src/commonui.js"></script>
 <script src="src/monospacebitmapfont.js"></script>
 <script src="src/lib/tween.min.js"></script>
 <script src="src/lib/three.min.js"></script>
@@ -146,9 +147,23 @@ window['start'] = function() {
     var game;
     
     var renderer = new THREE.WebGLRenderer();
+    var canvasWrapper = document.createElement('div');
+    canvasWrapper.appendChild(renderer.domElement);
+
+    var fsButton = GJS.commonUI.createFullscreenButton({
+        fullscreenElement: document.body,
+        fillStyle: '#000000',
+        width: Math.floor(document.body.getBoundingClientRect().width * 0.04)
+    });
+    fsButton.style.position = 'absolute';
+    fsButton.style.right = '10px';
+    fsButton.style.top = '10px';
+    canvasWrapper.appendChild(fsButton);
+
     var resizer = new GJS.CanvasResizer({
         mode: GJS.CanvasResizer.Mode.FIXED_ASPECT_RATIO,
         canvas: renderer.domElement,
+        wrapperElement: canvasWrapper,
         width: 16,
         height: 9,
         setCanvasSizeCallback: function(width, height) {
@@ -170,7 +185,7 @@ window['start'] = function() {
 </script>
 </head>
 
-<body onload="start()" style="background: black;">
+<body onload="start()" style="background: black; height: 100%">
 </body>
 
 </html>
