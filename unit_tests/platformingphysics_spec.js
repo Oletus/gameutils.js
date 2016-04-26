@@ -39,7 +39,7 @@ describe('PlatformingPhysics', function() {
     };
     
     var testPlatformingTileMap = function(options, initParams) {
-        var c = new PlatformingTileMap();
+        var c = new GJS.PlatformingTileMap();
         var x = 0;
         if (options.hasOwnProperty('x')) {
             x = options.x;
@@ -159,7 +159,7 @@ describe('PlatformingPhysics', function() {
         return testPlatformingTileMap(options, initParams);
     };
 
-    describe('GJS.PlatformingObject', function() {
+    describe('PlatformingObject', function() {
         it('initializes', function() {
             var c = new GJS.PlatformingObject();
             c.init({x: 12, y: 3});
@@ -188,21 +188,21 @@ describe('PlatformingPhysics', function() {
     
     describe('PlatformingLevel', function() {
         it('initializes', function() {
-            var level = new PlatformingLevel();
+            var level = new GJS.PlatformingLevel();
             level.init();
             expect(level._objects.length).toEqual(0);
             expect(level._colliders['_all'].length).toEqual(0);
         });
         
         it('updates when empty', function() {
-            var level = new PlatformingLevel();
+            var level = new GJS.PlatformingLevel();
             level.init();
             var deltaTime = 1 / 60;
             level.update(deltaTime);
         });
 
         it('adds objects to the "_all" collision group', function() {
-            var level = new PlatformingLevel();
+            var level = new GJS.PlatformingLevel();
             level.init();
             var c = testCollider({x: 1, y: 12});
             level.pushObject(c, []);
@@ -211,7 +211,7 @@ describe('PlatformingPhysics', function() {
         });
 
         it('adds tilemap objects to the "_all" collision group', function() {
-            var level = new PlatformingLevel();
+            var level = new GJS.PlatformingLevel();
             level.init();
             var c = testPlatformingTileMapWithFloor({});
             level.pushObject(c, []);
@@ -220,7 +220,7 @@ describe('PlatformingPhysics', function() {
         });
 
         it('adds objects to the requested collision groups', function() {
-            var level = new PlatformingLevel();
+            var level = new GJS.PlatformingLevel();
             level.init();
             var c = testCollider({x: 1, y: 12});
             level.pushObject(c, ['foo', 'bar']);
@@ -231,7 +231,7 @@ describe('PlatformingPhysics', function() {
         });
         
         it('removes an object', function() {
-            var level = new PlatformingLevel();
+            var level = new GJS.PlatformingLevel();
             level.init();
             var c = testPlatformingTileMapWithFloor({});
             level.pushObject(c, ['foo']);
@@ -242,7 +242,7 @@ describe('PlatformingPhysics', function() {
         });
 
         it('updates when it has one object', function() {
-            var level = new PlatformingLevel();
+            var level = new GJS.PlatformingLevel();
             level.init();
             level.pushObject(testCollider({x: 1, y: 12}), []);
             var deltaTime = 1 / 60;
@@ -250,7 +250,7 @@ describe('PlatformingPhysics', function() {
         });
 
         it('updates object y in free fall', function() {
-            var level = new PlatformingLevel();
+            var level = new GJS.PlatformingLevel();
             level.init();
             var obj = testCollider({width: 1, x: 12, y: 3, dy: 4});
             level.pushObject(obj, []);
@@ -261,7 +261,7 @@ describe('PlatformingPhysics', function() {
         });
 
         it('updates object x in free fall', function() {
-            var level = new PlatformingLevel();
+            var level = new GJS.PlatformingLevel();
             level.init();
             var obj = testCollider({width: 1, x: 12, y: 3, dx: 2});
             level.pushObject(obj, []);
@@ -272,7 +272,7 @@ describe('PlatformingPhysics', function() {
         });
         
         it('uses collision groups to determine objects that are candidates for collision', function() {
-            var level = new PlatformingLevel();
+            var level = new GJS.PlatformingLevel();
             level.init();
             var c = testCollider({x: 1, y: 12});
             level.pushObject(c, ['foo', 'bar']);
@@ -290,7 +290,7 @@ describe('PlatformingPhysics', function() {
         });
         
         it('updates tilemap x and y when it is moving', function() {
-            var level = new PlatformingLevel();
+            var level = new GJS.PlatformingLevel();
             level.init();
             var obj = testPlatformingTileMapWithFloor({x: 12, y: 34, dx: 2, dy: 5});
             level.pushObject(obj, []);
@@ -303,7 +303,7 @@ describe('PlatformingPhysics', function() {
         });
         
         it('handles a simple collision between two objects', function() {
-            var level = new PlatformingLevel();
+            var level = new GJS.PlatformingLevel();
             level.init();
             
             var colliderWidth = 1.0;
@@ -327,7 +327,7 @@ describe('PlatformingPhysics', function() {
         });
         
         it('handles a high-velocity collision between two objects', function() {
-            var level = new PlatformingLevel();
+            var level = new GJS.PlatformingLevel();
             level.init();
             
             var colliderWidth = 1.0;
@@ -353,7 +353,7 @@ describe('PlatformingPhysics', function() {
         
         describe('stationary tilemap', function() {
             it('handles a vertical collision with a downwards moving object', function() {
-                var level = new PlatformingLevel();
+                var level = new GJS.PlatformingLevel();
                 level.init();
 
                 var pTileMap = testPlatformingTileMapWithFloor({});
@@ -377,7 +377,7 @@ describe('PlatformingPhysics', function() {
             });
             
             it('handles a vertical collision with an upwards moving object', function() {
-                var level = new PlatformingLevel();
+                var level = new GJS.PlatformingLevel();
                 level.init();
 
                 var pTileMap = testPlatformingTileMapWithFloor({});
@@ -402,7 +402,7 @@ describe('PlatformingPhysics', function() {
             });
             
             it('an object does not vertically collide with a tilemap which has been moved', function() {
-                var level = new PlatformingLevel();
+                var level = new GJS.PlatformingLevel();
                 level.init();
 
                 var pTileMap = testPlatformingTileMapWithFloor({x: 10});
@@ -426,7 +426,7 @@ describe('PlatformingPhysics', function() {
             });
             
             it('handles a horizontal collision with an object moving to the right', function() {
-                var level = new PlatformingLevel();
+                var level = new GJS.PlatformingLevel();
                 level.init();
 
                 var pTileMap = testPlatformingTileMapWithWall({});
@@ -450,7 +450,7 @@ describe('PlatformingPhysics', function() {
             });
             
             it('handles a horizontal collision with an object moving to the left', function() {
-                var level = new PlatformingLevel();
+                var level = new GJS.PlatformingLevel();
                 level.init();
 
                 var pTileMap = testPlatformingTileMapWithWall({});
@@ -474,7 +474,7 @@ describe('PlatformingPhysics', function() {
             });
 
             it('handles a horizontal collision with an object moving diagonally', function() {
-                var level = new PlatformingLevel();
+                var level = new GJS.PlatformingLevel();
                 level.init();
 
                 var pTileMap = testPlatformingTileMapWithWall({});
@@ -499,7 +499,7 @@ describe('PlatformingPhysics', function() {
             });
             
             it('handles both x and y collisions on the same frame with an object moving diagonally', function() {
-                var level = new PlatformingLevel();
+                var level = new GJS.PlatformingLevel();
                 level.init();
 
                 // A bit of a twist: the tilemap origin is not positioned in the world origin.
@@ -525,7 +525,7 @@ describe('PlatformingPhysics', function() {
             });
             
             it('affects the movement of a moving tilemap inside', function() {
-                var level = new PlatformingLevel();
+                var level = new GJS.PlatformingLevel();
                 level.init();
 
                 var pTileMap = testPlatformingTileMapWithFloor({tilesAffectMovingTilemaps: true});
@@ -541,7 +541,7 @@ describe('PlatformingPhysics', function() {
             });
             
             it('does not take the tilemap into account when evaluating collision with a moving tilemap and tilesAffectMovingTilemaps is false', function() {
-                var level = new PlatformingLevel();
+                var level = new GJS.PlatformingLevel();
                 level.init();
 
                 var pTileMap = testPlatformingTileMapWithFloor({tilesAffectMovingTilemaps: false});
@@ -559,7 +559,7 @@ describe('PlatformingPhysics', function() {
         
         describe('moving tilemap', function() {
             it('handles a vertical collision with a downwards moving object', function() {
-                var level = new PlatformingLevel();
+                var level = new GJS.PlatformingLevel();
                 level.init();
 
                 var pTileMap = testPlatformingTileMapWithFloor({dx: 0.1, dy: -1});
@@ -583,7 +583,7 @@ describe('PlatformingPhysics', function() {
             });
             
             it('handles a vertical collision with an upwards moving object', function() {
-                var level = new PlatformingLevel();
+                var level = new GJS.PlatformingLevel();
                 level.init();
 
                 var pTileMap = testPlatformingTileMapWithFloor({dx: 0.1, dy: 1});
@@ -608,7 +608,7 @@ describe('PlatformingPhysics', function() {
             });
 
             it('handles a vertical collision when both the tilemap and the object are moving downwards', function() {
-                var level = new PlatformingLevel();
+                var level = new GJS.PlatformingLevel();
                 level.init();
 
                 var pTileMap = testPlatformingTileMapWithFloor({dx: 0.0, dy: 20.0});
@@ -632,7 +632,7 @@ describe('PlatformingPhysics', function() {
             });
             
             it('handles a vertical collision when both the tilemap and the object are moving upwards', function() {
-                var level = new PlatformingLevel();
+                var level = new GJS.PlatformingLevel();
                 level.init();
 
                 var pTileMap = testPlatformingTileMapWithFloor({dx: 0.0, y: 10.0, dy: -20.0});
@@ -656,7 +656,7 @@ describe('PlatformingPhysics', function() {
             });
 
             it('handles a horizontal collision with an object moving to the right', function() {
-                var level = new PlatformingLevel();
+                var level = new GJS.PlatformingLevel();
                 level.init();
 
                 var pTileMap = testPlatformingTileMapWithWall({dx: -5, dy: 0.1});
@@ -680,7 +680,7 @@ describe('PlatformingPhysics', function() {
             });
             
             it('handles a horizontal collision with an object moving to the left', function() {
-                var level = new PlatformingLevel();
+                var level = new GJS.PlatformingLevel();
                 level.init();
 
                 var pTileMap = testPlatformingTileMapWithWall({dx: 4, dy: 0.1});
@@ -704,7 +704,7 @@ describe('PlatformingPhysics', function() {
             });
             
             it('handles a horizontal collision when both the tilemap and the object are moving to the left', function() {
-                var level = new PlatformingLevel();
+                var level = new GJS.PlatformingLevel();
                 level.init();
 
                 var pTileMap = testPlatformingTileMapWithWall({x: 8.0, dx: -20.0, dy: 0.0});
@@ -728,7 +728,7 @@ describe('PlatformingPhysics', function() {
             });
             
             it('handles a horizontal collision when both the tilemap and the object are moving to the right', function() {
-                var level = new PlatformingLevel();
+                var level = new GJS.PlatformingLevel();
                 level.init();
 
                 var pTileMap = testPlatformingTileMapWithWall({x: -8.0, dx: 20.0, dy: 0.0});
@@ -752,7 +752,7 @@ describe('PlatformingPhysics', function() {
             });
 
             it('handles a horizontal collision with an object moving diagonally', function() {
-                var level = new PlatformingLevel();
+                var level = new GJS.PlatformingLevel();
                 level.init();
 
                 var pTileMap = testPlatformingTileMapWithWall({dx: 4, dy: 0.1});
@@ -777,7 +777,7 @@ describe('PlatformingPhysics', function() {
             });
             
             it('handles both x and y collisions on the same frame with an object moving diagonally', function() {
-                var level = new PlatformingLevel();
+                var level = new GJS.PlatformingLevel();
                 level.init();
 
                 // A bit of a twist: the tilemap origin is not positioned in the world origin.
@@ -803,7 +803,7 @@ describe('PlatformingPhysics', function() {
             });
             
             it('handles both x and y collisions on the same frame with an object approaching diagonally', function() {
-                var level = new PlatformingLevel();
+                var level = new GJS.PlatformingLevel();
                 level.init();
 
                 // A bit of a twist: the tilemap origin is not positioned in the world origin.
@@ -833,7 +833,7 @@ describe('PlatformingPhysics', function() {
             });
             
             it('a horizontally moving tilemap catches a vertically moving object', function() {
-                var level = new PlatformingLevel();
+                var level = new GJS.PlatformingLevel();
                 level.init();
 
                 var pTileMap = testPlatformingTileMapWithFloor({x: 12.0, dx: -12.0});
@@ -858,7 +858,7 @@ describe('PlatformingPhysics', function() {
             });
 
             it('a vertically moving tilemap catches a horizontally moving object', function() {
-                var level = new PlatformingLevel();
+                var level = new GJS.PlatformingLevel();
                 level.init();
 
                 var pTileMap = testPlatformingTileMapWithFloor({y: 12.0, dy: -24.0});
@@ -885,7 +885,7 @@ describe('PlatformingPhysics', function() {
         
         describe('slopes', function() {
             it('handles an object falling on a slope that rises to the right', function() {
-                var level = new PlatformingLevel();
+                var level = new GJS.PlatformingLevel();
                 level.init();
                 var tileMapParams = {};
                 var pTileMap = testPlatformingTileMapWithSlopeRight1(tileMapParams);
@@ -906,7 +906,7 @@ describe('PlatformingPhysics', function() {
                 expect(obj1._testTouchCeilingCounter).toBe(0);
             });
             it('handles an object falling on a slope that rises to the left', function() {
-                var level = new PlatformingLevel();
+                var level = new GJS.PlatformingLevel();
                 level.init();
                 var tileMapParams = {};
                 var pTileMap = testPlatformingTileMapWithSlopeLeft1(tileMapParams);
@@ -927,7 +927,7 @@ describe('PlatformingPhysics', function() {
                 expect(obj1._testTouchCeilingCounter).toBe(0);
             });
             it('handles an object colliding a floor slope from below', function() {
-                var level = new PlatformingLevel();
+                var level = new GJS.PlatformingLevel();
                 level.init();
                 var tileMapParams = {};
                 var pTileMap = testPlatformingTileMapWithSlopeFloor(tileMapParams);
@@ -948,7 +948,7 @@ describe('PlatformingPhysics', function() {
                 expect(obj1._testTouchCeilingCounter).toBe(1);
             });
             it('handles an object colliding a floor slope from the left', function() {
-                var level = new PlatformingLevel();
+                var level = new GJS.PlatformingLevel();
                 level.init();
                 var tileMapParams = {};
                 var pTileMap = testPlatformingTileMapWithSlopeFloor(tileMapParams);
@@ -969,7 +969,7 @@ describe('PlatformingPhysics', function() {
                 expect(obj1._testTouchCeilingCounter).toBe(0);
             });
             it('handles an object colliding a floor slope from the right', function() {
-                var level = new PlatformingLevel();
+                var level = new GJS.PlatformingLevel();
                 level.init();
                 var tileMapParams = {};
                 var pTileMap = testPlatformingTileMapWithSlopeFloor(tileMapParams);
@@ -996,7 +996,7 @@ describe('PlatformingPhysics', function() {
                     movingStr += (moveTilemapVertically ? ' vertically moving' : '');
                     if (movedTiles < 3) {
                         it('handles an object moving to the right against a' + movingStr + ' upward slope for ' + movedTiles + ' tiles', function() {
-                            var level = new PlatformingLevel();
+                            var level = new GJS.PlatformingLevel();
                             level.init();
 
                             var tileMapParams = {}
@@ -1029,7 +1029,7 @@ describe('PlatformingPhysics', function() {
                         });
                         
                         it('handles an object moving to the left against a' + movingStr + ' upward slope for ' + movedTiles + ' tiles', function() {
-                            var level = new PlatformingLevel();
+                            var level = new GJS.PlatformingLevel();
                             level.init();
 
                             var tileMapParams = {}
@@ -1063,7 +1063,7 @@ describe('PlatformingPhysics', function() {
                     } // movedTiles < 3
 
                     it('handles an object moving to the right against a' + movingStr + ' downward slope for ' + movedTiles + ' tiles', function() {
-                        var level = new PlatformingLevel();
+                        var level = new GJS.PlatformingLevel();
                         level.init();
 
                         var tileMapParams = {}
@@ -1102,5 +1102,5 @@ describe('PlatformingPhysics', function() {
                 })((i & 8) != 0, (i & 4) != 0, (i & 3) + 1);
             }
         }); // slopes
-    }); // PlatformingLevel
+    }); // GJS.PlatformingLevel
 });

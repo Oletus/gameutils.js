@@ -227,10 +227,10 @@ GJS.PlatformingObject.prototype.getLastCollisionRect = function() {
  * A tile map that can be a part of a platforming level.
  * @constructor
  */
-var PlatformingTileMap = function() {
+GJS.PlatformingTileMap = function() {
 };
 
-PlatformingTileMap.prototype = new GJS.PlatformingObject();
+GJS.PlatformingTileMap.prototype = new GJS.PlatformingObject();
 
 /**
  * Initialize the tilemap.
@@ -239,7 +239,7 @@ PlatformingTileMap.prototype = new GJS.PlatformingObject();
  *   x: number
  *   y: number
  */
-PlatformingTileMap.prototype.init = function(options) {
+GJS.PlatformingTileMap.prototype.init = function(options) {
     GJS.PlatformingObject.prototype.init.call(this, options);
     var defaults = {
         tileMap: null,
@@ -264,7 +264,7 @@ PlatformingTileMap.prototype.init = function(options) {
  * @param {number} y Vertical position.
  * @return {Rect} Collision rectangle.
  */
-PlatformingTileMap.prototype.getPositionedCollisionRect = function(x, y) {
+GJS.PlatformingTileMap.prototype.getPositionedCollisionRect = function(x, y) {
     return new Rect(x, x + this.tileMap.width,
                     y, y + this.tileMap.height);
 };
@@ -273,7 +273,7 @@ PlatformingTileMap.prototype.getPositionedCollisionRect = function(x, y) {
  * Control the this.dx value that the character uses on each frame.
  * @param {number} deltaTime
  */
-PlatformingTileMap.prototype.decideDx = function(deltaTime) {
+GJS.PlatformingTileMap.prototype.decideDx = function(deltaTime) {
     this.dx = 0;
 };
 
@@ -281,7 +281,7 @@ PlatformingTileMap.prototype.decideDx = function(deltaTime) {
  * Control the this.dy value that the character uses on each frame.
  * @param {number} deltaTime
  */
-PlatformingTileMap.prototype.decideDy = function(deltaTime) {
+GJS.PlatformingTileMap.prototype.decideDy = function(deltaTime) {
     this.dy = 0;
 };
 
@@ -289,10 +289,10 @@ PlatformingTileMap.prototype.decideDy = function(deltaTime) {
  * Render all the tiles to a canvas.
  * @param {CanvasRenderingContext2D} ctx Context to draw to.
  */
-PlatformingTileMap.prototype.render = function(ctx) {
+GJS.PlatformingTileMap.prototype.render = function(ctx) {
     ctx.fillStyle = this.color;
     var rect = this.getCollisionRect();
-    var defaultRect = PlatformingTileMap.prototype.getPositionedCollisionRect.call(this, this.x, this.y);
+    var defaultRect = GJS.PlatformingTileMap.prototype.getPositionedCollisionRect.call(this, this.x, this.y);
     if (Math.abs(rect.left - defaultRect.left) + Math.abs(rect.right - defaultRect.right) + 
         Math.abs(rect.top - defaultRect.top) + Math.abs(rect.bottom - defaultRect.bottom) > 0.1)
     {
@@ -315,7 +315,7 @@ PlatformingTileMap.prototype.render = function(ctx) {
  * Render only sloped tiles to a canvas.
  * @param {CanvasRenderingContext2D} ctx 2D rendering context to use for drawing.
  */
-PlatformingTileMap.prototype.renderSlopes = function(ctx) {
+GJS.PlatformingTileMap.prototype.renderSlopes = function(ctx) {
     for (var y = 0; y < this.tileMap.height; ++y) {
         for (var x = 0; x < this.tileMap.width; ++x) {
             var tile = this.tileMap.tiles[y][x];
@@ -330,18 +330,18 @@ PlatformingTileMap.prototype.renderSlopes = function(ctx) {
  * A platforming level composed of tilemaps and objects that collide against them (or against each other).
  * @constructor
  */
-var PlatformingLevel = function() {
+GJS.PlatformingLevel = function() {
 };
 
 /**
  * Initialize the level.
  */
-PlatformingLevel.prototype.init = function() {
+GJS.PlatformingLevel.prototype.init = function() {
     this._objects = [];
     this._colliders = {'_all': []}; // All is a special collision group that includes all objects.
 };
 
-PlatformingLevel.resolveSort = function(a, b) {
+GJS.PlatformingLevel.resolveSort = function(a, b) {
     if (a.resolvePriority > b.resolvePriority) {
         return -1;
     }
@@ -357,9 +357,9 @@ PlatformingLevel.resolveSort = function(a, b) {
  * @param {Array.<string>} collisionGroups Collision groups to add the object to. Will automatically be added to
  *     the "_all" collision group.
  */
-PlatformingLevel.prototype.pushObject = function(object, collisionGroups) {
+GJS.PlatformingLevel.prototype.pushObject = function(object, collisionGroups) {
     this._objects.push(object);
-    this._objects.sort(PlatformingLevel.resolveSort);
+    this._objects.sort(GJS.PlatformingLevel.resolveSort);
     if (collisionGroups !== undefined) {
         for (var i = 0; i < collisionGroups.length; ++i) {
             if (collisionGroups[i] !== '_all' && collisionGroups[i] !== '_none') {
@@ -377,7 +377,7 @@ PlatformingLevel.prototype.pushObject = function(object, collisionGroups) {
  * Remove an object from the level.
  * @param {GJS.PlatformingObject} object Object to remove.
  */
-PlatformingLevel.prototype.removeObject = function(object) {
+GJS.PlatformingLevel.prototype.removeObject = function(object) {
     this._objects.splice(this._objects.indexOf(object), 1);
     for (var groupKey in this._colliders) {
         var indexInGroup = this._colliders[groupKey].indexOf(object);
@@ -395,7 +395,7 @@ PlatformingLevel.prototype.removeObject = function(object) {
  * only the object's bounding geometry does.
  * @param {number} deltaTime
  */
-PlatformingLevel.prototype.update = function(deltaTime) {
+GJS.PlatformingLevel.prototype.update = function(deltaTime) {
     for (var i = 0; i < this._objects.length; ++i) {
         var object = this._objects[i];
         object.lastX = object.x;
@@ -407,7 +407,7 @@ PlatformingLevel.prototype.update = function(deltaTime) {
     for (var i = 0; i < this._objects.length; ++i) {
         var object = this._objects[i];
         // tilemaps which affect moving tilemaps may not move.
-        if (!(object instanceof PlatformingTileMap) || !object.tilesAffectMovingTilemaps) {
+        if (!(object instanceof GJS.PlatformingTileMap) || !object.tilesAffectMovingTilemaps) {
             object.updateX(deltaTime, this._colliders[object.collisionGroup]);
         }
     }
@@ -419,7 +419,7 @@ PlatformingLevel.prototype.update = function(deltaTime) {
     for (var i = 0; i < this._objects.length; ++i) {
         var object = this._objects[i];
         // tilemaps which affect moving tilemaps may not move.
-        if (!(object instanceof PlatformingTileMap) || !object.tilesAffectMovingTilemaps) {
+        if (!(object instanceof GJS.PlatformingTileMap) || !object.tilesAffectMovingTilemaps) {
             object.updateY(deltaTime, this._colliders[object.collisionGroup]);
         }
     }
@@ -430,7 +430,7 @@ PlatformingLevel.prototype.update = function(deltaTime) {
  * calling to scale the rendering.
  * @param {CanvasRenderingContext2D} ctx 2D rendering context to use for drawing.
  */
-PlatformingLevel.prototype.render = function(ctx) {
+GJS.PlatformingLevel.prototype.render = function(ctx) {
     for (var i = 0; i < this._objects.length; ++i) {
         this._objects[i].render(ctx);
     }
@@ -440,20 +440,20 @@ PlatformingLevel.prototype.render = function(ctx) {
  * A platforming tile.
  * @constructor
  */
-var PlatformingTile = function() {
+GJS.PlatformingTile = function() {
 };
 
 /**
  * @return {number} floor height inside sloping tile.
  */
-PlatformingTile.prototype.getFloorRelativeHeight = function(xInTile) {
+GJS.PlatformingTile.prototype.getFloorRelativeHeight = function(xInTile) {
     return 0.0;
 };
 
 /**
  * Set the position of the tile relative to the tilemap.
  */
-PlatformingTile.prototype.setPos = function(x, y) {
+GJS.PlatformingTile.prototype.setPos = function(x, y) {
     this._x = x;
     this._y = y;
 };
@@ -461,28 +461,28 @@ PlatformingTile.prototype.setPos = function(x, y) {
 /**
  * @return {number} maximum floor height inside sloping tile.
  */
-PlatformingTile.prototype.getMaxFloorRelativeHeight = function() {
+GJS.PlatformingTile.prototype.getMaxFloorRelativeHeight = function() {
     return Math.max(this.getFloorRelativeHeight(0), this.getFloorRelativeHeight(1));
 };
 
 /**
  * @return {boolean} True if the tile is a wall for movement towards any direction.
  */
-PlatformingTile.prototype.isWall = function() {
+GJS.PlatformingTile.prototype.isWall = function() {
     return false;
 };
 
 /**
  * @return {boolean} True if the tile is a wall for upwards movement (negative y).
  */
-PlatformingTile.prototype.isWallUp = function() {
+GJS.PlatformingTile.prototype.isWallUp = function() {
     return false;
 };
 
 /**
  * @return {boolean} True if the tile is sloped for objects moving above it.
  */
-PlatformingTile.prototype.isFloorSlope = function() {
+GJS.PlatformingTile.prototype.isFloorSlope = function() {
     return false;
 };
 
@@ -491,26 +491,26 @@ PlatformingTile.prototype.isFloorSlope = function() {
  * A tile with a sloped floor.
  * @constructor
  */
-var SlopedFloorTile = function(floorLeft, floorRight) {
+GJS.SlopedFloorTile = function(floorLeft, floorRight) {
     this._floorLeft = floorLeft;
     this._floorRight = floorRight;
     this._maxFloor = Math.max(floorLeft, floorRight);
     this._minFloor = Math.min(floorLeft, floorRight);
 };
 
-SlopedFloorTile.prototype = new PlatformingTile();
+GJS.SlopedFloorTile.prototype = new GJS.PlatformingTile();
 
 /**
  * @return {number} floor height inside sloping tile. Must be monotonically increasing or decreasing inside the tile.
  */
-SlopedFloorTile.prototype.getFloorRelativeHeight = function(xInTile) {
+GJS.SlopedFloorTile.prototype.getFloorRelativeHeight = function(xInTile) {
     return mathUtil.clamp(this._minFloor, this._maxFloor, mathUtil.mix(this._floorLeft, this._floorRight, xInTile));
 };
 
 /**
  * @return {boolean} True if the tile is sloped for objects moving above it.
  */
-SlopedFloorTile.prototype.isFloorSlope = function() {
+GJS.SlopedFloorTile.prototype.isFloorSlope = function() {
     return true;
 };
 
@@ -518,7 +518,7 @@ SlopedFloorTile.prototype.isFloorSlope = function() {
  * Render the sloped tile on a canvas.
  * @param {CanvasRenderingContext2D} ctx 2D rendering context to use for drawing.
  */
-SlopedFloorTile.prototype.render = function(ctx) {
+GJS.SlopedFloorTile.prototype.render = function(ctx) {
     ctx.beginPath();
     ctx.moveTo(this._x, this._y + 1);
     for (var x = 0; x <= 1; x += 0.25) {
@@ -534,26 +534,26 @@ SlopedFloorTile.prototype.render = function(ctx) {
  * @constructor
  * @param {boolean} wallUp True if the wall affects upwards movement (negative y).
  */
-var WallTile = function(wallUp) {
+GJS.WallTile = function(wallUp) {
     if (wallUp === undefined) {
         wallUp = true;
     }
     this._wallUp = wallUp;
 };
 
-WallTile.prototype = new PlatformingTile();
+GJS.WallTile.prototype = new GJS.PlatformingTile();
 
 /**
  * @return {boolean} True if the tile is a wall for movement towards any direction.
  */
-WallTile.prototype.isWall = function() {
+GJS.WallTile.prototype.isWall = function() {
     return true;
 };
 
 /**
  * @return {boolean} True if the tile is a wall for upwards movement (negative y).
  */
-WallTile.prototype.isWallUp = function() {
+GJS.WallTile.prototype.isWallUp = function() {
     return this._wallUp;
 };
 
@@ -575,7 +575,7 @@ WallTile.prototype.isWallUp = function() {
  *          : empty space.
  *
  * @param {boolean?} flippedX Set to true to flip the data in the x direction.
- * @return {function} Function that will initialize a GJS.TileMap with PlatformingTiles.
+ * @return {function} Function that will initialize a GJS.TileMap with GJS.PlatformingTiles.
  */
 GJS.PlatformingPhysics.initFromData = function(data, flippedX) {
     if (flippedX === undefined) {
@@ -588,23 +588,23 @@ GJS.PlatformingPhysics.initFromData = function(data, flippedX) {
         for (var j = 0; j < row.length; ++j) {
             var tile = null;
             if (row[j] == 'x') {
-                tile = new WallTile(true);
+                tile = new GJS.WallTile(true);
             } else if (row[j] == '^') {
-                tile = new WallTile(false);
+                tile = new GJS.WallTile(false);
             } else if ((row[j] == '/' && !flippedX) || (row[j] == '.' && flippedX)) {
-                tile = new SlopedFloorTile(0, 1);
+                tile = new GJS.SlopedFloorTile(0, 1);
             } else if ((row[j] == '.' && !flippedX) || (row[j] == '/' && flippedX)) {
-                tile = new SlopedFloorTile(1, 0);
+                tile = new GJS.SlopedFloorTile(1, 0);
             } else if ((row[j] == 'L' && !flippedX) || (row[j] == 'R' && flippedX)) {
-                tile = new SlopedFloorTile(1, 0.5);
+                tile = new GJS.SlopedFloorTile(1, 0.5);
             } else if ((row[j] == 'R' && !flippedX) || (row[j] == 'L' && flippedX)) {
-                tile = new SlopedFloorTile(0.5, 1);
+                tile = new GJS.SlopedFloorTile(0.5, 1);
             } else if ((row[j] == 'l' && !flippedX) || (row[j] == 'r' && flippedX)) {
-                tile = new SlopedFloorTile(0.5, 0);
+                tile = new GJS.SlopedFloorTile(0.5, 0);
             } else if ((row[j] == 'r' && !flippedX) || (row[j] == 'l' && flippedX)) {
-                tile = new SlopedFloorTile(0, 0.5);
+                tile = new GJS.SlopedFloorTile(0, 0.5);
             } else  {
-                tile = new PlatformingTile();
+                tile = new GJS.PlatformingTile();
             }
             var x = j;
             if (flippedX) {
@@ -652,7 +652,7 @@ GJS.PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, coll
         delta = movingObj.dy * deltaTime;
     }
     var lastDelta = delta;
-    var isMovingObjTileMap = (movingObj instanceof PlatformingTileMap);
+    var isMovingObjTileMap = (movingObj instanceof GJS.PlatformingTileMap);
     while (!done) {
         var rect = movingObj.getCollisionRect();
         done = true;
@@ -685,7 +685,7 @@ GJS.PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, coll
             var slopeEndXLeft = wallXLeft;
 
             for (var i = 0; i < xColliders.length; ++i) {
-                if (xColliders[i] instanceof PlatformingTileMap && (!isMovingObjTileMap || colliders[i].tilesAffectMovingTilemaps)) {
+                if (xColliders[i] instanceof GJS.PlatformingTileMap && (!isMovingObjTileMap || colliders[i].tilesAffectMovingTilemaps)) {
                     var fromWorldToTileMap = new Vec2(-xColliders[i].lastX, -xColliders[i].lastY);
                     var relativeDelta = delta - xColliders[i].frameDeltaX;
                     var relativeRect = new Rect(rect.left, rect.right, rect.top, rect.bottom);
@@ -819,7 +819,7 @@ GJS.PlatformingPhysics.moveAndCollide = function(movingObj, deltaTime, dim, coll
             var wallDownObject = null;
             var wallUpObject = null;
             for (var i = 0; i < yColliders.length; ++i) {
-                if (yColliders[i] instanceof PlatformingTileMap && (!isMovingObjTileMap || colliders[i].tilesAffectMovingTilemaps)) {
+                if (yColliders[i] instanceof GJS.PlatformingTileMap && (!isMovingObjTileMap || colliders[i].tilesAffectMovingTilemaps)) {
                     // X movement has already been fully evaluated
                     var fromWorldToTileMap = new Vec2(-yColliders[i].x, -yColliders[i].lastY);
                     var relativeDelta = delta - yColliders[i].frameDeltaY;
