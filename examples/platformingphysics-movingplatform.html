@@ -74,12 +74,12 @@ var Tester = function() {
     this.character.decideDx = function(deltaTime) { // Normally this would be in an inherited class
         if (this.onGround) {
             this.dx += this.groundPlatform.frameDeltaDeltaX / deltaTime;
-            this.dx = towardsValue(this.dx, this.playerMoveIntent * 5.0 + this.groundPlatform.frameDeltaX / deltaTime, deltaTime * 200.0);
+            this.dx = GJS.towardsValue(this.dx, this.playerMoveIntent * 5.0 + this.groundPlatform.frameDeltaX / deltaTime, deltaTime * 200.0);
         } else {
             if (this.playerMoveIntent < 0) {
-                this.dx = towardsValue(this.dx, Math.min(this.dx, this.playerMoveIntent * 5.0), deltaTime * 20.0);
+                this.dx = GJS.towardsValue(this.dx, Math.min(this.dx, this.playerMoveIntent * 5.0), deltaTime * 20.0);
             } else if (this.playerMoveIntent > 0) {
-                this.dx = towardsValue(this.dx, Math.max(this.dx, this.playerMoveIntent * 5.0), deltaTime * 20.0);
+                this.dx = GJS.towardsValue(this.dx, Math.max(this.dx, this.playerMoveIntent * 5.0), deltaTime * 20.0);
             }
         }
     };
