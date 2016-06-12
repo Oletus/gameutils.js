@@ -1545,7 +1545,8 @@ dat.GUI = dat.gui.GUI = (function (css, saveDialogueContents, styleSheet, contro
 
   var SUPPORTS_LOCAL_STORAGE = (function() {
     try {
-      return 'localStorage' in window && window['localStorage'] !== null;
+      // localStorage can be undefined at least in MS Edge on file: URLs
+      return 'localStorage' in window && window['localStorage'] !== null && window['localStorage'] !== undefined;
     } catch (e) {
       return false;
     }
