@@ -271,6 +271,22 @@ GJS.Sprite.prototype.draw = function(ctx, leftX, topY) {
 };
 
 /**
+ * Draw this to the given 2D canvas.
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {number} leftX X coordinate of the left edge.
+ * @param {number} topY Y coordinate of the top edge.
+ * @param {number} sx X coordinate of the left edge in the source image.
+ * @param {number} sy Y coordinate of the top edge in the source image.
+ * @param {number} sWidth Width of the subrectangle in the source image.
+ * @param {number} sHeight Height of the subrectangle in the source image.
+ */
+GJS.Sprite.prototype.drawCropped = function(ctx, leftX, topY, sx, sy, sWidth, sHeight) {
+    if (this.loaded) {
+        ctx.drawImage(this.img, sx, sy, sWidth, sHeight, leftX, topY, sWidth, sHeight);
+    }
+};
+
+/**
  * Draw the sprite to the given 2D canvas.
  * @param {CanvasRenderingContext2D} ctx
  * @param {number} centerX X coordinate of the center of the sprite on the canvas.
