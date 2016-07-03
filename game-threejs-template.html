@@ -21,6 +21,7 @@
 <script src="src/lib/threejs/SkyShader.js"></script>
 <!-- dev mode helpers -->
 <script src="src/lib/dat.gui.js"></script>
+<script src="src/lib/FileSaver.js"></script>
 <script src="src/gameparameters.js"></script>
 <!-- input -->
 <script src="src/lib/mousetrap.js"></script>
@@ -61,6 +62,11 @@ var Game = function(resizer, renderer, loadingBar) {
     this.input = new GJS.InputMapper(this, numPlayers);
     // Example usage of GJS.InputMapper
     //this.input.addListener(GJS.Gamepad.BUTTONS.UP_OR_ANALOG_UP, ['up', 'w'], this.upPress, this.upRelease);
+    
+    if (DEV_MODE) {
+        this.input.addListener(undefined, ['0'], this.devModeTakeScreenshot);
+    }
+    this.takeScreenshot = false;
 };
 
 Game.prototype.loadedInit = function() {
@@ -75,6 +81,16 @@ Game.prototype.loadedInit = function() {
 
 Game.prototype.render = function() {
     this.renderer.render(this.scene, this.camera);
+    
+    var that = this;
+    if (this.takeScreenshot) {
+        this.renderer.domElement.toBlob(function(blob) {
+            saveAs(blob, 'screenshot.png');
+            that.takeScreenshot = false;
+        });
+        this.takeScreenshot = false;
+    }
+    
     return this.renderer;
 };
 
@@ -128,6 +144,13 @@ Game.prototype.canvasRelease = function(event) {
  *   index: Integer index of the pointer being tracked.
  */
 Game.prototype.canvasMove = function(event) {
+};
+
+/**
+ * Set the takeScreenshot flag so that a screenshot is taken on the next frame.
+ */
+Game.prototype.devModeTakeScreenshot = function() {
+    this.takeScreenshot = true;
 };
 
 // Parameters added here can be tuned at run time when in developer mode
