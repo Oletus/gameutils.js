@@ -489,9 +489,16 @@ GJS.CanvasResizer._createVec2 = function(x, y) {
 };
 
 /**
- * Create an event listener function that will normalize different events into unified API calls and make the event
- * coordinates relative to the canvas coordinate system.
- * @param {Object} callbackObject Object where canvasPress and canvasRelease functions will be called on.
+ * Create an event listener function that will normalize different pointer events (touch and mouse) into unified
+ * callbacks and make the event coordinates relative to the canvas coordinate system. Multiple pointers can be active
+ * simultaneously.
+ * @param {Object} callbackObject Object where canvasPress, canvasRelease and canvasMove functions will be called on.
+ * The callback functions are called whenever the status of a pointer changes, and receive a single object parameter
+ * with the following keys:
+ *   lastDown: an x,y vector indicating the last position where the pointer was down.
+ *   current: an x,y vector indicating the last known position of the pointer.
+ *   isDown: a boolean indicating whether the pointer is down.
+ *   index: numerical index identifying the pointer.
  * @param {boolean} listenOnCanvas Automatically add listeners on the canvas.
  * @return {function} Function to be added as a mouse and touch listener to elements (for example the canvas element).
  */
