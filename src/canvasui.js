@@ -11,43 +11,7 @@ if (typeof GJS === "undefined") {
  * @constructor
  */
 GJS.CanvasUI = function(options) {
-    var defaults = {
-        element: null,
-        getCanvasPositionFromEvent: null
-    };
-    for(var key in defaults) {
-        if (!options.hasOwnProperty(key)) {
-            this[key] = defaults[key];
-        } else {
-            this[key] = options[key];
-        }
-    }
     this.clear();
-    
-    if (this.element !== null && this.getCanvasPositionFromEvent !== null) {
-        var that = this;
-        this.element.addEventListener('mousemove', function(event) {
-            that.setCursorPosition(that.getCanvasPositionFromEvent(event));
-        });
-        this.element.addEventListener('touchmove', function(event) {
-            that.setCursorPosition(that.getCanvasPositionFromEvent(event));
-            event.preventDefault();
-        });
-        this.element.addEventListener('mousedown', function(event) {
-            that.down(that.getCanvasPositionFromEvent(event));
-        });
-        this.element.addEventListener('touchstart', function(event) {
-            that.down(that.getCanvasPositionFromEvent(event));
-            event.preventDefault();
-        });
-        this.element.addEventListener('mouseup', function(event) {
-            that.release(that.getCanvasPositionFromEvent(event));
-        });
-        this.element.addEventListener('touchend', function(event) {
-            that.release(undefined);
-            event.preventDefault();
-        });
-    }
 };
 
 /**
@@ -65,17 +29,23 @@ GJS.CanvasUI.prototype.update = function(deltaTime) {
  * @param {CanvasRenderingContext2D} ctx The canvas rendering context to use.
  */
 GJS.CanvasUI.prototype.render = function(ctx) {
+    var activeCursors = [];
+    for (var i = 0; i < this.cursors.length; ++i) {
+        if (this.cursors[i].active) {
+            activeCursors.push(this.cursors[i]);
+        }
+    }
     var draggedElements = [];
     var i;
     for (i = 0; i < this.uiElements.length; ++i) {
         if (!this.uiElements[i].dragged) {
-            this.uiElements[i].render(ctx, this.cursorX, this.cursorY);
+            this.uiElements[i].render(ctx, activeCursors);
         } else {
             draggedElements.push(this.uiElements[i]);
         }
     }
     for (i = 0; i < draggedElements.length; ++i) {
-        draggedElements[i].render(ctx, this.cursorX, this.cursorY);
+        draggedElements[i].render(ctx, activeCursors);
     }
 };
 
@@ -84,9 +54,61 @@ GJS.CanvasUI.prototype.render = function(ctx) {
  */
 GJS.CanvasUI.prototype.clear = function() {
     this.uiElements = [];
-    this.cursorX = 0;
-    this.cursorY = 0;
+    this.cursors = [];
+};
+
+GJS.CanvasUI.prototype.addElement = function(element) {
+    this.uiElements.push(element);
+};
+
+/**
+ * @param {number} cursorIndex Index for the cursor that was pressed.
+ * @param {Vec2} position Position where the cursor was moved to.
+ */
+GJS.CanvasUI.prototype.press = function(cursorIndex, position) {
+    while (this.cursors.length <= cursorIndex) {
+        this.cursors.push(new GJS.CanvasUICursor(this));
+    }
+    this.cursors[cursorIndex].active = true;
+    this.cursors[cursorIndex].press(position);
+};
+
+/**
+ * @param {number} cursorIndex Index for the cursor.
+ * @param {boolean} makeInactive Set to true to make the cursor inactive at the same time. Useful for touch cursors.
+ */
+GJS.CanvasUI.prototype.release = function(cursorIndex, makeInactive) {
+    while (this.cursors.length <= cursorIndex) {
+        this.cursors.push(new GJS.CanvasUICursor(this));
+    }
+    this.cursors[cursorIndex].release();
+    this.cursors[cursorIndex].active = !makeInactive;
+};
+
+/**
+ * @param {number} cursorIndex Index for the cursor that was moved.
+ * @param {Vec2} position Position where the cursor was moved to.
+ */
+GJS.CanvasUI.prototype.move = function(cursorIndex, position) {
+    while (this.cursors.length <= cursorIndex) {
+        this.cursors.push(new GJS.CanvasUICursor(this));
+    }
+    this.cursors[cursorIndex].active = true;
+    this.cursors[cursorIndex].setPosition(position);
+};
+
+/**
+ * A single cursor.
+ * @param {GJS.CanvasUI} ui UI this cursor belongs to.
+ * @constructor
+ */
+GJS.CanvasUICursor = function(ui) {
+    this.ui = ui;
+    this.active = false;
+    this.x = -Infinity;
+    this.y = -Infinity;
     this.downButton = null;
+    this.dragging = false;
 };
 
 /**
@@ -94,65 +116,67 @@ GJS.CanvasUI.prototype.clear = function() {
  * @param {Object|Vec2} vec New position to set. Needs to have x and y coordinates. Relative to the canvas coordinate
  * space.
  */
-GJS.CanvasUI.prototype.setCursorPosition = function(vec) {
-    this.cursorX = vec.x;
-    this.cursorY = vec.y;
-    if (this.downButton !== null && this.downButton.draggable) {
-        this.downButton.draggedX = this.downButton.centerX + (this.cursorX - this.dragStartX);
-        this.downButton.draggedY = this.downButton.centerY + (this.cursorY - this.dragStartY);
+GJS.CanvasUICursor.prototype.setPosition = function(pos) {
+    this.x = pos.x;
+    this.y = pos.y;
+    if (this.dragging) {
+        this.downButton.draggedX = this.downButton.centerX + (this.x - this.dragStartX);
+        this.downButton.draggedY = this.downButton.centerY + (this.y - this.dragStartY);
     }
 };
 
 /**
  * Handle a mouse / touch down event.
- * @param {Object|Vec2} vec New position to set. Needs to have x and y coordinates. Relative to the canvas coordinate
+ * @param {Object|Vec2} pos New position to set. Needs to have x and y coordinates. Relative to the canvas coordinate
  * space.
  */
-GJS.CanvasUI.prototype.down = function(vec) {
-    this.setCursorPosition(vec);
-    for (var i = 0; i < this.uiElements.length; ++i) {
-        if (this.uiElements[i].active && this.uiElements[i].hitTest(this.cursorX, this.cursorY)) {
-            this.downButton = this.uiElements[i];
+GJS.CanvasUICursor.prototype.press = function(pos) {
+    this.setPosition(pos);
+    var uiElements = this.ui.uiElements;
+    for (var i = 0; i < uiElements.length; ++i) {
+        if (uiElements[i].active && uiElements[i].hitTest(this.x, this.y) && !uiElements[i].isDown) {
+            this.downButton = uiElements[i];
             this.downButton.down();
-            if (this.uiElements[i].draggable) {
+            if (uiElements[i].draggable && !uiElements[i].dragged) {
                 this.downButton.dragged = true;
-                this.dragStartX = this.cursorX;
-                this.dragStartY = this.cursorY;
+                this.dragStartX = this.x;
+                this.dragStartY = this.y;
+                this.dragging = true;
             }
         }
     }
-    this.setCursorPosition(vec);
+    this.setPosition(pos);
 };
 
 /**
  * Handle a mouse / touch up event.
- * @param {Object|Vec2=} vec New position to set. Needs to have x and y coordinates. Relative to the canvas coordinate
+ * @param {Object|Vec2=} pos New position to set. Needs to have x and y coordinates. Relative to the canvas coordinate
  * space. May be undefined, in which case the last known position will be used to evaluate the effects.
  */
-GJS.CanvasUI.prototype.release = function(vec) {
-    if (vec !== undefined) {
-        this.setCursorPosition(vec);
+GJS.CanvasUICursor.prototype.release = function(pos) {
+    if (pos !== undefined) {
+        this.setPosition(pos);
     }
     if (this.downButton !== null) {
         var clicked = false;
-        for (var i = 0; i < this.uiElements.length; ++i) {
-            if (this.uiElements[i].active && this.uiElements[i].hitTest(this.cursorX, this.cursorY)) {
-                if (this.downButton === this.uiElements[i]) {
+        var uiElements = this.ui.uiElements;
+        for (var i = 0; i < uiElements.length; ++i) {
+            if (uiElements[i].active && uiElements[i].hitTest(this.x, this.y)) {
+                if (this.downButton === uiElements[i]) {
                     clicked = true;
-                } else if (this.uiElements[i].dragTargetCallback !== null && this.downButton.dragged) {
-                    this.uiElements[i].dragTargetCallback(this.downButton.draggedObjectFunc());
+                } else if (uiElements[i].dragTargetCallback !== null && this.downButton.dragged) {
+                    uiElements[i].dragTargetCallback(this.downButton.draggedObjectFunc());
                 }
             }
         }
         this.downButton.release(clicked);
-        this.downButton.dragged = false;
+        if (this.dragging) {
+            this.downButton.dragged = false;
+            this.dragging = false;
+        }
         this.downButton = null;
     }
-    console.log(this.cursorX, this.cursorY);
-};
-
-GJS.CanvasUI.prototype.addElement = function(element) {
-    this.uiElements.push(element);
+    console.log(this.x, this.y);
 };
 
 /**
@@ -226,16 +250,21 @@ GJS.CanvasUIElement.prototype.update = function(deltaTime) {
 /**
  * Render the element. Will call renderFunc if it is defined.
  * @param {CanvasRenderingContext2D} ctx Context to render to.
- * @param {number} cursorX Cursor horizontal coordinate in the canvas coordinate system.
- * @param {number} cursorY Cursor vertical coordinate in the canvas coordinate system.
+ * @param {Array.<GJS.CanvasUICursor>} cursors A list of all active cursors.
  */
-GJS.CanvasUIElement.prototype.render = function(ctx, cursorX, cursorY) {
+GJS.CanvasUIElement.prototype.render = function(ctx, cursors) {
     if (!this.active) {
         return;
     }
     var pressedExtent = this.isDown ? (this.time - this.lastDownTime) * 8.0 : 1.0 - (this.time - this.lastUpTime) * 3.0;
     pressedExtent = mathUtil.clamp(0, 1, pressedExtent);
-    var cursorOn = this.hitTest(cursorX, cursorY);
+    var cursorOn = false;
+    for (var i = 0; i < cursors.length; ++i) {
+        var cursor = cursors[i];
+        if (this.hitTest(cursor.x, cursor.y)) {
+            cursorOn = true;
+        }
+    }
 
     if (this.renderFunc !== null) {
         this.renderFunc(ctx, this, cursorOn, pressedExtent);
