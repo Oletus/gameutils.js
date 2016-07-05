@@ -505,19 +505,19 @@ GJS.CanvasResizer._createVec2 = function(x, y) {
 GJS.CanvasResizer.prototype.createPointerEventListener = function(callbackObject, listenOnCanvas) {
     var that = this;
 
-    var coordinates = [
+    var cursors = [
     ];
     
     var alwaysTracked = [
         'mouse'
     ];
     
-    var coordinateIndices = {};
+    var cursorIndices = {};
     
     for (var i = 0; i < alwaysTracked.length; ++i) {
-        var index = coordinates.length;
-        coordinateIndices[alwaysTracked[i]] = index;
-        coordinates.push({
+        var index = cursors.length;
+        cursorIndices[alwaysTracked[i]] = index;
+        cursors.push({
             current: GJS.CanvasResizer._createVec2(-Infinity, -Infinity),
             lastDown: GJS.CanvasResizer._createVec2(-Infinity, -Infinity),
             isDown: false,
@@ -561,44 +561,44 @@ GJS.CanvasResizer.prototype.createPointerEventListener = function(callbackObject
                     touchId = id.substring(5);
                 }
                 var pos = that.getCanvasPosition(e, touchId);
-                if (!coordinateIndices.hasOwnProperty(id) || coordinateIndices[id] === -1) {
+                if (!cursorIndices.hasOwnProperty(id) || cursorIndices[id] === -1) {
                     var reuseIndexKey = undefined;
-                    for (var key in coordinateIndices) {
-                        if (coordinateIndices.hasOwnProperty(key) &&
+                    for (var key in cursorIndices) {
+                        if (cursorIndices.hasOwnProperty(key) &&
                             alwaysTracked.indexOf(key) < 0 &&
-                            coordinateIndices[key] >= 0 &&
-                            !coordinates[coordinateIndices[key]].isDown) {
+                            cursorIndices[key] >= 0 &&
+                            !cursors[cursorIndices[key]].isDown) {
                             reuseIndexKey = key;
                         }
                     }
                     if (reuseIndexKey !== undefined) {
-                        coordinateIndices[id] = coordinateIndices[reuseIndexKey];
-                        coordinateIndices[reuseIndexKey] = -1;
+                        cursorIndices[id] = cursorIndices[reuseIndexKey];
+                        cursorIndices[reuseIndexKey] = -1;
                     } else {
-                        var index = coordinates.length;
-                        coordinates.push({
+                        var index = cursors.length;
+                        cursors.push({
                             current: pos,
                             lastDown: pos,
                             isDown: false,
                             index: index
                         });
-                        coordinateIndices[id] = index;
+                        cursorIndices[id] = index;
                     }
                 }
-                var index = coordinateIndices[id];
-                if (!coordinates[index].isDown) {
-                    coordinates[index].lastDown = pos;
-                    coordinates[index].current = pos;
-                    coordinates[index].isDown = true;
-                    coordinates[index].index = index;
-                    callbackObject.canvasPress(coordinates[index]);
+                var index = cursorIndices[id];
+                if (!cursors[index].isDown) {
+                    cursors[index].lastDown = pos;
+                    cursors[index].current = pos;
+                    cursors[index].isDown = true;
+                    cursors[index].index = index;
+                    callbackObject.canvasPress(cursors[index]);
                 }
             } else if (type === 'up') {
-                if (coordinateIndices.hasOwnProperty(id) && coordinateIndices[id] !== -1) {
-                    var index = coordinateIndices[id];
-                    if (coordinates[index].isDown) {
-                        callbackObject.canvasRelease(coordinates[index]);
-                        coordinates[index].isDown = false;
+                if (cursorIndices.hasOwnProperty(id) && cursorIndices[id] !== -1) {
+                    var index = cursorIndices[id];
+                    if (cursors[index].isDown) {
+                        callbackObject.canvasRelease(cursors[index]);
+                        cursors[index].isDown = false;
                     }
                 }
             } else if (type === 'move') {
@@ -607,9 +607,9 @@ GJS.CanvasResizer.prototype.createPointerEventListener = function(callbackObject
                     touchId = id.substring(5);
                 }
                 var pos = that.getCanvasPosition(e, touchId);
-                var index = coordinateIndices[id];
-                coordinates[index].current = pos;
-                callbackObject.canvasMove(coordinates[index]);
+                var index = cursorIndices[id];
+                cursors[index].current = pos;
+                callbackObject.canvasMove(cursors[index]);
             }
         }
         e.preventDefault();
