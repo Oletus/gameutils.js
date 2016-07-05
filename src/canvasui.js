@@ -62,39 +62,44 @@ GJS.CanvasUI.prototype.addElement = function(element) {
 };
 
 /**
- * @param {number} cursorIndex Index for the cursor that was pressed.
- * @param {Vec2} position Position where the cursor was moved to.
+ * @param {Object} cursor Cursor with the following keys:
+ *   current: an x,y vector indicating the last known position of the pointer.
+ *   isDown: a boolean indicating whether the pointer is down.
+ *   index: numerical index identifying the pointer.
  */
-GJS.CanvasUI.prototype.press = function(cursorIndex, position) {
-    while (this.cursors.length <= cursorIndex) {
+GJS.CanvasUI.prototype.canvasPress = function(cursor) {
+    while (this.cursors.length <= cursor.index) {
         this.cursors.push(new GJS.CanvasUICursor(this));
     }
-    this.cursors[cursorIndex].active = true;
-    this.cursors[cursorIndex].press(position);
+    this.cursors[cursor.index].active = true;
+    this.cursors[cursor.index].press(cursor.current);
 };
 
 /**
- * @param {number} cursorIndex Index for the cursor.
+ * @param {Object} cursor Cursor with the following keys:
+ *   index: numerical index identifying the pointer.
  * @param {boolean} makeInactive Set to true to make the cursor inactive at the same time. Useful for touch cursors.
  */
-GJS.CanvasUI.prototype.release = function(cursorIndex, makeInactive) {
-    while (this.cursors.length <= cursorIndex) {
+GJS.CanvasUI.prototype.canvasRelease = function(cursor, makeInactive) {
+    while (this.cursors.length <= cursor.index) {
         this.cursors.push(new GJS.CanvasUICursor(this));
     }
-    this.cursors[cursorIndex].release();
-    this.cursors[cursorIndex].active = !makeInactive;
+    this.cursors[cursor.index].release();
+    this.cursors[cursor.index].active = !makeInactive;
 };
 
 /**
- * @param {number} cursorIndex Index for the cursor that was moved.
- * @param {Vec2} position Position where the cursor was moved to.
+ * @param {Object} cursor Cursor with the following keys:
+ *   current: an x,y vector indicating the last known position of the pointer.
+ *   isDown: a boolean indicating whether the pointer is down.
+ *   index: numerical index identifying the pointer.
  */
-GJS.CanvasUI.prototype.move = function(cursorIndex, position) {
-    while (this.cursors.length <= cursorIndex) {
+GJS.CanvasUI.prototype.canvasMove = function(cursor) {
+    while (this.cursors.length <= cursor.index) {
         this.cursors.push(new GJS.CanvasUICursor(this));
     }
-    this.cursors[cursorIndex].active = true;
-    this.cursors[cursorIndex].setPosition(position);
+    this.cursors[cursor.index].active = true;
+    this.cursors[cursor.index].setPosition(cursor.current);
 };
 
 /**
