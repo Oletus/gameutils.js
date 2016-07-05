@@ -42,8 +42,8 @@ var Listener = function() {
 };
 
 Listener.prototype.canvasPress = function(event) {
-    pos.x = event.current.x;
-    pos.y = event.current.y;
+    pos.x = event.currentPosition.x;
+    pos.y = event.currentPosition.y;
 };
 
 Listener.prototype.canvasRelease = function(event) {

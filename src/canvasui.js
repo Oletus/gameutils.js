@@ -63,8 +63,7 @@ GJS.CanvasUI.prototype.addElement = function(element) {
 
 /**
  * @param {Object} cursor Cursor with the following keys:
- *   current: an x,y vector indicating the last known position of the pointer.
- *   isDown: a boolean indicating whether the pointer is down.
+ *   currentPosition: an x,y vector indicating the last known position of the pointer.
  *   index: numerical index identifying the pointer.
  */
 GJS.CanvasUI.prototype.canvasPress = function(cursor) {
@@ -72,7 +71,7 @@ GJS.CanvasUI.prototype.canvasPress = function(cursor) {
         this.cursors.push(new GJS.CanvasUICursor(this));
     }
     this.cursors[cursor.index].active = true;
-    this.cursors[cursor.index].press(cursor.current);
+    this.cursors[cursor.index].press(cursor.currentPosition);
 };
 
 /**
@@ -90,8 +89,7 @@ GJS.CanvasUI.prototype.canvasRelease = function(cursor, makeInactive) {
 
 /**
  * @param {Object} cursor Cursor with the following keys:
- *   current: an x,y vector indicating the last known position of the pointer.
- *   isDown: a boolean indicating whether the pointer is down.
+ *   currentPosition: an x,y vector indicating the last known position of the pointer.
  *   index: numerical index identifying the pointer.
  */
 GJS.CanvasUI.prototype.canvasMove = function(cursor) {
@@ -99,7 +97,7 @@ GJS.CanvasUI.prototype.canvasMove = function(cursor) {
         this.cursors.push(new GJS.CanvasUICursor(this));
     }
     this.cursors[cursor.index].active = true;
-    this.cursors[cursor.index].setPosition(cursor.current);
+    this.cursors[cursor.index].setPosition(cursor.currentPosition);
 };
 
 /**

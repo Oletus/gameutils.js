@@ -496,7 +496,7 @@ GJS.CanvasResizer._createVec2 = function(x, y) {
  * The callback functions are called whenever the status of a pointer changes, and receive a single object parameter
  * with the following keys:
  *   lastDown: an x,y vector indicating the last position where the pointer was down.
- *   current: an x,y vector indicating the last known position of the pointer.
+ *   currentPosition: an x,y vector indicating the last known position of the pointer.
  *   isDown: a boolean indicating whether the pointer is down.
  *   index: numerical index identifying the pointer.
  * @param {boolean} listenOnCanvas Automatically add listeners on the canvas.
@@ -518,7 +518,7 @@ GJS.CanvasResizer.prototype.createPointerEventListener = function(callbackObject
         var index = cursors.length;
         cursorIndices[alwaysTracked[i]] = index;
         cursors.push({
-            current: GJS.CanvasResizer._createVec2(-Infinity, -Infinity),
+            currentPosition: GJS.CanvasResizer._createVec2(-Infinity, -Infinity),
             lastDown: GJS.CanvasResizer._createVec2(-Infinity, -Infinity),
             isDown: false,
             index: index
@@ -577,7 +577,7 @@ GJS.CanvasResizer.prototype.createPointerEventListener = function(callbackObject
                     } else {
                         var index = cursors.length;
                         cursors.push({
-                            current: pos,
+                            currentPosition: pos,
                             lastDown: pos,
                             isDown: false,
                             index: index
@@ -588,7 +588,7 @@ GJS.CanvasResizer.prototype.createPointerEventListener = function(callbackObject
                 var index = cursorIndices[id];
                 if (!cursors[index].isDown) {
                     cursors[index].lastDown = pos;
-                    cursors[index].current = pos;
+                    cursors[index].currentPosition = pos;
                     cursors[index].isDown = true;
                     cursors[index].index = index;
                     callbackObject.canvasPress(cursors[index]);
@@ -608,7 +608,7 @@ GJS.CanvasResizer.prototype.createPointerEventListener = function(callbackObject
                 }
                 var pos = that.getCanvasPosition(e, touchId);
                 var index = cursorIndices[id];
-                cursors[index].current = pos;
+                cursors[index].currentPosition = pos;
                 callbackObject.canvasMove(cursors[index]);
             }
         }

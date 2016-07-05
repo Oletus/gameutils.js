@@ -23,20 +23,20 @@ var Tester = function(canvas) {
     
     var ui = this.ui;
     canvas.addEventListener('mousemove', function(event) {
-        ui.canvasMove({ index: 0, current: getCanvasPositionFromEvent(event) });
+        ui.canvasMove({ index: 0, currentPosition: getCanvasPositionFromEvent(event) });
     });
     canvas.addEventListener('mousedown', function(event) {
-        ui.canvasPress({ index: 0, current: getCanvasPositionFromEvent(event) });
+        ui.canvasPress({ index: 0, currentPosition: getCanvasPositionFromEvent(event) });
     });
     canvas.addEventListener('mouseup', function(event) {
         ui.canvasRelease({ index: 0 }, false);
     });
     canvas.addEventListener('touchmove', function(event) {
-        ui.canvasMove({ index: 1, current: getCanvasPositionFromEvent(event) });
+        ui.canvasMove({ index: 1, currentPosition: getCanvasPositionFromEvent(event) });
         event.preventDefault();
     });
     canvas.addEventListener('touchstart', function(event) {
-        ui.canvasPress({ index: 1, current: getCanvasPositionFromEvent(event) });
+        ui.canvasPress({ index: 1, currentPosition: getCanvasPositionFromEvent(event) });
         event.preventDefault();
     });
     canvas.addEventListener('touchend', function(event) {
