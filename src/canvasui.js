@@ -65,13 +65,14 @@ GJS.CanvasUI.prototype.addElement = function(element) {
  * @param {Object} cursor Cursor with the following keys:
  *   currentPosition: an x,y vector indicating the last known position of the pointer.
  *   index: numerical index identifying the pointer.
+ * @return {boolean} True if an element was pressed.
  */
 GJS.CanvasUI.prototype.canvasPress = function(cursor) {
     while (this.cursors.length <= cursor.index) {
         this.cursors.push(new GJS.CanvasUICursor(this));
     }
     this.cursors[cursor.index].active = true;
-    this.cursors[cursor.index].press(cursor.currentPosition);
+    return this.cursors[cursor.index].press(cursor.currentPosition);
 };
 
 /**
@@ -132,6 +133,7 @@ GJS.CanvasUICursor.prototype.setPosition = function(pos) {
  * Handle a mouse / touch down event.
  * @param {Object|Vec2} pos New position to set. Needs to have x and y coordinates. Relative to the canvas coordinate
  * space.
+ * @return {boolean} True if an element was pressed.
  */
 GJS.CanvasUICursor.prototype.press = function(pos) {
     this.setPosition(pos);
@@ -149,6 +151,7 @@ GJS.CanvasUICursor.prototype.press = function(pos) {
         }
     }
     this.setPosition(pos);
+    return this.downButton !== null;
 };
 
 /**
@@ -195,6 +198,7 @@ GJS.CanvasUI.minimumClickInterval = 0.5;
 /**
  * A single UI element to draw on a canvas, typically either a button or a label.
  * Will be rendered with text by default, but can also be drawn with a custom rendering function renderFunc.
+ * @param {Object} options Options for the UI element.
  * @constructor
  */
 GJS.CanvasUIElement = function(options) {
@@ -206,14 +210,14 @@ GJS.CanvasUIElement = function(options) {
         centerY: 0,
         width: 100,
         height: 50,
-        clickCallback: null,
+        clickCallback: null, // Function that is called when the UI element is clicked or tapped.
         dragTargetCallback: null, // Called when something is dragged onto this object, with the dragged object as parameter.
-        draggedObjectFunc: null,
+        draggedObjectFunc: null, // Function that returns the dragged object associated with this UI element.
         active: true, // Active elements are visible and can be interacted with. Inactive elements can't be interacted with.
         draggable: false,
         fontSize: 20, // In pixels
         font: GJS.CanvasUI.defaultFont,
-        appearance: undefined // One of GJS.CanvasUIElement.Appearance. By default the appearance is determined based on callbacks.
+        appearance: undefined // One of GJS.CanvasUIElement.Appearance. By default the appearance is a button if the element has a clickCallback.
     };
     for(var key in defaults) {
         if (!options.hasOwnProperty(key)) {
@@ -264,7 +268,7 @@ GJS.CanvasUIElement.prototype.render = function(ctx, cursors) {
     var cursorOn = false;
     for (var i = 0; i < cursors.length; ++i) {
         var cursor = cursors[i];
-        if (this.hitTest(cursor.x, cursor.y)) {
+        if (cursor.active && this.hitTest(cursor.x, cursor.y)) {
             cursorOn = true;
         }
     }
