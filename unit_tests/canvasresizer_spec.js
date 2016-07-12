@@ -90,8 +90,8 @@ describe('CanvasResizer', function() {
         expect(testCallback.pressCalled.length).toBe(1);
         expect(testCallback.releaseCalled.length).toBe(0);
         expect(testCallback.moveCalled.length).toBe(0);
-        expect(testCallback.pressCalled[0].current.x).toBe(5.5);
-        expect(testCallback.pressCalled[0].current.y).toBe(5.5);
+        expect(testCallback.pressCalled[0].currentPosition.x).toBe(5.5);
+        expect(testCallback.pressCalled[0].currentPosition.y).toBe(5.5);
         expect(testCallback.pressCalled[0].index).toBe(1);
         
         var touchB = new MockTouch({
@@ -107,8 +107,8 @@ describe('CanvasResizer', function() {
         expect(testCallback.pressCalled.length).toBe(2);
         expect(testCallback.releaseCalled.length).toBe(0);
         expect(testCallback.moveCalled.length).toBe(0);
-        expect(testCallback.pressCalled[1].current.x).toBe(5.5);
-        expect(testCallback.pressCalled[1].current.y).toBe(12.5);
+        expect(testCallback.pressCalled[1].currentPosition.x).toBe(5.5);
+        expect(testCallback.pressCalled[1].currentPosition.y).toBe(12.5);
         expect(testCallback.pressCalled[1].index).toBe(2);
         
         touchB.clientY = 30;
@@ -121,8 +121,8 @@ describe('CanvasResizer', function() {
         expect(testCallback.pressCalled.length).toBe(2);
         expect(testCallback.releaseCalled.length).toBe(0);
         expect(testCallback.moveCalled.length).toBe(1);
-        expect(testCallback.moveCalled[0].current.x).toBe(5.5);
-        expect(testCallback.moveCalled[0].current.y).toBe(10.5);
+        expect(testCallback.moveCalled[0].currentPosition.x).toBe(5.5);
+        expect(testCallback.moveCalled[0].currentPosition.y).toBe(10.5);
         expect(testCallback.moveCalled[0].index).toBe(2);
         
         touchA.clientX = undefined;
@@ -136,8 +136,8 @@ describe('CanvasResizer', function() {
         expect(testCallback.pressCalled.length).toBe(2);
         expect(testCallback.releaseCalled.length).toBe(1);
         expect(testCallback.moveCalled.length).toBe(1);
-        expect(testCallback.releaseCalled[0].current.x).toBe(5.5);
-        expect(testCallback.releaseCalled[0].current.y).toBe(5.5);
+        expect(testCallback.releaseCalled[0].currentPosition.x).toBe(5.5);
+        expect(testCallback.releaseCalled[0].currentPosition.y).toBe(5.5);
         expect(testCallback.releaseCalled[0].index).toBe(1);
         
         // Test that a touch event with a new identifier takes over the index previously used by 'a'
@@ -154,8 +154,8 @@ describe('CanvasResizer', function() {
         expect(testCallback.pressCalled.length).toBe(3);
         expect(testCallback.releaseCalled.length).toBe(1);
         expect(testCallback.moveCalled.length).toBe(1);
-        expect(testCallback.pressCalled[2].current.x).toBe(10.5);
-        expect(testCallback.pressCalled[2].current.y).toBe(5.5);
+        expect(testCallback.pressCalled[2].currentPosition.x).toBe(10.5);
+        expect(testCallback.pressCalled[2].currentPosition.y).toBe(5.5);
         expect(testCallback.pressCalled[2].index).toBe(1);
         
         // Test that 'a' gets a different index now that 'c' has taken over its old index.
@@ -170,8 +170,8 @@ describe('CanvasResizer', function() {
         expect(testCallback.pressCalled.length).toBe(4);
         expect(testCallback.releaseCalled.length).toBe(1);
         expect(testCallback.moveCalled.length).toBe(1);
-        expect(testCallback.pressCalled[3].current.x).toBe(13.5);
-        expect(testCallback.pressCalled[3].current.y).toBe(13.5);
+        expect(testCallback.pressCalled[3].currentPosition.x).toBe(13.5);
+        expect(testCallback.pressCalled[3].currentPosition.y).toBe(13.5);
         expect(testCallback.pressCalled[3].index).toBe(3);
     });
 });
