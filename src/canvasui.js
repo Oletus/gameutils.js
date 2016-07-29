@@ -27,26 +27,38 @@ GJS.CanvasUI.prototype.update = function(deltaTime) {
 /**
  * Render the UI.
  * @param {CanvasRenderingContext2D} ctx The canvas rendering context to use.
+ * @param {function=} matchFunc Set this to only render the matching elements. By default all elements are rendered.
  */
-GJS.CanvasUI.prototype.render = function(ctx) {
+GJS.CanvasUI.prototype.render = function(ctx, matchFunc) {
+    var activeCursors = this._getActiveCursors();
+    var draggedElements = [];
+    var i;
+    for (i = 0; i < this.uiElements.length; ++i) {
+        if (matchFunc === undefined || matchFunc(this.uiElements[i])) {
+            if (!this.uiElements[i].dragged) {
+                this.uiElements[i].render(ctx, activeCursors);
+            } else {
+                draggedElements.push(this.uiElements[i]);
+            }
+        }
+    }
+    for (i = 0; i < draggedElements.length; ++i) {
+        draggedElements[i].render(ctx, activeCursors);
+    }
+};
+
+/**
+ * @return {Array.<Object>} Active cursors.
+ * @protected
+ */
+GJS.CanvasUI.prototype._getActiveCursors = function() {
     var activeCursors = [];
     for (var i = 0; i < this.cursors.length; ++i) {
         if (this.cursors[i].active) {
             activeCursors.push(this.cursors[i]);
         }
     }
-    var draggedElements = [];
-    var i;
-    for (i = 0; i < this.uiElements.length; ++i) {
-        if (!this.uiElements[i].dragged) {
-            this.uiElements[i].render(ctx, activeCursors);
-        } else {
-            draggedElements.push(this.uiElements[i]);
-        }
-    }
-    for (i = 0; i < draggedElements.length; ++i) {
-        draggedElements[i].render(ctx, activeCursors);
-    }
+    return activeCursors;
 };
 
 /**
@@ -126,6 +138,13 @@ GJS.CanvasUICursor.prototype.setPosition = function(pos) {
     if (this.dragging) {
         this.downButton.draggedX = this.downButton.centerX + (this.x - this.dragStartX);
         this.downButton.draggedY = this.downButton.centerY + (this.y - this.dragStartY);
+    } else if (this.downButton) {
+        var hit = this.downButton.hitTest(this.x, this.y);
+        if (!hit) {
+            this.downButton.release(false);
+        } else {
+            this.downButton.down();
+        }
     }
 };
 
@@ -205,7 +224,7 @@ GJS.CanvasUIElement = function(options) {
     var defaults = {
         label: 'Button',
         labelFunc: null, // Function that returns the current text to draw on the element. Overrides label if set.
-        renderFunc: null,
+        renderFunc: null, // Function to draw the element. Takes CanvasRenderingContext2D, CanvasUIElement, cursorOver (boolean), pressedExtent (0 to 1)
         centerX: 0,
         centerY: 0,
         width: 100,
@@ -213,10 +232,12 @@ GJS.CanvasUIElement = function(options) {
         clickCallback: null, // Function that is called when the UI element is clicked or tapped.
         dragTargetCallback: null, // Called when something is dragged onto this object, with the dragged object as parameter.
         draggedObjectFunc: null, // Function that returns the dragged object associated with this UI element.
-        active: true, // Active elements are visible and can be interacted with. Inactive elements can't be interacted with.
+        active: true, // Active elements are visible and can be interacted with. Inactive elements are invisible and can't be interacted with.
         draggable: false,
         fontSize: 20, // In pixels
         font: GJS.CanvasUI.defaultFont,
+        pressSpeed: GJS.CanvasUIElement.defaultPressSpeed,
+        depressSpeed: GJS.CanvasUIElement.defaultDepressSpeed,
         appearance: undefined // One of GJS.CanvasUIElement.Appearance. By default the appearance is a button if the element has a clickCallback.
     };
     for(var key in defaults) {
@@ -247,6 +268,12 @@ GJS.CanvasUIElement.Appearance = {
 };
 
 /**
+ * Visual press/depress speed that affects how fast pressedExtent changes for the element.
+ */
+GJS.CanvasUIElement.defaultPressSpeed = 8.0;
+GJS.CanvasUIElement.defaultDepressSpeed = 3.0;
+
+/**
  * Update UI element state and animations.
  * @param {number} deltaTime Time passed since the last update in seconds.
  */
@@ -263,18 +290,19 @@ GJS.CanvasUIElement.prototype.render = function(ctx, cursors) {
     if (!this.active) {
         return;
     }
-    var pressedExtent = this.isDown ? (this.time - this.lastDownTime) * 8.0 : 1.0 - (this.time - this.lastUpTime) * 3.0;
+    var pressedExtent = this.isDown ? (this.time - this.lastDownTime) * this.pressSpeed
+                                    : 1.0 - (this.time - this.lastUpTime) * this.depressSpeed;
     pressedExtent = mathUtil.clamp(0, 1, pressedExtent);
-    var cursorOn = false;
+    var cursorOver = false;
     for (var i = 0; i < cursors.length; ++i) {
         var cursor = cursors[i];
         if (cursor.active && this.hitTest(cursor.x, cursor.y)) {
-            cursorOn = true;
+            cursorOver = true;
         }
     }
 
     if (this.renderFunc !== null) {
-        this.renderFunc(ctx, this, cursorOn, pressedExtent);
+        this.renderFunc(ctx, this, cursorOver, pressedExtent);
         return;
     }
 
@@ -283,7 +311,7 @@ GJS.CanvasUIElement.prototype.render = function(ctx, cursors) {
         ctx.fillStyle = '#000';
         if (pressedExtent > 0) {
             ctx.globalAlpha = 1.0 - pressedExtent * 0.2;
-        } else if (cursorOn) {
+        } else if (cursorOver) {
             ctx.globalAlpha = 1.0;
         } else {
             ctx.globalAlpha = 0.5;
@@ -372,8 +400,10 @@ GJS.CanvasUIElement.prototype.getRect = function() {
  * Mark the element as down, for visual purposes only.
  */
 GJS.CanvasUIElement.prototype.down = function() {
-    this.isDown = true;
-    this.lastDownTime = this.time;
+    if (!this.isDown) {
+        this.isDown = true;
+        this.lastDownTime = this.time;
+    }
 };
 
 /**
@@ -381,8 +411,10 @@ GJS.CanvasUIElement.prototype.down = function() {
  * @param {boolean} clicked True when clicked, false when the cursor position has left the area of the element.
  */
 GJS.CanvasUIElement.prototype.release = function(clicked) {
-    this.isDown = false;
-    this.lastUpTime = this.time;
+    if (this.isDown) {
+        this.isDown = false;
+        this.lastUpTime = this.time;
+    }
     if (!clicked || !this.canClick()) {
         return;
     }
