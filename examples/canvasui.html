@@ -10,7 +10,7 @@
 var ctx;
 var tester;
 
-GJS.CanvasUI.defaultFont = 'monospace';
+GJS.CanvasUIElement.defaultFont = 'monospace';
 
 var Tester = function(canvas) {
     this.time = 0;
@@ -71,7 +71,7 @@ var Tester = function(canvas) {
         height: 70,
         label: 'Custom button',
         clickCallback: function() { console.log('custom clicked!') },
-        renderFunc: function(ctx, button, cursorOver, pressedExtent) {
+        renderFunc: function(ctx, button, cursorOver, pressedExtent, label) {
             ctx.beginPath();
             ctx.arc(button.visualX(), button.visualY(), 50, 0, Math.PI * 2);
             ctx.globalAlpha = 1.0;

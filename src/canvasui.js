@@ -129,8 +129,7 @@ GJS.CanvasUICursor = function(ui) {
 
 /**
  * Set the cursor position.
- * @param {Object|Vec2} vec New position to set. Needs to have x and y coordinates. Relative to the canvas coordinate
- * space.
+ * @param {Vec2} vec New position to set. Relative to the canvas coordinate space.
  */
 GJS.CanvasUICursor.prototype.setPosition = function(pos) {
     this.x = pos.x;
@@ -140,6 +139,9 @@ GJS.CanvasUICursor.prototype.setPosition = function(pos) {
         this.downButton.draggedY = this.downButton.centerY + (this.y - this.dragStartY);
     } else if (this.downButton) {
         var hit = this.downButton.hitTest(this.x, this.y);
+        if (this.downButton.moveWhenDownCallback !== null) {
+            this.downButton.moveWhenDownCallback(this.downButton, pos);
+        }
         if (!hit) {
             this.downButton.release(false);
         } else {
@@ -205,16 +207,6 @@ GJS.CanvasUICursor.prototype.release = function(pos) {
 };
 
 /**
- * The default font for UI elements.
- */
-GJS.CanvasUI.defaultFont = 'sans-serif';
-
-/**
- * Minimum interval between clicks on the same button in seconds.
- */
-GJS.CanvasUI.minimumClickInterval = 0.5;
-
-/**
  * A single UI element to draw on a canvas, typically either a button or a label.
  * Will be rendered with text by default, but can also be drawn with a custom rendering function renderFunc.
  * @param {Object} options Options for the UI element.
@@ -224,21 +216,19 @@ GJS.CanvasUIElement = function(options) {
     var defaults = {
         label: 'Button',
         labelFunc: null, // Function that returns the current text to draw on the element. Overrides label if set.
-        renderFunc: null, // Function to draw the element. Takes CanvasRenderingContext2D, CanvasUIElement, cursorOver (boolean), pressedExtent (0 to 1)
+        renderFunc: GJS.CanvasUIElement.defaultRenderFunc, // Function to draw the element. Takes CanvasRenderingContext2D, CanvasUIElement, cursorOver (boolean), pressedExtent (0 to 1), label (string)
         centerX: 0,
         centerY: 0,
         width: 100,
         height: 50,
         clickCallback: null, // Function that is called when the UI element is clicked or tapped.
+        moveWhenDownCallback: null, // Function that is called while the cursor is moved when the element is down. Takes CanvasUIElement, cursor position (Vec2).
         dragTargetCallback: null, // Called when something is dragged onto this object, with the dragged object as parameter.
         draggedObjectFunc: null, // Function that returns the dragged object associated with this UI element.
         active: true, // Active elements are visible and can be interacted with. Inactive elements are invisible and can't be interacted with.
         draggable: false,
-        fontSize: 20, // In pixels
-        font: GJS.CanvasUI.defaultFont,
         pressSpeed: GJS.CanvasUIElement.defaultPressSpeed,
-        depressSpeed: GJS.CanvasUIElement.defaultDepressSpeed,
-        appearance: undefined // One of GJS.CanvasUIElement.Appearance. By default the appearance is a button if the element has a clickCallback.
+        depressSpeed: GJS.CanvasUIElement.defaultDepressSpeed
     };
     for(var key in defaults) {
         if (!options.hasOwnProperty(key)) {
@@ -253,25 +243,66 @@ GJS.CanvasUIElement = function(options) {
     this.time = 0.5;
     this.isDown = false;
     this.lastClick = 0;
-    if (this.appearance === undefined) {
-        if (this.clickCallback !== null) {
-            this.appearance = GJS.CanvasUIElement.Appearance.BUTTON;
-        } else {
-            this.appearance = GJS.CanvasUIElement.Appearance.LABEL;
-        }
-    }
+    this.lastDownTime = -1;
+    this.lastUpTime = -1;
 };
 
-GJS.CanvasUIElement.Appearance = {
-    BUTTON: 0,
-    LABEL: 1
-};
+/**
+ * Minimum interval between clicks on the same button in seconds.
+ */
+GJS.CanvasUIElement.minimumClickInterval = 0.5;
 
 /**
  * Visual press/depress speed that affects how fast pressedExtent changes for the element.
  */
 GJS.CanvasUIElement.defaultPressSpeed = 8.0;
 GJS.CanvasUIElement.defaultDepressSpeed = 3.0;
+
+/**
+ * The default font for UI elements used in defaultRenderFunc.
+ */
+GJS.CanvasUIElement.defaultFont = 'sans-serif';
+
+/**
+ * Font size used by defaultRenderFunc in px.
+ */
+GJS.CanvasUIElement.defaultFontSize = 20;
+
+/**
+ * Default render function.
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {GJS.CanvasUIElement} element
+ * @param {boolean} cursorOver
+ * @param {number} pressedExtent Between 0 and 1. 1 means fully pressed.
+ * @param {string} label
+ */
+GJS.CanvasUIElement.defaultRenderFunc = function(ctx, element, cursorOver, pressedExtent, label) {
+    var isButton = element.clickCallback !== null;
+
+    if (isButton) {
+        var rect = element.getRect();
+        ctx.fillStyle = '#000';
+        if (pressedExtent > 0) {
+            ctx.globalAlpha = 1.0 - pressedExtent * 0.2;
+        } else if (cursorOver) {
+            ctx.globalAlpha = 1.0;
+        } else {
+            ctx.globalAlpha = 0.5;
+        }
+        ctx.fillRect(rect.left, rect.top, rect.width(), rect.height());
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = '#fff';
+        if (!element.canClick()) {
+            ctx.globalAlpha *= 0.6;
+        }
+        ctx.strokeRect(rect.left, rect.top, rect.width(), rect.height());
+    }
+    ctx.globalAlpha = 1.0;
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#fff';
+    ctx.font = GJS.CanvasUIElement.defaultFontSize + 'px ' + GJS.CanvasUIElement.defaultFont;
+    ctx.fillText(label, element.centerX, element.centerY + 7);
+};
 
 /**
  * Update UI element state and animations.
@@ -301,38 +332,12 @@ GJS.CanvasUIElement.prototype.render = function(ctx, cursors) {
         }
     }
 
-    if (this.renderFunc !== null) {
-        this.renderFunc(ctx, this, cursorOver, pressedExtent);
-        return;
-    }
-
-    if (this.appearance === GJS.CanvasUIElement.Appearance.BUTTON) {
-        var rect = this.getRect();
-        ctx.fillStyle = '#000';
-        if (pressedExtent > 0) {
-            ctx.globalAlpha = 1.0 - pressedExtent * 0.2;
-        } else if (cursorOver) {
-            ctx.globalAlpha = 1.0;
-        } else {
-            ctx.globalAlpha = 0.5;
-        }
-        ctx.fillRect(rect.left, rect.top, rect.width(), rect.height());
-        ctx.lineWidth = 3;
-        ctx.strokeStyle = '#fff';
-        if (!this.canClick()) {
-            ctx.globalAlpha *= 0.6;
-        }
-        ctx.strokeRect(rect.left, rect.top, rect.width(), rect.height());
-    }
-    ctx.globalAlpha = 1.0;
-    ctx.textAlign = 'center';
-    ctx.fillStyle = '#fff';
-    ctx.font = this.fontSize + 'px ' + this.font;
     var label = this.label;
-    if (this.labelFunc) {
+    if (this.labelFunc !== null) {
         label = this.labelFunc();
     }
-    ctx.fillText(label, this.centerX, this.centerY + 7);
+
+    this.renderFunc(ctx, this, cursorOver, pressedExtent, label);
 };
 
 /**
@@ -372,7 +377,7 @@ GJS.CanvasUIElement.prototype.isDragged = function() {
  * @return {boolean} Whether the coordinate is within the area of the element.
  */
 GJS.CanvasUIElement.prototype.hitTest = function(x, y) {
-    if (this.clickCallback !== null) {
+    if (this.clickCallback !== null || this.moveWhenDownCallback !== null) {
         return this.getRect().containsVec2(new Vec2(x, y));
     }
     return false;
@@ -384,9 +389,12 @@ GJS.CanvasUIElement.prototype.hitTest = function(x, y) {
  */
 GJS.CanvasUIElement.prototype.canClick = function() {
     var sinceClicked = this.time - this.lastClick;
-    return sinceClicked >= GJS.CanvasUI.minimumClickInterval;
+    return sinceClicked >= GJS.CanvasUIElement.minimumClickInterval;
 };
 
+/**
+ * @return {Rect} Rectangle of the element centered around its centerX, centerY.
+ */
 GJS.CanvasUIElement.prototype.getRect = function() {
     return new Rect(
         this.centerX - this.width * 0.5,
