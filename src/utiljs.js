@@ -307,7 +307,7 @@ GJS.isFullscreen = function() {
  * @return {number} Changed value.
  */
 GJS.towardsZero = function(value, delta) {
-    return towardsValue(value, 0, delta);
+    return GJS.towardsValue(value, 0, delta);
 };
 
 /**
