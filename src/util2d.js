@@ -1200,7 +1200,7 @@ var Polygon = function(vertices) {
 };
 
 /**
- * @param {Vec2} vec2 Vector to test.
+ * @param {Vec2} vec Vector to test.
  * @return {boolean} True if the vector is inside the polygon.
  */
 Polygon.prototype.containsVec2 = function(vec) {

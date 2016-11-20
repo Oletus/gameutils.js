@@ -364,8 +364,7 @@ GJS.Particle.RotationMode = {
 /**
  * Appearance that uses the GJS.Sprite class from gameutils.js
  * @param {GJS.Sprite} sprite GJS.Sprite to draw.
- * @param {number=} scaleMultiplier Scale multiplier for all the sprites. Useful for example if you run the particle
- * engine in a game world's coordinate system which has different scale compared to the canvas.
+ * @param {Object} options Appearence options.
  * @return {function} An appearance function that draws the sprite centered on the particle position.
  */
 GJS.Particle.spriteAppearance = function(sprite, options) {
@@ -414,7 +413,7 @@ GJS.Particle.spriteAppearance = function(sprite, options) {
  * @param {string} color CSS color string for the circle.
  * @param {number} resolution Resolution of the sprite to create in pixels. Will not affect the size of the particle
  * when drawing.
- * @param {number=} size Size of the prerendered circle as drawn.
+ * @param {Object} options Appearence options.
  */
 GJS.Particle.prerenderedCircleAppearance = function(color, resolution, options) {
     if (color === undefined) {

@@ -116,7 +116,7 @@ GJS.InputMapper.prototype.getPlayerIndex = function(controllerType, controllerIn
 
 /**
  * @param {number} gamepadButton A button from GJS.Gamepad.BUTTONS
- * @param {Array} keyboardBindings List of bindings for different players, for example ['up', 'w']
+ * @param {Array} keyboardButtons List of bindings for different players, for example ['up', 'w']
  * @param {function=} downCallback Callback when the button is pressed down, that takes a player number as a parameter.
  * @param {function=} upCallback Callback when the button is released, that takes a player number as a parameter.
  */
@@ -246,7 +246,7 @@ GJS.InputMapper.prototype.cycleDefaultControllerForInstruction = function() {
 };
 
 /**
- * @param {playerIndex} index of the player to return information for.
+ * @param {number} playerIndex Index of the player to return information for.
  * @return {string} String containing an URL for an icon representing the controller the player is using.
  */
 GJS.InputMapper.prototype.getControllerIconURL = function(playerIndex) {
@@ -262,8 +262,8 @@ GJS.InputMapper.prototype.getControllerIconURL = function(playerIndex) {
  * Get instruction for a key. Prioritizes gamepad over keyboard if keyboard hasn't been used. If you want to change the
  * controller which is prioritized, call cycleDefaultControllerForInstruction().
  * @param {function} callback A callback that has been previously attached to a button.
- * @param {playerIndex} index of the player to return information for. Set to undefined if the listener doesn't care
- * about the player number.
+ * @param {number} playerIndex Index of the player to return information for. Set to undefined if the listener doesn't
+ * care about the player number.
  * @return {string} String identifying the button for the player.
  */
 GJS.InputMapper.prototype.getKeyInstruction = function(callback, playerIndex) {

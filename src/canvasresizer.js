@@ -436,7 +436,7 @@ GJS.CanvasResizer.prototype._getCanvasBoundingClientRect = function() {
 /**
  * Get a canvas coordinate space position from a given event. The coordinate
  * space is relative to the width and height properties of the canvas.
- * @param {MouseEvent|PointerEvent|TouchEvent} Event to get the position from.
+ * @param {MouseEvent|PointerEvent|TouchEvent} event Event to get the position from.
  * In case of a touch event, the position is retrieved from the first touch
  * point.
  * @param {string=} touchIdentifier In case the event is a touch event, the
