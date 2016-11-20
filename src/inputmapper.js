@@ -245,13 +245,26 @@ GJS.InputMapper.prototype.cycleDefaultControllerForInstruction = function() {
     }
 };
 
+GJS.InputMapper.prototype._getInstructionController = function(playerIndex) {
+    var controller;
+    if (playerIndex !== undefined && this.players.length > playerIndex) {
+        if (this.players[playerIndex].length > 0) {
+            controller = this._getLastUsedController(this.players[playerIndex]);
+        } else {
+            // GJS.Gamepad instructions by default
+            controller = this._defaultController;
+        }
+    }
+    return controller;
+};
+
 /**
  * @param {number} playerIndex Index of the player to return information for.
  * @return {string} String containing an URL for an icon representing the controller the player is using.
  */
 GJS.InputMapper.prototype.getControllerIconURL = function(playerIndex) {
     var controller = this._getInstructionController(playerIndex);
-    if (controller.controllerType === InputMapper.GAMEPAD) {
+    if (controller.controllerType === GJS.InputMapper.GAMEPAD) {
         return GJS.InputMapper.gamepadIconURL;
     } else {
         return GJS.InputMapper.keyboardIconURL;
@@ -267,15 +280,7 @@ GJS.InputMapper.prototype.getControllerIconURL = function(playerIndex) {
  * @return {string} String identifying the button for the player.
  */
 GJS.InputMapper.prototype.getKeyInstruction = function(callback, playerIndex) {
-    var controller;
-    if (playerIndex !== undefined && this.players.length > playerIndex) {
-        if (this.players[playerIndex].length > 0) {
-            controller = this._getLastUsedController(this.players[playerIndex]);
-        } else {
-            // GJS.Gamepad instructions by default
-            controller = this._defaultController;
-        }
-    }
+    var controller = this._getInstructionController(playerIndex);
     var returnStr = [];
     for (var i = 0; i < this.callbacks.length; ++i) {
         var cbInfo = this.callbacks[i];
