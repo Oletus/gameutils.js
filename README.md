@@ -32,8 +32,12 @@ To install:
 * Install [node.js](https://nodejs.org/en/)
 * Install [ffmpeg](https://www.ffmpeg.org/) and add it to PATH
 * Run **npm install** in the directory where package.json is.
+* To use web2exe - install [web2exe Windows release](https://github.com/jyapayne/Web2Executable) and add it to PATH (tested with v0.5.4b Web2ExeWin-CMD)
 
 Things you can do with the tools (note: use **cmd** for this on Windows, NOT GitHub for Windows shell):
 
 * **gulp ogg2mp3** - convert all ogg files under assets/audio to mp3.
 * **gulp mp32ogg** - convert all mp3 files under assets/audio to ogg.
+* **gulp compile** - compile the project as minified under out/js.
+* **gulp compile_js** - same as above, but process only JS, not assets. Good for incremental updates.
+* **gulp web2exe** - convert index.html to exe
