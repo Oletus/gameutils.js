@@ -9,6 +9,8 @@ var insert = require('gulp-insert');
 var ffmpeg = require('gulp-fluent-ffmpeg');
 var path = require('path');
 
+var argv = require('yargs').argv;
+
 var packageJson = require('./package.json');
 
 var sourceIndex = 'index.html';
@@ -148,5 +150,84 @@ gulp.task('mp32ogg', function () {
     }))
     .pipe(gulp.dest('assets/audio/'));
 });
+
+/* --------------------------------------------------------------------------------------------- */
+
+// TODO: Would be nice if these dependency tasks could be hidden from the user somehow.
+
+// TODO: Create package.json and copy gulpfile to game created from template.
+
+var checkValidGameName = function(name) {
+    if (name === undefined) {
+        console.log('usage: gulp game-from-template --name <game name>');
+        return false;
+    } else if (name === 'out' || name === 'assets' || name === 'src' || name === 'tools' || name === 'unit_tests' || name === 'examples' || name === 'node_modules') {
+        console.log('--name parameter is reserved and can not be used!');
+        return false;
+    }
+    return true;
+};
+
+var mkdirIfDoesntExist = function(dir) {
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir);
+    }
+}
+
+gulp.task('create-template-dirs', function(callback) {
+    var gameName = argv.name;
+    if (!checkValidGameName(gameName)) {
+        return;
+    }
+    mkdirIfDoesntExist('./' + gameName + '/assets/');
+    mkdirIfDoesntExist('./' + gameName + '/assets/audio/');
+    mkdirIfDoesntExist('./' + gameName + '/assets/gfx/');
+    mkdirIfDoesntExist('./' + gameName + '/assets/models/');
+    callback();
+});
+
+gulp.task('copy-useful-example-assets', function() {
+    var gameName = argv.name;
+    if (!checkValidGameName(gameName)) {
+        return;
+    }
+    return gulp.src('./examples/assets/gfx/bitmapfont*')
+    .pipe(gulp.dest('./' + gameName + '/assets/gfx/'));
+});
+
+var copyTemplateFn = function(templateName) {
+    return function() {
+        var gameName = argv.name;
+        if (!checkValidGameName(gameName)) {
+            return;
+        }
+        return gulp.src(templateName)
+        .pipe(rename('index.html'))
+        .pipe(gulp.dest('./' + gameName + '/'));
+    };
+};
+
+gulp.task('copy-template', copyTemplateFn('game-template.html'));
+gulp.task('copy-template-threejs', copyTemplateFn('game-threejs-template.html'));
+
+var copySrcToGame = function() {
+    var gameName = argv.name;
+    if (!checkValidGameName(gameName)) {
+        return;
+    }
+    console.log(gameName);
+    return gulp.src('./src/**/*')
+    .pipe(gulp.dest('./' + gameName + '/src/'));
+};
+
+gulp.task('game-from-template',
+    ['copy-template', 'copy-useful-example-assets', 'create-template-dirs'],
+    copySrcToGame
+);
+
+gulp.task('game-from-threejs-template',
+    ['copy-template-threejs', 'copy-useful-example-assets', 'create-template-dirs'],
+    copySrcToGame
+);
 
 gulp.task('default', ['web2exe']);
