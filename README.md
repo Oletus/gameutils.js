@@ -31,10 +31,17 @@ To install:
 
 * Install [node.js](https://nodejs.org/en/)
 * Install [ffmpeg](https://www.ffmpeg.org/) and add it to PATH
-* Run **npm install** in the directory where package.json is.
 * To use web2exe - install [web2exe Windows release](https://github.com/jyapayne/Web2Executable) and add it to PATH (tested with v0.5.4b Web2ExeWin-CMD)
+* Run **npm install** in the directory where package.json is.
 
-Things you can do with the tools (note: use **cmd** for this on Windows, NOT GitHub for Windows shell):
+Note: use **cmd** for running gulp commands on Windows, NOT GitHub for Windows shell:
+
+To start a game project (it will be created in a new folder under gameutils.js):
+
+* **gulp game-from-template --name <game name>** - create a game based on the basic template.
+* **gulp game-from-threejs-template --name <game name>** - create a game based on the three.js template.
+
+Things you can do with the tools for a game project:
 
 * **gulp ogg2mp3** - convert all ogg files under assets/audio to mp3.
 * **gulp mp32ogg** - convert all mp3 files under assets/audio to ogg.
