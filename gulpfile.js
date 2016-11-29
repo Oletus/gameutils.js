@@ -57,8 +57,13 @@ var copyUsefulExampleAssets = function(gameName) {
     });
 };
 
-var copyGulpFileTemplate = function(gameName) {
-    ncp('./tools/gulpfile-template.js', './' + gameName + '/gulpfile.js', function(err) {
+var copyTemplateFiles = function(gameName) {
+    ncp('./tools/template-files/gulpfile.js', './' + gameName + '/gulpfile.js', function(err) {
+        if (err) {
+            return console.error(err);
+        }
+    });
+    ncp('./tools/template-files/gitignore.txt', './' + gameName + '/.gitignore', function(err) {
         if (err) {
             return console.error(err);
         }
@@ -73,7 +78,7 @@ gulp.task('init-game-from-template', function(callback) {
     createTemplateDirs(gameName);
     copyPackageJSON(gameName);
     copyUsefulExampleAssets(gameName);
-    copyGulpFileTemplate(gameName);
+    copyTemplateFiles(gameName);
     callback();
 });
 
