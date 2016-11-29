@@ -210,6 +210,21 @@ var copyTemplateFn = function(templateName) {
 gulp.task('copy-template', copyTemplateFn('game-template.html'));
 gulp.task('copy-template-threejs', copyTemplateFn('game-threejs-template.html'));
 
+gulp.task('copy-package-json', function(callback) {
+    var gameName = argv.name;
+    if (!checkValidGameName(gameName)) {
+        return;
+    }
+    packageJsonCopy = JSON.parse(JSON.stringify(packageJson));
+    packageJsonCopy.name = gameName;
+    packageJsonCopy.version = '0.1';
+    packageJsonCopy.description = 'Game project created using gameutils.js';
+    delete packageJsonCopy.repository;
+    delete packageJsonCopy.license;
+    fs.writeFileSync('./' + gameName + '/package.json', JSON.stringify(packageJsonCopy, null, 2));
+    callback();
+});
+
 var copySrcToGame = function() {
     var gameName = argv.name;
     if (!checkValidGameName(gameName)) {
@@ -221,12 +236,12 @@ var copySrcToGame = function() {
 };
 
 gulp.task('game-from-template',
-    ['copy-template', 'copy-useful-example-assets', 'create-template-dirs'],
+    ['copy-template', 'copy-useful-example-assets', 'copy-package-json', 'create-template-dirs'],
     copySrcToGame
 );
 
 gulp.task('game-from-threejs-template',
-    ['copy-template-threejs', 'copy-useful-example-assets', 'create-template-dirs'],
+    ['copy-template-threejs', 'copy-useful-example-assets', 'copy-package-json', 'create-template-dirs'],
     copySrcToGame
 );
 
