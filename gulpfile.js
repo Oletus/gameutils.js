@@ -8,6 +8,7 @@ var shell = require('gulp-shell')
 var insert = require('gulp-insert');
 var ffmpeg = require('gulp-fluent-ffmpeg');
 var path = require('path');
+var ncp = require('ncp');
 
 var argv = require('yargs').argv;
 
@@ -172,27 +173,48 @@ var mkdirIfDoesntExist = function(dir) {
     if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir);
     }
-}
+};
 
-gulp.task('create-template-dirs', function(callback) {
-    var gameName = argv.name;
-    if (!checkValidGameName(gameName)) {
-        return;
-    }
+var createTemplateDirs = function(gameName) {
+    mkdirIfDoesntExist('./' + gameName + '/');
     mkdirIfDoesntExist('./' + gameName + '/assets/');
     mkdirIfDoesntExist('./' + gameName + '/assets/audio/');
     mkdirIfDoesntExist('./' + gameName + '/assets/gfx/');
     mkdirIfDoesntExist('./' + gameName + '/assets/models/');
-    callback();
-});
+};
 
-gulp.task('copy-useful-example-assets', function() {
+var copyPackageJSON = function(gameName) {
+    packageJsonCopy = JSON.parse(JSON.stringify(packageJson));
+    packageJsonCopy.name = gameName;
+    packageJsonCopy.version = '0.1';
+    packageJsonCopy.description = 'Game project created using gameutils.js';
+    delete packageJsonCopy.repository;
+    delete packageJsonCopy.license;
+    fs.writeFileSync('./' + gameName + '/package.json', JSON.stringify(packageJsonCopy, null, 2));
+};
+
+var copyUsefulExampleAssets = function(gameName) {
+    ncp('./examples/assets/gfx/bitmapfont-medium.png', './' + gameName + '/assets/gfx/bitmapfont-medium.png', function(err) {
+        if (err) {
+            return console.error(err);
+        }
+    });
+    ncp('./examples/assets/gfx/bitmapfont-tiny.png', './' + gameName + '/assets/gfx/bitmapfont-tiny.png', function(err) {
+        if (err) {
+            return console.error(err);
+        }
+    });
+};
+
+gulp.task('init-game-from-template', function(callback) {
     var gameName = argv.name;
     if (!checkValidGameName(gameName)) {
         return;
     }
-    return gulp.src('./examples/assets/gfx/bitmapfont*')
-    .pipe(gulp.dest('./' + gameName + '/assets/gfx/'));
+    createTemplateDirs(gameName);
+    copyPackageJSON(gameName);
+    copyUsefulExampleAssets(gameName);
+    callback();
 });
 
 var copyTemplateFn = function(templateName) {
@@ -210,21 +232,6 @@ var copyTemplateFn = function(templateName) {
 gulp.task('copy-template', copyTemplateFn('game-template.html'));
 gulp.task('copy-template-threejs', copyTemplateFn('game-threejs-template.html'));
 
-gulp.task('copy-package-json', function(callback) {
-    var gameName = argv.name;
-    if (!checkValidGameName(gameName)) {
-        return;
-    }
-    packageJsonCopy = JSON.parse(JSON.stringify(packageJson));
-    packageJsonCopy.name = gameName;
-    packageJsonCopy.version = '0.1';
-    packageJsonCopy.description = 'Game project created using gameutils.js';
-    delete packageJsonCopy.repository;
-    delete packageJsonCopy.license;
-    fs.writeFileSync('./' + gameName + '/package.json', JSON.stringify(packageJsonCopy, null, 2));
-    callback();
-});
-
 var copySrcToGame = function() {
     var gameName = argv.name;
     if (!checkValidGameName(gameName)) {
@@ -236,12 +243,12 @@ var copySrcToGame = function() {
 };
 
 gulp.task('game-from-template',
-    ['copy-template', 'copy-useful-example-assets', 'copy-package-json', 'create-template-dirs'],
+    ['copy-template', 'init-game-from-template'],
     copySrcToGame
 );
 
 gulp.task('game-from-threejs-template',
-    ['copy-template-threejs', 'copy-useful-example-assets', 'copy-package-json', 'create-template-dirs'],
+    ['copy-template-threejs', 'init-game-from-template'],
     copySrcToGame
 );
 
