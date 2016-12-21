@@ -158,6 +158,15 @@ GJS.AnimatedSpriteInstance.prototype.update = function(deltaTime) {
 };
 
 /**
+ * Set the animation finished callback.
+ * @param {function(string)} callback A callback to execute when an animation has finished. Can be used to
+ * switch to a different animation, for example. Takes the finished animation key as a parameter.
+ */
+GJS.AnimatedSpriteInstance.prototype.setFinishedAnimationCallback = function(callback) {
+    this.finishedAnimationCallback = callback;
+};
+
+/**
  * Scrub the animation backwards or forwards.
  * @param {number} deltaTime Amount to scrub by.
  */
