@@ -29,6 +29,7 @@ GJS.StateMachine = function(options) {
         }
     }
     this.time = 0;
+    this.lifeTime = 0;
 };
 
 /**
@@ -45,4 +46,13 @@ GJS.StateMachine.prototype.change = function(newStateId) {
  */
 GJS.StateMachine.prototype.update = function(deltaTime) {
     this.time += deltaTime;
+    this.lifeTime += deltaTime;
+};
+
+/**
+ * Return amount of time passed since this.lifeTime was lifeTime.
+ * @param {number} lifeTime Timestamp to compare against.
+ */
+GJS.StateMachine.prototype.timeSince = function(lifeTime) {
+    return this.lifeTime - lifeTime;
 };
