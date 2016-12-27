@@ -62,7 +62,7 @@ var start = function() {
     // Pass the game to GJS.LoadingBar since in this example the Game class
     // implements loadedFraction().
     game.loadingBar = new GJS.LoadingBar([game]);
-    startMainLoop([game, game.loadingBar], {debugMode: true, frameLog: true});
+    startMainLoop([game, game.loadingBar], {debugMode: true, frameLog: true, updateFPS: {min: 59, max: 121}});
 };
 </script>
 </head>

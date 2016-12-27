@@ -11,11 +11,14 @@
  *   as a parameter.
  * @param {Object} options Takes the following keys (all optional):
  *
- * updateFPS: number
+ * updateFPS: number OR Object
  *  The rate at which the game state receives update() calls.
  *  Having a fixed update rate can help you to make the game deterministic
  *  and to keep physics calculations stable.
  *  Every update is not necessarily displayed on the screen.
+ *  Alternatively an object with keys min and max, like: {min: 59, max: 121},
+ *  which will cause updates to come at variable intervals. This is more
+ *  suitable for some VR applications.
  *
  * debugMode: boolean
  *  If Mousetrap is imported, you may hold F to speed up the game
@@ -60,14 +63,26 @@ var startMainLoop = function(updateables, options) {
         }
     };
 
-    var timePerUpdate = 1000 / options.updateFPS;
+    var minUpdateFPS = 60;
+    var maxUpdateFPS = 60;
+    if (typeof options.updateFPS === 'number') {
+        minUpdateFPS = options.updateFPS;
+        maxUpdateFPS = options.updateFPS;
+    } else {
+        minUpdateFPS = options.updateFPS.min;
+        maxUpdateFPS = options.updateFPS.max;
+    }
 
-    var nextFrameTime = -1;
+    var minTimePerUpdate = 1000 / maxUpdateFPS; // In milliseconds
+    var maxTimePerUpdate = 1000 / minUpdateFPS;
+
+    var nextFrameAllowedTime = -1;
 
     var frameLog = [];
 
+    // Convert a time value to x value in log display.
     var logTimeToX = function(time, lastTime, canvasWidth) {
-        var fpsMult = Math.max(60, options.updateFPS) / 60;
+        var fpsMult = Math.max(60, maxUpdateFPS) / 60;
         return (canvasWidth - 1) - (Math.ceil(lastTime / 2000) * 2000 - time) * 0.2 * fpsMult;
     }
 
@@ -91,7 +106,7 @@ var startMainLoop = function(updateables, options) {
                     if (frameStats.updates > 1) {
                     ctx.fillStyle = '#f84';
                     for (var j = 1; j < frameStats.updates; ++j) {
-                        var updateX = logTimeToX(frameStats.time - (j - 0.5) * timePerUpdate, lastTime, w);
+                        var updateX = logTimeToX(frameStats.time - (j - 0.5) * minTimePerUpdate, lastTime, w);
                         ctx.fillRect(Math.round(updateX), 0, 2, 10);
                     }
                     ctx.fillStyle = '#0f0';
@@ -108,7 +123,7 @@ var startMainLoop = function(updateables, options) {
     var visible = true;
     var visibilityChange = function() {
         visible = document.visibilityState == document.PAGE_VISIBLE || (document.hidden === false);
-        nextFrameTime = -1;
+        nextFrameAllowedTime = -1;
         if (visible && options.onRefocus != null) {
             options.onRefocus();
         }
@@ -147,28 +162,36 @@ var startMainLoop = function(updateables, options) {
         var callbackTime = time;
         var updated = false;
         var updates = 0;
-        if (nextFrameTime < 0) {
-            nextFrameTime = time - timePerUpdate * 0.5;
+        if (nextFrameAllowedTime < 0) {
+            nextFrameAllowedTime = time - minTimePerUpdate * 0.5;
         }
         // If there's been a long time since the last callback, it can be a sign that the game
         // is running very badly but it is possible that the game has gone out of focus entirely.
         // In either case, it is reasonable to do a maximum of half a second's worth of updates
         // at once.
-        if (time - nextFrameTime > 500) {
-            nextFrameTime = time - 500;
+        if (time - nextFrameAllowedTime > 500) {
+            nextFrameAllowedTime = time - 500;
         }
-        while (time > nextFrameTime) {
-            if (fastForward) {
-                nextFrameTime += timePerUpdate / 5;
-            } else {
-                if (slowedDown) {
-                    nextFrameTime += timePerUpdate * 5;
-                } else {
-                    nextFrameTime += timePerUpdate;
+        while (time > nextFrameAllowedTime) {
+            var updateDeltaTime = minTimePerUpdate;
+            if (minUpdateFPS != maxUpdateFPS) {
+                var flexDeltaTime = time - nextFrameAllowedTime + minTimePerUpdate * 0.5;
+                if (flexDeltaTime > maxTimePerUpdate) {
+                    flexDeltaTime = maxTimePerUpdate;
+                } else if (flexDeltaTime < minTimePerUpdate) {
+                    flexDeltaTime = minTimePerUpdate;
                 }
+                updateDeltaTime = flexDeltaTime;
+            }
+            if (fastForward) {
+                nextFrameAllowedTime += updateDeltaTime / 5;
+            } else if (slowedDown) {
+                nextFrameAllowedTime += updateDeltaTime * 5;
+            } else {
+                nextFrameAllowedTime += updateDeltaTime;
             }
             for (var i = 0; i < updateables.length; ++i) {
-                updateables[i].update(timePerUpdate * 0.001);
+                updateables[i].update(updateDeltaTime * 0.001);
             }
             updates++;
         }
