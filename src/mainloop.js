@@ -34,13 +34,19 @@
  * onRefocus: function
  *  Function that should be called when the window becomes visible after it
  *  has been invisible for a while.
+ *
+ * requestAnimationFrame: function
+ *  Function that should be used as requestAnimationFrame to synchronize updates
+ *  with the display. Defaults to using window.requestAnimationFrame. Use this
+ *  to redirect to VRDisplay.requestAnimationFrame in VR applications.
  */
 var startMainLoop = function(updateables, options) {
     var defaults = {
         updateFPS: 60,
         debugMode: false,
         frameLog: false,
-        onRefocus: null
+        onRefocus: null,
+        requestAnimationFrame: null
     };
 
     if (options === undefined) {
@@ -77,6 +83,11 @@ var startMainLoop = function(updateables, options) {
     var maxTimePerUpdate = 1000 / minUpdateFPS;
 
     var nextFrameAllowedTime = -1;
+    
+    var requestAnimationFrameFunc = options.requestAnimationFrame;
+    if (requestAnimationFrameFunc === null) {
+        requestAnimationFrameFunc = window.requestAnimationFrame;
+    }
 
     var frameLog = [];
 
@@ -155,7 +166,7 @@ var startMainLoop = function(updateables, options) {
     var frame = function() {
         // Process a single requestAnimationFrame callback
         if (!visible) {
-            requestAnimationFrame(frame);
+            requestAnimationFrameFunc(frame);
             return;
         }
         var time = now();
@@ -213,7 +224,7 @@ var startMainLoop = function(updateables, options) {
                 }
             }
         }
-        requestAnimationFrame(frame);
+        requestAnimationFrameFunc(frame);
     };
     frame();
 };
