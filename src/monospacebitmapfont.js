@@ -102,3 +102,39 @@ GJS.MonospaceBitmapFont.prototype.drawText = function(ctx, string, x, y) {
     }
     ctx.restore();
 };
+
+/**
+ * Draw a string of text split in several rows. The "textAlign" property of the canvas context affects its placement.
+ * The text is split at spaces.
+ * @param {CanvasRenderingContext2D} ctx Context to draw to.
+ * @param {string} textToRender String to draw.
+ * @param {number} x Horizontal coordinate.
+ * @param {number} y Vertical coordinate of the top row.
+ * @param {number} maxRowLength Maximum length of row in characters.
+ * @param {number} rowHeight Row height in coordinates.
+ */
+GJS.MonospaceBitmapFont.prototype.drawTextInRows = function(ctx, textToRender, x, y, maxRowLength, rowHeight) {
+    var renderedRows = textToRender;
+    if (!(renderedRows instanceof Array)) {
+        if (maxRowLength < 0) {
+            renderedRows = [textToRender];
+        } else {
+            renderedRows = [];
+            var rowStartIndex = 0;
+            var spaceIndex = textToRender.indexOf(' ');
+            while (textToRender.length - rowStartIndex > maxRowLength) {
+                var prevSpaceIndex = spaceIndex;
+                while (spaceIndex - rowStartIndex < maxRowLength && spaceIndex !== -1) {
+                    prevSpaceIndex = spaceIndex;
+                    spaceIndex = textToRender.indexOf(' ', prevSpaceIndex + 1);
+                }
+                renderedRows.push(textToRender.substring(rowStartIndex, prevSpaceIndex));
+                rowStartIndex = prevSpaceIndex + 1;
+            }
+            renderedRows.push(textToRender.substring(rowStartIndex));
+        }
+    }
+    for (var i = 0; i < renderedRows.length; ++i) {
+        this.drawText(ctx, renderedRows[i], x, y + i * rowHeight);
+    }
+};
