@@ -20,10 +20,24 @@ GJS.UnlockCondition = function(options) {
  */
 GJS.UnlockCondition.prototype.initCondition = function(options) {
     var defaults = {
-        unlockId: ''
+        unlockId: '',
+        difficulty: 0  // Higher number means more difficult to unlock. Can be used to sort unlocks.
     };
     objectUtil.initWithDefaults(this, defaults, options);
     this.fulfilled = false;
+};
+
+/**
+ * Compare the difficulty of two unlock conditions.
+ */
+GJS.UnlockCondition.compareDifficulty = function(condA, condB) {
+    if (condA.difficulty < condB.difficulty) {
+        return -1;
+    } else if (condA.difficulty > condB.difficulty) {
+        return 1;
+    } else {
+        return 0;
+    }
 };
 
 /**
@@ -129,15 +143,27 @@ GJS.Unlocker.prototype.update = function(gameState, deltaTime) {
 };
 
 /**
+ * @param {string} unlockId Id of the condition to get the condition for.
+ * @return {GJS.UnlockCondition} The unlock condition or null.
+ */
+GJS.Unlocker.prototype.getCondition = function(unlockId) {
+    for (var i = 0; i < this.conditions.length; ++i) {
+        var condition = this.conditions[i];
+        if (condition.unlockId === unlockId) {
+            return condition;
+        }
+    }
+    return null;
+};
+
+/**
  * @param {string} unlockId Id of the condition to get the description for.
  * @return {string} A description of the unlock condition.
  */
 GJS.Unlocker.prototype.getDescription = function(unlockId) {
-    for (var i = 0; i < this.conditions.length; ++i) {
-        var condition = this.conditions[i];
-        if (condition.unlockId === unlockId) {
-            return condition.getDescription();
-        }
+    var condition = this.getCondition(unlockId);
+    if (condition !== null) {
+        return condition.getDescription();
     }
     return '';
 };
