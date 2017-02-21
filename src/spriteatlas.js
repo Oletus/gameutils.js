@@ -47,7 +47,7 @@ GJS.SpriteAtlas.bakeLoadedSpritesAndSave = function() {
         var infoBlob = new Blob([JSON.stringify(atlas.info)], {type: 'application/json'});
         window['saveAs'](infoBlob, 'sprite-atlas.json');
 
-        atlas.img.toBlob(function(blob) {
+        atlas.img.img.toBlob(function(blob) {
             window['saveAs'](blob, 'sprite-atlas.png');
         });
     });
