@@ -15,6 +15,7 @@ if (typeof GJS === "undefined") {
  */
 GJS.Sprite = function(filename, /* Optional */ filter, fallback) {
     this.filename = filename;
+    this.bakeableFilepath = null;
     this.missing = false;
     this.fallback = fallback;
     this.filter = filter;
@@ -61,55 +62,89 @@ GJS.Sprite.prototype._reload = function() {
         if (this.filter !== undefined) {
             this.filter(this);
         }
+        this._callLoadedListeners();
     } else {
-        this.img = document.createElement('img');
-        if (this.filename.substring(0, 5) === 'data:' || this.filename.substring(0, 5) === 'http:') {
-            this.img.src = this.filename;
-        } else {
-            this.img.src = GJS.Sprite.gfxPath + this.filename;
-        }
-        var that = this;
-        this.loaded = false;
-        this.img.onload = function() {
-            that.loaded = true;
-            GJS.Sprite.loadedCount++;
-            that.width = that.img.width;
-            that.height = that.img.height;
-            if (that.filter !== undefined) {
-                that.filter(that);
-            }
-            that._callLoadedListeners();
-        };
-        this.img.onerror = function() {
-            if (that.fallback) {
-                that.filename = that.fallback;
-                that.fallback = undefined;
+        var isDataOrHTTP = this.filename.substring(0, 5) === 'data:' ||
+                           this.filename.substring(0, 5) === 'http:' ||
+                           this.filename.substring(0, 6) === 'https:';
+        if (!isDataOrHTTP && GJS.Sprite.atlas !== null && GJS.Sprite.atlas.hasSpriteImg(GJS.Sprite.gfxPath + this.filename)) {
+            var that = this;
+            GJS.Sprite.atlas.img.addLoadedListener(function() {
+                that.filename = GJS.Sprite.atlas.getSpriteImg(GJS.Sprite.gfxPath + that.filename);
                 that._reload();
-                return;
+            });
+            return;
+        } else {
+            this.img = document.createElement('img');
+            if (isDataOrHTTP) {
+                this.img.src = this.filename;
+            } else {
+                this.bakeableFilepath = GJS.Sprite.gfxPath + this.filename;
+                this.img.src = this.bakeableFilepath;
+                GJS.Sprite.bakeableSpritePaths.push(this.bakeableFilepath);
             }
-            that.loaded = true;
-            that.missing = true;
-            GJS.Sprite.loadedCount++;
-            that.img = document.createElement('canvas');
-            that.img.width = 150;
-            that.img.height = 20;
-            that.width = that.img.width;
-            that.height = that.img.height;
-            var ctx =that.img.getContext('2d');
-            ctx.textBaseline = 'top';
-            ctx.fillStyle = '#fff';
-            ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-            ctx.fillStyle = '#000';
-            ctx.fillText('Missing: ' + that.filename, 0, 0);
-            that._callLoadedListeners();
-        };
+            var that = this;
+            this.loaded = false;
+            this.img.onload = function() {
+                that.loaded = true;
+                GJS.Sprite.loadedCount++;
+                that.width = that.img.width;
+                that.height = that.img.height;
+                if (that.filter !== undefined) {
+                    that.filter(that);
+                }
+                that._callLoadedListeners();
+            };
+            this.img.onerror = function() {
+                if (that.fallback) {
+                    that.filename = that.fallback;
+                    that.fallback = undefined;
+                    that._reload();
+                    return;
+                }
+                that.loaded = true;
+                that.missing = true;
+                GJS.Sprite.loadedCount++;
+                that.img = GJS.Sprite.getMissingImg(that.filename);
+                that.width = that.img.width;
+                that.height = that.img.height;
+                that._callLoadedListeners();
+            };
+        }
     }
+};
+
+/**
+ * @param {string} filename
+ * @return {HTMLCanvasElement} Canvas element with the text "Missing: <filename>"
+ */
+GJS.Sprite.getMissingImg = function(filename) {
+    var img = document.createElement('canvas');
+    img.width = 150;
+    img.height = 20;
+    var ctx = img.getContext('2d');
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.fillStyle = '#000';
+    ctx.fillText('Missing: ' + filename, 0, 0);
+    return img;
 };
 
 /**
  * Path for graphics files. Set this before creating any GJS.Sprite objects.
  */
 GJS.Sprite.gfxPath = 'assets/gfx/';
+
+/**
+ * Baked atlas to load sprites from instead of loading them from relative filenames. GJS.SpriteAtlas.
+ */
+GJS.Sprite.atlas = null;
+
+/**
+ * List of the paths of all bakeable sprites.
+ */
+GJS.Sprite.bakeableSpritePaths = [];
 
 /**
  * Filter for turning the sprite solid colored.
