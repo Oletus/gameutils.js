@@ -132,9 +132,11 @@ GJS.SpriteAtlas.bakeSprites = function(sprites) {
         'imgInfo': {}
     };
 
+    var borderWidth = 1;
+
     var x = 0;
     var y = 0;
-    var nextRowY = sprites[0].height;
+    var nextRowY = sprites[0].height + borderWidth * 2;
     var emptyRectTop = null;
     var emptyRectLeft = null;
     var emptyRectBottom = null;
@@ -147,7 +149,7 @@ GJS.SpriteAtlas.bakeSprites = function(sprites) {
             console.log('sprite missing: ' + sprites[i].filename)
         } else {
             var filepath = sprites[i].bakeableFilepath;
-            if (x + sprites[i].width > binWidth) {
+            if (x + sprites[i].width + borderWidth * 2 > binWidth) {
                 x = 0;
                 y = nextRowY;
                 if (emptyRectTop !== null) {
@@ -163,12 +165,12 @@ GJS.SpriteAtlas.bakeSprites = function(sprites) {
                         emptyRectBottom = null;
                     }
                 }
-                nextRowY = y + sprites[i].height;
+                nextRowY = y + sprites[i].height + borderWidth * 2;
                 binHeight = Math.max(binHeight, nextRowY);
             }
             info['imgInfo'][filepath] = {
-                'x': x,
-                'y': y,
+                'x': x + borderWidth,
+                'y': y + borderWidth,
                 'width': sprites[i].width,
                 'height': sprites[i].height
             };
@@ -178,7 +180,7 @@ GJS.SpriteAtlas.bakeSprites = function(sprites) {
                 emptyRectBottom = nextRowY;
                 nextRowY = emptyRectTop;
             }
-            x += sprites[i].width;
+            x += sprites[i].width + borderWidth * 2;
         }
     }
 
