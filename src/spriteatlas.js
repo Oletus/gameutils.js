@@ -84,7 +84,9 @@ GJS.SpriteAtlas.bakeLoadedSprites = function(doneCallback) {
     };
     
     var restoreGfxPath = GJS.Sprite.gfxPath;
+    var restoreAtlas = GJS.Sprite.atlas;
     GJS.Sprite.gfxPath = '';
+    GJS.Sprite.atlas = null;
     for (var i = 0; i < bakeablePaths.length; ++i) {
         var path = bakeablePaths[i];
         var sprite = new GJS.Sprite(path);
@@ -92,6 +94,7 @@ GJS.SpriteAtlas.bakeLoadedSprites = function(doneCallback) {
         sprite.addLoadedListener(spriteLoaded);
     }
     GJS.Sprite.gfxPath = restoreGfxPath;
+    GJS.Sprite.atlas = restoreAtlas;
 };
 
 /**
@@ -174,7 +177,6 @@ GJS.SpriteAtlas.bakeSprites = function(sprites) {
                 emptyRectLeft = x;
                 emptyRectBottom = nextRowY;
                 nextRowY = emptyRectTop;
-                console.log('empty rect: ', emptyRectTop, emptyRectLeft);
             }
             x += sprites[i].width;
         }
