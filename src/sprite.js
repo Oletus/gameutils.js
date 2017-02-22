@@ -69,8 +69,10 @@ GJS.Sprite.prototype._reload = function() {
                            this.filename.substring(0, 6) === 'https:';
         if (!isDataOrHTTP && GJS.Sprite.atlas !== null && GJS.Sprite.atlas.hasSpriteImg(GJS.Sprite.gfxPath + this.filename)) {
             var that = this;
+            this.bakeableFilepath = GJS.Sprite.gfxPath + that.filename;
+            GJS.Sprite.bakeableSpritePaths.push(this.bakeableFilepath);
             GJS.Sprite.atlas.img.addLoadedListener(function() {
-                that.filename = GJS.Sprite.atlas.getSpriteImg(GJS.Sprite.gfxPath + that.filename);
+                that.filename = GJS.Sprite.atlas.getSpriteImg(that.bakeableFilepath);
                 that._reload();
             });
             return;

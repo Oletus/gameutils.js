@@ -12,6 +12,12 @@ if (typeof GJS === "undefined") {
 GJS.SpriteAtlas = function(img, info) {
     this.img = img;
     this.info = JSON.parse(info);
+    if (this.img.bakeableFilepath !== null) {
+        var index = GJS.Sprite.bakeableSpritePaths.indexOf(this.img.bakeableFilepath);
+        if (index >= 0) {
+            GJS.Sprite.bakeableSpritePaths.splice(index, 1);
+        }
+    }
 };
 
 /** 
@@ -28,7 +34,7 @@ GJS.SpriteAtlas.prototype.getSpriteImg = function(filepath) {
         ctx.drawImage(this.img.img, fileinfo['x'], fileinfo['y'], fileinfo['width'], fileinfo['height'], 0, 0, fileinfo['width'], fileinfo['height']);
         return targetImg;
     } else {
-        return GJS.Sprite.getMissingImage(filepath);
+        return GJS.Sprite.getMissingImg(filepath);
     }
 };
 
