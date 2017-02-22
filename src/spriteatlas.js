@@ -125,7 +125,12 @@ GJS.SpriteAtlas.bakeSprites = function(sprites) {
 
     var x = 0;
     var y = 0;
-    var rowBottom = sprites[0].height;
+    var nextRowY = sprites[0].height;
+    var emptyRectTop = null;
+    var emptyRectLeft = null;
+    var emptyRectBottom = null;
+    var inEmptyRect = false;
+    var binHeight = 0;
     // Lay out the sprites in a scanline fashion.
     // TODO: This is a really primitive algorithm and could be optimized.
     for (var i = 0; i < sprites.length; ++i) {
@@ -135,8 +140,22 @@ GJS.SpriteAtlas.bakeSprites = function(sprites) {
             var filepath = sprites[i].bakeableFilepath;
             if (x + sprites[i].width > binWidth) {
                 x = 0;
-                y = rowBottom;
-                rowBottom += sprites[i].height;
+                y = nextRowY;
+                if (emptyRectTop !== null) {
+                    if (sprites[i].width < binWidth - emptyRectLeft && y + sprites[i].height <= emptyRectBottom) {
+                        inEmptyRect = true;
+                        x = emptyRectLeft;
+                    } else {
+                        x = 0;
+                        y = emptyRectBottom;
+                        inEmptyRect = false;
+                        emptyRectTop = null;
+                        emptyRectLeft = null;
+                        emptyRectBottom = null;
+                    }
+                }
+                nextRowY = y + sprites[i].height;
+                binHeight = Math.max(binHeight, nextRowY);
             }
             info['imgInfo'][filepath] = {
                 'x': x,
@@ -144,13 +163,20 @@ GJS.SpriteAtlas.bakeSprites = function(sprites) {
                 'width': sprites[i].width,
                 'height': sprites[i].height
             };
+            if (y + sprites[i].height * 2 < nextRowY && !inEmptyRect && emptyRectTop === null) {
+                emptyRectTop = y + sprites[i].height;
+                emptyRectLeft = x;
+                emptyRectBottom = nextRowY;
+                nextRowY = emptyRectTop;
+                console.log('empty rect: ', emptyRectTop, emptyRectLeft);
+            }
             x += sprites[i].width;
         }
     }
 
     var img = document.createElement('canvas');
     img.width = binWidth;
-    img.height = rowBottom;
+    img.height = binHeight;
     var ctx = img.getContext('2d');
 
     for (var filepath in info['imgInfo']) {
