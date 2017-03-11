@@ -114,6 +114,28 @@ GJS.MonospaceBitmapFont.prototype.drawText = function(ctx, string, x, y) {
  * @param {number} rowHeight Row height in coordinates.
  */
 GJS.MonospaceBitmapFont.prototype.drawTextInRows = function(ctx, textToRender, x, y, maxRowLength, rowHeight) {
+    var renderedRows = this._splitRows(textToRender, maxRowLength);
+    for (var i = 0; i < renderedRows.length; ++i) {
+        this.drawText(ctx, renderedRows[i], x, y + i * rowHeight);
+    }
+};
+
+/**
+ * @param {string} textToRender String to draw.
+ * @param {number} maxRowLength Maximum length of row in characters.
+ * @return {number} Number of rows that would get drawn if drawTextInRows is called with the same arguments.
+ */
+GJS.MonospaceBitmapFont.prototype.getNumberOfRows = function(textToRender, maxRowLength) {
+    return this._splitRows(textToRender, maxRowLength).length;
+};
+
+/**
+ * Split text into rows. The text is split at spaces.
+ * @param {string} textToRender String to draw.
+ * @param {number} maxRowLength Maximum length of row in characters.
+ * @protected
+ */
+GJS.MonospaceBitmapFont.prototype._splitRows = function(textToRender, maxRowLength) {
     var renderedRows = textToRender;
     if (!(renderedRows instanceof Array)) {
         if (maxRowLength < 0) {
@@ -134,7 +156,5 @@ GJS.MonospaceBitmapFont.prototype.drawTextInRows = function(ctx, textToRender, x
             renderedRows.push(textToRender.substring(rowStartIndex));
         }
     }
-    for (var i = 0; i < renderedRows.length; ++i) {
-        this.drawText(ctx, renderedRows[i], x, y + i * rowHeight);
-    }
+    return renderedRows;
 };
