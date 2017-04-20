@@ -160,7 +160,9 @@ GJS.CanvasUICursor.prototype.press = function(pos) {
     this.setPosition(pos);
     var uiElements = this.ui.uiElements;
     for (var i = 0; i < uiElements.length; ++i) {
-        if (uiElements[i].active && uiElements[i].hitTest(this.x, this.y) && !uiElements[i].isDown) {
+        if (uiElements[i].active && !uiElements[i].locked &&
+            uiElements[i].hitTest(this.x, this.y) && !uiElements[i].isDown)
+        {
             this.downButton = uiElements[i];
             this.downButton.down();
             if (uiElements[i].draggable && !uiElements[i].dragged) {
@@ -226,6 +228,7 @@ GJS.CanvasUIElement = function(options) {
         dragTargetCallback: null, // Called when something is dragged onto this object, with the dragged object as parameter.
         draggedObjectFunc: null, // Function that returns the dragged object associated with this UI element.
         active: true, // Active elements are visible and can be interacted with. Inactive elements are invisible and can't be interacted with.
+        locked: false, // Locked elements can't be interacted with. Often they'd render with a lock on top.
         draggable: false,
         pressSpeed: GJS.CanvasUIElement.defaultPressSpeed,
         depressSpeed: GJS.CanvasUIElement.defaultDepressSpeed
