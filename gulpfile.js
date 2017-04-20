@@ -30,6 +30,7 @@ var createTemplateDirs = function(gameName) {
     mkdirIfDoesntExist('./' + gameName + '/');
     mkdirIfDoesntExist('./' + gameName + '/assets/');
     mkdirIfDoesntExist('./' + gameName + '/assets/audio/');
+    mkdirIfDoesntExist('./' + gameName + '/assets/fonts/');
     mkdirIfDoesntExist('./' + gameName + '/assets/gfx/');
     mkdirIfDoesntExist('./' + gameName + '/assets/models/');
 };
