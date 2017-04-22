@@ -7,12 +7,12 @@
 if (typeof GJS === "undefined") {
     var GJS = {};
 }
- 
+
 /**
  * A 2D grid made out of tiles. Tiles can be of any type, but they are strings by default.
  * @constructor
  */
-GJS.TileMap = function(options) 
+GJS.TileMap = function(options)
 {
     var defaults = {
         width: 1,
@@ -25,7 +25,7 @@ GJS.TileMap = function(options)
     var tile;
     for (var y = 0; y < this.height; ++y) {
         var row = [];
-        for (var x = 0; x < this.width; ++x) {  
+        for (var x = 0; x < this.width; ++x) {
             if (this.initEdgeTile != null && (x == 0 || x == this.width - 1 || y == 0 || y == this.height - 1)) {
                 tile = this.initEdgeTile(x, y);
             } else {
@@ -140,7 +140,7 @@ GJS.TileMap.prototype.isTileInArea = function(tileMin, tileMax, matchFunc) {
                 return true;
             }
         }
-    }    
+    }
     return false;
 };
 
@@ -148,10 +148,10 @@ GJS.TileMap.prototype.isTileInArea = function(tileMin, tileMax, matchFunc) {
  * @param {Vec2} tileMin Integer coordinates for top left corner of the area.
  * @param {Vec2} tileMax Integer coordinates for bottom right corner of the area.
  * @param {function} matchFunc Gets passed a tile and returns true if it matches.
- * @return {Array.<Object>} Matching tiles within the area limited by tileMin and tileMax
+ * @return {Array.<Vec2>} Coordinates of matching tiles within the area limited by tileMin and tileMax.
  * Coordinates are inclusive.
  */
-GJS.TileMap.prototype.getTilesInArea = function(tileMin, tileMax, matchFunc) {
+GJS.TileMap.prototype.getTileCoordsInArea = function(tileMin, tileMax, matchFunc) {
     var tiles = [];
     for (var y = tileMin.y; y <= tileMax.y; ++y) {
         if (y < 0) {
@@ -170,11 +170,43 @@ GJS.TileMap.prototype.getTilesInArea = function(tileMin, tileMax, matchFunc) {
                 break;
             }
             if (matchFunc(this.tiles[y][x])) {
-                tiles.push(this.tiles[y][x]);
+                tiles.push(new Vec2(x, y));
             }
         }
-    }    
+    }
     return tiles;
+};
+
+/**
+ * @param {Vec2} tileMin Integer coordinates for top left corner of the area.
+ * @param {Vec2} tileMax Integer coordinates for bottom right corner of the area.
+ * @param {function} matchFunc Gets passed a tile and returns true if it matches.
+ * @return {Array.<Object>} Matching tiles within the area limited by tileMin and tileMax.
+ * Coordinates are inclusive.
+ */
+GJS.TileMap.prototype.getTilesInArea = function(tileMin, tileMax, matchFunc) {
+    var tileCoords = this.getTileCoordsInArea(tileMin, tileMax, matchFunc);
+    var tiles = [];
+    for (var i = 0; i < tileCoords.length; ++i) {
+        tiles.push(this.tiles[tileCoords[i].y][tileCoords[i].x]);
+    }
+    return tiles;
+};
+
+/*
+ * @param {function} matchFunc Gets passed a tile and returns true if it matches.
+ * @return {Array.<Vec2>} Coordinates of matching tiles within the tilemap.
+ */
+GJS.TileMap.prototype.getTileCoords = function(matchFunc) {
+    return this.getTileCoordsInArea(new Vec2(0, 0), new Vec2(this.width, this.height), matchFunc);
+};
+
+/*
+ * @param {function} matchFunc Gets passed a tile and returns true if it matches.
+ * @return {Array.<Object>} Matching tiles within the tilemap.
+ */
+GJS.TileMap.prototype.getTiles = function(matchFunc) {
+    return this.getTilesInArea(new Vec2(0, 0), new Vec2(this.width, this.height), matchFunc);
 };
 
 /**
@@ -370,4 +402,70 @@ GJS.TileMap.prototype.overlapsTiles = function(rect, matchFunc) {
  */
 GJS.TileMap.prototype.getRect = function() {
     return new Rect(0.0, this.width, 0.0, this.height);
+};
+
+/**
+ * Return a list of Rect objects into which matching tiles have been grouped.
+ *
+ * The algorithm first searches horizontally and when the line of consecutive
+ * matching tiles ends it searches vertically to extend it.
+ *
+ * @param {function} matchFunc Gets passed a tile and returns true if it should be grouped.
+ * @return {Array.<Rect>} Rectangles into which all tiles are grouped.
+ */
+GJS.TileMap.prototype.groupTilesToRectangles = function(matchFunc) {
+    var row, tile;
+    var groups = [];
+    var currentMatch = undefined;
+    
+    var inGroups = function(x, y) {
+        var searchVec2 = new Vec2(x + 0.5, y + 0.5);
+        for (var i = 0; i < groups.length; ++i) {
+            if (groups[i].containsVec2(searchVec2)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    var that = this;
+    
+    var expandDown = function(rect) {
+        var allmatch = true;
+        while (allmatch && rect.bottom < that.height) {
+            for (var x = rect.left; x < rect.right; ++x) {
+                if (!matchFunc(that.tiles[rect.bottom][x])) {
+                    allmatch = false;
+                    break;
+                }
+            }
+            if (allmatch) {
+                rect.bottom += 1;
+            }
+        }
+    };
+
+    for (var y = 0; y < this.tiles.length; ++y) {
+        row = this.tiles[y];
+        for (var x = 0; x < row.length; ++x) {
+            tile = row[x];
+            if (matchFunc(tile) && !inGroups(x, y)) {
+                if (currentMatch === undefined) {
+                    currentMatch = new Rect(x, x + 1, y, y + 1);
+                    groups.push(currentMatch);
+                } else {
+                    currentMatch.right += 1;
+                }
+            } else if (currentMatch !== undefined) {
+                expandDown(currentMatch);
+                currentMatch = undefined;
+            }
+        }
+
+        if (currentMatch !== undefined) {
+            expandDown(currentMatch);
+            currentMatch = undefined;
+        }
+    }
+    return groups;
 };
