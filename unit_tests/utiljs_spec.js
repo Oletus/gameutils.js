@@ -127,3 +127,21 @@ describe('objectUtil', function() {
         expect(obj.hasOwnProperty('c')).toBe(false);
     });
 });
+
+describe('querystringUtil', function() {
+    var querystring = '?x=1&y=2';
+
+    it('gets a querystring value by the key', function() {
+        expect(querystringUtil.get('x', querystring)).toBe('1');
+        expect(querystringUtil.get('y', querystring)).toBe('2');
+    });
+
+    it('returns undefined when the key is missing', function() {
+        expect(querystringUtil.get('z', querystring)).toBe(undefined);
+    });
+
+    it('returns the empty string when the key has no value', function() {
+        expect(querystringUtil.get('a', '?a&b=1')).toBe('');
+        expect(querystringUtil.get('b', '?a=1&b')).toBe('');
+    });
+});
