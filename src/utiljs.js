@@ -7,6 +7,7 @@ if (typeof GJS === "undefined") {
 var arrayUtil = {}; // Utilities for working with JS arrays
 var stringUtil = {}; // Utilities for working with JS strings
 var objectUtil = {}; // Utilities for working with JS objects
+var querystringUtil = {}; // Utilities for working with querystring parameters
 
 /**
  * Random function. Prefers using mathUtil.random() if available, falls back to Math.random().
@@ -244,6 +245,32 @@ objectUtil.wrap = function(toWrap, excludeFromForwarding) {
         })(prop);
     }
     return wrapper;
+};
+
+/**
+ * Get the value of the given querystring key else return undefined.
+ * @param {String} key Key to search for in the querystring.
+ * @param {String} [querystring] Querystring to search. If undefined then falls back to window.location.search.
+ * @return {(String|undefined)} Value as a string.
+ */
+querystringUtil.get = function(key, querystring) {
+    querystring = querystring || window.location.search;
+
+    if (querystring.indexOf('?') === 0) {
+        querystring = querystring.substring(1);  // Drop the starting "?"
+    }
+
+    var items = querystring.split('&');
+
+    for (var i = 0; i < items.length; i++) {
+        var item = items[i].split('=');
+
+        if (item[0] === key) {
+            return item[1] || '';
+        }
+    }
+
+    return undefined;
 };
 
 
