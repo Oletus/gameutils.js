@@ -37,6 +37,32 @@ GJS.TileMap = function(options)
     }
 };
 
+GJS.CardinalDirection = {
+    RIGHT: 0,
+    DOWN: 1,
+    LEFT: 2,
+    UP: 3
+};
+
+/**
+ * @param {GJS.CardinalDirection} direction
+ * @return {Vec2}
+ */
+GJS.CardinalDirection.toVec2 = function(direction) {
+    if (direction === GJS.CardinalDirection.RIGHT) {
+        return new Vec2(1, 0);
+    }
+    if (direction === GJS.CardinalDirection.LEFT) {
+        return new Vec2(-1, 0);
+    }
+    if (direction === GJS.CardinalDirection.UP) {
+        return new Vec2(0, -1);
+    }
+    if (direction === GJS.CardinalDirection.DOWN) {
+        return new Vec2(0, 1);
+    }
+};
+
 /**
  * @param {Array} data Tiles in an array in row-major form.
  * @param {boolean?} flippedX Set to true to flip the data in the x direction.
@@ -386,6 +412,62 @@ GJS.TileMap.prototype.getNearestTilesDownFromRect = function(rect, matchFunc, ma
     return tiles;
 };
 
+/**
+ * @param {Vec2} originTile Integer coordinates of the tile to start the search from.
+ * @return {Array} Map from GJS.CardinalDirection to how many tiles there are in between the originTile and the
+ * first matching tile found in that direction.
+ */
+GJS.TileMap.prototype.getDistancesByCardinalDirection = function(originTile, matchFunc) {
+    var distances = [-1, -1, -1, -1];
+    var distance = 1;
+    while (originTile.x + distance < this.width && distances[GJS.CardinalDirection.RIGHT] < 0) {
+        if (matchFunc(this.tiles[originTile.y][originTile.x + distance])) {
+            distances[GJS.CardinalDirection.RIGHT] = distance;
+        }
+        ++distance;
+    }
+    distance = 1;
+    while (originTile.x - distance >= 0 && distances[GJS.CardinalDirection.LEFT] < 0) {
+        if (matchFunc(this.tiles[originTile.y][originTile.x - distance])) {
+            distances[GJS.CardinalDirection.LEFT] = distance;
+        }
+        ++distance;
+    }
+    distance = 1;
+    while (originTile.y + distance < this.height && distances[GJS.CardinalDirection.DOWN] < 0) {
+        if (matchFunc(this.tiles[originTile.y + distance][originTile.x])) {
+            distances[GJS.CardinalDirection.DOWN] = distance;
+        }
+        ++distance;
+    }
+    distance = 0;
+    while (originTile.y - distance >= 0 && distances[GJS.CardinalDirection.UP] < 0) {
+        if (matchFunc(this.tiles[originTile.y - distance][originTile.x])) {
+            distances[GJS.CardinalDirection.UP] = distance;
+        }
+        ++distance;
+    }
+    return distances;
+};
+
+/**
+ * @param {Vec2} originTile Integer coordinates for the tile to start searching from.
+ * @param {function} matchFunc Gets passed a tile and returns true if it matches.
+ * @return {GJS.CardinalDirection} The cardinal direction of the nearest matching tile, or undefined if no matching
+ * tiles found.
+ */
+GJS.TileMap.prototype.getNearestTileDirection = function(originTile, matchFunc) {
+    var distances = this.getDistancesByCardinalDirection(originTile, matchFunc);
+    var nearest = -1;
+    var nearestDirection = undefined;
+    for (var i = 0; i < 4; ++i) {
+        if (distances[i] >= 0 && (nearest < 0 || distances[i] < nearest)) {
+            nearest = distances[i];
+            nearestDirection = i;
+        }
+    }
+    return nearestDirection;
+};
 
 /**
  * @return {boolean} True if matching tiles overlap the given rectangle.
