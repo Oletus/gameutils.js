@@ -145,6 +145,8 @@ window['start'] = function() {
     var DEBUG_MAIN_LOOP = DEV_MODE && true; // Set to true to allow fast-forwarding main loop with 'f'
     Game.parameters.set('muteAudio', (DEV_MODE && true)); // Set to true if sounds annoy developers
 
+    mathUtil.seedrandom();
+
     var canvas = document.createElement('canvas');
     var canvasWrapper = document.createElement('div');
     canvasWrapper.appendChild(canvas);

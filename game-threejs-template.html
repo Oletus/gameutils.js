@@ -165,6 +165,8 @@ window['start'] = function() {
     var DEBUG_MAIN_LOOP = DEV_MODE && true; // Set to true to allow fast-forwarding main loop with 'f'
     Game.parameters.set('muteAudio', (DEV_MODE && true)); // Set to true if sounds annoy developers
     
+    mathUtil.seedrandom();
+    
     var game;
     
     var renderer = new THREE.WebGLRenderer();
