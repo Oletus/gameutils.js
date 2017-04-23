@@ -567,6 +567,33 @@ mathUtil.factorial = function(n) {
     return n * mathUtil.factorial(n - 1);
 };
 
+
+GJS.CardinalDirection = {
+    RIGHT: 0,
+    DOWN: 1,
+    LEFT: 2,
+    UP: 3
+};
+
+/**
+ * @param {GJS.CardinalDirection} direction
+ * @return {Vec2}
+ */
+GJS.CardinalDirection.toVec2 = function(direction) {
+    if (direction === GJS.CardinalDirection.RIGHT) {
+        return new Vec2(1, 0);
+    }
+    if (direction === GJS.CardinalDirection.LEFT) {
+        return new Vec2(-1, 0);
+    }
+    if (direction === GJS.CardinalDirection.UP) {
+        return new Vec2(0, -1);
+    }
+    if (direction === GJS.CardinalDirection.DOWN) {
+        return new Vec2(0, 1);
+    }
+};
+
 /**
  * @constructor
  * @param {number} x Horizontal component of the vector.
