@@ -41,6 +41,15 @@ GJS.StateMachine.prototype.change = function(newStateId) {
 };
 
 /**
+ * @param {number} newStateId Id of the new state.
+ */
+GJS.StateMachine.prototype.changeIfDifferent = function(newStateId) {
+    if (this.id !== newStateId) {
+        this.change(newStateId);
+    }
+};
+
+/**
  * Call this regularly to update the state machine.
  * @param {number} deltaTime Time change since last call to this function.
  */
