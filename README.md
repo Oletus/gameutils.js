@@ -29,7 +29,7 @@ The utilities include some tools to automate common development tasks.
 
 To install:
 
-* Install [node.js](https://nodejs.org/en/)
+* Install [node.js](https://nodejs.org/en/) LTS version (tested with 6.10.2)
 * Install [ffmpeg](https://www.ffmpeg.org/) and add it to PATH
 * To use web2exe - install [web2exe Windows release](https://github.com/jyapayne/Web2Executable) and add it to PATH (tested with v0.5.4b Web2ExeWin-CMD)
 * Run **npm install** in the directory where package.json is.
@@ -38,8 +38,12 @@ Note: use **cmd** for running gulp commands on Windows, NOT GitHub for Windows s
 
 To start a game project (it will be created in a new folder under gameutils.js):
 
+Step 1:
 * **gulp game-from-template --name <game name>** - create a game based on the basic template.
 * **gulp game-from-threejs-template --name <game name>** - create a game based on the three.js template.
+
+Step 2 (install tools for the game):
+* In the newly created game folder, run **npm install**
 
 Things you can do with the tools for a game project:
 
