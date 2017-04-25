@@ -65,6 +65,8 @@ var Game = function(resizer, renderer, loadingBar) {
     this.camera = new THREE.PerspectiveCamera( 75, resizer.canvas.width / resizer.canvas.height, 1, 10000 );
     this.camera.position.z = 1000;
     
+    this.pointerRaycaster = new THREE.Raycaster();
+    
     this.time = 0;
     
     this.initializedAfterLoad = false;
@@ -112,8 +114,10 @@ Game.prototype.update = function(deltaTime) {
     if (this.mesh) {
         this.mesh.rotation.x += 0.01;
         this.mesh.rotation.y += 0.02;
+        var intersects = this.pointerRaycaster.intersectObject(this.mesh, true);
+        this.mesh.material.wireframe = (intersects.length === 0);
     }
-    
+
     GJS.Audio.muteAll(Game.parameters.get('muteAudio'));
 
     // Call initialization function after all model assets have been loaded.
@@ -127,8 +131,8 @@ Game.prototype.update = function(deltaTime) {
 /**
  * Mouse/touch handler for pressing down a mouse button or touch.
  * @param {Object} event With following keys:
- *   current: Vec2 with current pointer coordinates in the canvas coordinate system.
- *   lastDown: Vec2 with coordinates of the latest press event in the canvas coordinate system.
+ *   currentPosition: Vec2 with current pointer coordinates in normalized device coordinates.
+ *   lastDown: Vec2 with coordinates of the latest press event in normalized device coordinates.
  *   isDown: Boolean telling if the pointer is down.
  *   index: Integer index of the pointer being tracked.
  */
@@ -138,8 +142,8 @@ Game.prototype.canvasPress = function(event) {
 /**
  * Mouse/touch handler for releasing a mouse button or touch.
  * @param {Object} event With following keys:
- *   current: Vec2 with current pointer coordinates in the canvas coordinate system.
- *   lastDown: Vec2 with coordinates of the latest press event in the canvas coordinate system.
+ *   currentPosition: Vec2 with current pointer coordinates in normalized device coordinates.
+ *   lastDown: Vec2 with coordinates of the latest press event in normalized device coordinates.
  *   isDown: Boolean telling if the pointer is down.
  *   index: Integer index of the pointer being tracked.
  */
@@ -149,12 +153,14 @@ Game.prototype.canvasRelease = function(event) {
 /**
  * Mouse/touch handler when a pointer is being moved.
  * @param {Object} event With following keys:
- *   current: Vec2 with current pointer coordinates in the canvas coordinate system.
- *   lastDown: Vec2 with coordinates of the latest press event in the canvas coordinate system.
+ *   currentPosition: Vec2 with current pointer coordinates in normalized device coordinates.
+ *   lastDown: Vec2 with coordinates of the latest press event in normalized device coordinates.
  *   isDown: Boolean telling if the pointer is down.
  *   index: Integer index of the pointer being tracked.
  */
 Game.prototype.canvasMove = function(event) {
+    var positionAsVec3 = new THREE.Vector3(event.currentPosition.x, event.currentPosition.y, 0);
+    this.pointerRaycaster.setFromCamera(positionAsVec3, this.camera);
 };
 
 /**
@@ -210,7 +216,8 @@ window['start'] = function() {
     game = new Game(resizer, renderer, loadingBar);
     
     // Create event handlers for mouse and touch based input that will call on the canvas* members of game.
-    resizer.createPointerEventListener(game, true);
+    resizer.createPointerEventListener(game, true,
+                                       GJS.CanvasResizer.EventCoordinateSystem.WEBGL_NORMALIZED_DEVICE_COORDINATES);
 
     // Initialize after CanvasResizer so it is always drawn on top
     if (DEV_MODE) {

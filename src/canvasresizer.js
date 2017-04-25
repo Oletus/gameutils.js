@@ -442,10 +442,12 @@ GJS.CanvasResizer.prototype._getCanvasBoundingClientRect = function() {
  * @param {string=} touchIdentifier In case the event is a touch event, the
  * identifier of the touch point to get the position from. By default uses
  * the first entry in event.touches.
+ * @param {GJS.CanvasResizer.EventCoordinateSystem=} coordinateSystem The coordinate system for the return value. The
+ * default is CANVAS_COORDINATES.
  * @return {Object} Object with x and y keys for horizontal and vertical
  * positions in the canvas coordinate space.
  */
-GJS.CanvasResizer.prototype.getCanvasPosition = function(event, touchIdentifier) {
+GJS.CanvasResizer.prototype.getCanvasPosition = function(event, touchIdentifier, coordinateSystem) {
     var rect = this._getCanvasBoundingClientRect();
     var x, y;
     if (event.touches !== undefined && event.touches.length > 0) {
@@ -477,6 +479,10 @@ GJS.CanvasResizer.prototype.getCanvasPosition = function(event, touchIdentifier)
         xRel *= coordWidth / rect.width;
         yRel *= coordHeight / rect.height;
     }
+    if (coordinateSystem === GJS.CanvasResizer.EventCoordinateSystem.WEBGL_NORMALIZED_DEVICE_COORDINATES) {
+        xRel = 2.0 * xRel / coordWidth - 1.0;
+        yRel = 1.0 - 2.0 * yRel / coordHeight;
+    }
     return GJS.CanvasResizer._createVec2(xRel, yRel);
 };
 
@@ -486,6 +492,16 @@ GJS.CanvasResizer._createVec2 = function(x, y) {
     } else {
         return {x: x, y: y};
     }
+};
+
+/**
+ * @enum
+ */
+GJS.CanvasResizer.EventCoordinateSystem = {
+    CANVAS_COORDINATES: 0,
+    
+    // Also known as clip space. Coordinates range from -1.0 to 1.0, with y = 1.0 being at the top of the canvas.
+    WEBGL_NORMALIZED_DEVICE_COORDINATES: 1
 };
 
 /**
@@ -500,10 +516,16 @@ GJS.CanvasResizer._createVec2 = function(x, y) {
  *   isDown: a boolean indicating whether the pointer is down.
  *   index: numerical index identifying the pointer.
  * @param {boolean} listenOnCanvas Automatically add listeners on the canvas.
+ * @param {GJS.CanvasResizer.EventCoordinateSystem=} coordinateSystem The coordinate system to use for events. The
+ * default is CANVAS_COORDINATES.
  * @return {function} Function to be added as a mouse and touch listener to elements (for example the canvas element).
  */
-GJS.CanvasResizer.prototype.createPointerEventListener = function(callbackObject, listenOnCanvas) {
+GJS.CanvasResizer.prototype.createPointerEventListener = function(callbackObject, listenOnCanvas, coordinateSystem) {
     var that = this;
+    
+    if (coordinateSystem === undefined) {
+        coordinateSystem = GJS.CanvasResizer.EventCoordinateSystem.CANVAS_COORDINATES;
+    }
 
     var cursors = [
     ];
@@ -560,7 +582,7 @@ GJS.CanvasResizer.prototype.createPointerEventListener = function(callbackObject
                 if (id !== 'mouse') {
                     touchId = id.substring(5);
                 }
-                var pos = that.getCanvasPosition(e, touchId);
+                var pos = that.getCanvasPosition(e, touchId, coordinateSystem);
                 if (!cursorIndices.hasOwnProperty(id) || cursorIndices[id] === -1) {
                     var reuseIndexKey = undefined;
                     for (var key in cursorIndices) {
@@ -606,7 +628,7 @@ GJS.CanvasResizer.prototype.createPointerEventListener = function(callbackObject
                 if (id !== 'mouse') {
                     touchId = id.substring(5);
                 }
-                var pos = that.getCanvasPosition(e, touchId);
+                var pos = that.getCanvasPosition(e, touchId, coordinateSystem);
                 var index = cursorIndices[id];
                 cursors[index].currentPosition = pos;
                 callbackObject.canvasMove(cursors[index]);
