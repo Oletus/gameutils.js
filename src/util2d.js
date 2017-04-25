@@ -1,10 +1,15 @@
 /*
  * Copyright Olli Etuaho 2012-2014.
  */
+ 
+ if (typeof GJS === "undefined") {
+    var GJS = {};
+}
 
 // This file contains following utilities:
 // cssUtil: Utilities for working with CSS
 // colorUtil: Utilities for working with RGB colors represented as arrays of numbers, including blending
+// GJS.CardinalDirection: An enum for storing and operating on a cardinal direction: up, down, left, right
 // Vec2: A class for storing a two-dimensional vector.
 // AffineTransform: A scale/translate transform.
 // Rect: A class for storing a two-dimensional rectangle.
