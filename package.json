@@ -1,6 +1,6 @@
 {
   "name": "gameutils.js",
-  "version": "0.12.1",
+  "version": "0.13.0",
   "description": "Gameutils.js helper library",
   "repository": "https://github.com/Oletus/gameutils.js.git",
   "license": "MIT",
