@@ -38,7 +38,7 @@ var createTemplateDirs = function(gameName) {
 var copyPackageJSON = function(gameName) {
     packageJsonCopy = JSON.parse(JSON.stringify(packageJson));
     packageJsonCopy.name = gameName;
-    packageJsonCopy.version = '0.1';
+    packageJsonCopy.version = '0.1.0';
     packageJsonCopy.description = 'Game project created using gameutils.js';
     delete packageJsonCopy.repository;
     delete packageJsonCopy.license;
