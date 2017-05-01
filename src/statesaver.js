@@ -40,7 +40,8 @@ GJS.Saveable.prototype.getStateVersionConversion = function(loadedStateVersion, 
 /**
  * @constructor
  * @param {Object} options. Options with the following keys:
- *   savedObjects (Array.<GJS.Saveable>) The objects that get loaded or saved.
+ *   savedObjects (Array.<GJS.Saveable>) The objects that get loaded or saved. Each object is handled independently -
+ *     the version of the save state of one object can't have an effect on the loading of another object.
  *   prepareSaveState (function) Function to call just before state is saved. Intended to be used if some parts of state
  *     are populated only on demand. May be null.
  *   gameName (string): For identifying the game in local storage.
@@ -109,4 +110,12 @@ GJS.StateSaver.prototype.saveTo = function(storage) {
         };
     }
     storage.setItem(this.gameName + '-gameutilsjs-state', JSON.stringify(gatheredState));
+};
+
+/**
+ * Erase save state in storage.
+ * @param {Storage} storage Storage object to erase from.
+ */
+GJS.StateSaver.prototype.eraseSave = function(storage) {
+    storage.setItem(this.gameName + '-gameutilsjs-state', JSON.stringify({}));
 };
