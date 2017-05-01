@@ -1,6 +1,6 @@
 'use strict';
 
-// Requires utiljs.js
+// Requires utiljs.js, statesaver.js
 
 if (typeof GJS === "undefined") {
     var GJS = {};
@@ -96,6 +96,8 @@ GJS.NeverUnlock.prototype = new GJS.UnlockCondition();
  * @constructor
  * Engine for managing game unlocks. Each unlock is identified by an id, has a condition that's an instance of
  * GJS.UnlockCondition based on game state and can be either unlocked (true) or locked (false).
+ * If needCommitUnlocks is true, then all unlocks that are not unlocked by default need to be committed by calling
+ * popFulfilledUnlockConditions and commitUnlock.
  */
 GJS.Unlocker = function(options) {
     var defaults = {
@@ -106,13 +108,28 @@ GJS.Unlocker = function(options) {
     objectUtil.initWithDefaults(this, defaults, options);
     this._fulfilledConditions = [];
     this.unlocks = {};
-    this.unlocksInOrder = [];
+
+    this.state = {
+        unlocksInOrder: []
+    };
+    this.stateDefaults = {
+        unlocksInOrder: []
+    };
+    this.stateVersion = 1;
+    this.saveName = 'gameutilsjs-unlocker';
+
     for (var i = 0; i < this.conditions.length; ++i) {
         var condition = this.conditions[i];
         this.unlocks[condition.unlockId] = false;
-        this._checkFulfilled(condition);
+        // The conditions that are fulfilled by default are always committed.
+        if (condition.fulfilled) {
+            this.commitUnlock(condition.unlockId);
+            this.stateDefaults.unlocksInOrder.push(condition.unlockId);
+        }
     }
 };
+
+GJS.Unlocker.prototype = new GJS.Saveable();
 
 /**
  * @param {GJS.UnlockCondition} condition Check if a condition is fulfilled.
@@ -185,38 +202,18 @@ GJS.Unlocker.prototype.popFulfilledUnlockConditions = function() {
 GJS.Unlocker.prototype.commitUnlock = function(unlockId) {
     if (this.unlocks.hasOwnProperty(unlockId)) {
         this.unlocks[unlockId] = true;
-        this.unlocksInOrder.push(unlockId);
+        this.state.unlocksInOrder.push(unlockId);
         return true;
     }
     return false;
 };
 
 /**
- * Load unlocks from storage.
- * @param {Storage} storage Storage object to load from.
+ * Called after state has been loaded.
  */
-GJS.Unlocker.prototype.loadFrom = function(storage) {
-    var unlocksInOrder = null;
-    try {
-        unlocksInOrder = JSON.parse(storage.getItem(this.gameName + '-gameutilsjs-unlocks-in-order'));
-    } catch(e) {
-        return;
+GJS.Unlocker.prototype.postLoadState = function() {
+    for (var i = 0; i < this.state.unlocksInOrder.length; ++i) {
+        var unlockId = this.state.unlocksInOrder[i];
+        this.unlocks[unlockId] = true;
     }
-    if (unlocksInOrder === null) {
-        return;
-    }
-    this.unlocksInOrder = [];
-    for (var i = 0; i < unlocksInOrder.length; ++i) {
-        var key = unlocksInOrder[i];
-        this.commitUnlock(key);
-    }
-};
-
-/**
- * Save unlocks to storage.
- * @param {Storage} storage Storage object to save to.
- */
-GJS.Unlocker.prototype.saveTo = function(storage) {
-    storage.setItem(this.gameName + '-gameutilsjs-unlocks-version', '1');
-    storage.setItem(this.gameName + '-gameutilsjs-unlocks-in-order', JSON.stringify(this.unlocksInOrder));
 };
