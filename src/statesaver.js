@@ -11,10 +11,16 @@ if (typeof GJS === "undefined") {
  */
 GJS.Saveable = function() {
     // An object containing state that can be passed to JSON.stringify for serialization and loaded by JSON.parse.
+    // Any previous state will be cleared completely when loading.
     this.state = {};
 
     // An object containing the default state of state.
     this.stateDefaults = {};
+
+    // Set to apply defaults recursively when loading state. In case set to 1, keys missing from saved object properties
+    // of state will be filled in from defaults. In case set to 2, keys missing from object properties of object
+    // properties of state will be filled in. And so on.
+    this.applyStateDefaultsRecursivelyLevels = 0;
 
     // A number that is incremented each time the format of state is changed.
     this.stateVersion = 1;
@@ -68,6 +74,17 @@ GJS.StateSaver.prototype.loadFrom = function(storage) {
         }
     } catch(e) {}
 
+    var applyStateDefaultsRecursively = function(state, defaults, levels) {
+        for (var key in defaults) {
+            if (state.hasOwnProperty(key) && defaults.hasOwnProperty(key) && typeof defaults[key] === 'object') {
+                if (levels > 1) {
+                    applyStateDefaultsRecursively(state[key], defaults[key], levels - 1);
+                }
+                objectUtil.fillIn(state[key], defaults[key]);
+            }
+        }
+    };
+
     for (var i = 0; i < this.savedObjects.length; ++i) {
         var loadedObject = {
             state: {},
@@ -86,6 +103,10 @@ GJS.StateSaver.prototype.loadFrom = function(storage) {
         }
         this.savedObjects[i].state = {};
         objectUtil.initWithDefaults(this.savedObjects[i].state, this.savedObjects[i].stateDefaults, loadedObject.state);
+        if (this.savedObjects[i].applyStateDefaultsRecursivelyLevels > 0) {
+            applyStateDefaultsRecursively(this.savedObjects[i].state, this.savedObjects[i].stateDefaults,
+                                          this.savedObjects[i].applyStateDefaultsRecursivelyLevels);
+        }
         this.savedObjects[i].postLoadState();
     }
 };

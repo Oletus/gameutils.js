@@ -207,11 +207,24 @@ stringUtil.capitalizeFirstLetter = function(string) {
  * @param {Object} options Options to override the default properties.
  */
 objectUtil.initWithDefaults = function(obj, defaults, options) {
-    for(var key in defaults) {
+    for (var key in defaults) {
         if (!options.hasOwnProperty(key)) {
             obj[key] = defaults[key];
         } else {
             obj[key] = options[key];
+        }
+    }
+};
+
+/**
+ * Fill in properties missing from an object.
+ * @param {Object} obj Object that may already have some properties set.
+ * @param {Object} fillIn Properties to fill in in case obj doesn't already have them.
+ */
+objectUtil.fillIn = function(obj, fillIn) {
+    for (var key in fillIn) {
+        if (!obj.hasOwnProperty(key)) {
+            obj[key] = fillIn[key];
         }
     }
 };

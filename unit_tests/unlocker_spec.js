@@ -20,25 +20,6 @@ var testUnlockCondition = function() {
     return new TestCondition({unlockId: 'test'});
 };
 
-var testStorage = function() {
-    var TestStorage = function() {
-        this.data = {};
-    };
-    
-    TestStorage.prototype.setItem = function(key, value) {
-        this.data[key] = String(value);
-    };
-    
-    TestStorage.prototype.getItem = function(key) {
-        if (this.data.hasOwnProperty(key)) {
-            return this.data[key];
-        }
-        return null;
-    };
-    
-    return new TestStorage();
-};
-
 /**
  * @constructor
  */
@@ -63,11 +44,9 @@ describe('UnlockCondition', function() {
 describe('Unlocker', function() {
     it('initializes', function() {
         var unlocker = new GJS.Unlocker({
-            gameName: 'testGame',
             needCommitUnlocks: true,
             conditions: [testUnlockCondition()]
         });
-        expect(unlocker.gameName).toBe('testGame');
         expect(unlocker.needCommitUnlocks).toBe(true);
         expect(unlocker.unlocks['test']).toBe(false);
         expect(unlocker.state.unlocksInOrder.length).toBe(0);
@@ -75,7 +54,6 @@ describe('Unlocker', function() {
     
     it('initializes with something unlocked by default', function() {
         var unlocker = new GJS.Unlocker({
-            gameName: 'testGame',
             needCommitUnlocks: false,
             conditions: [new GJS.UnlockByDefault({unlockId: 'foo'})]
         });
@@ -88,7 +66,6 @@ describe('Unlocker', function() {
     it('updates', function() {
         var gameState = new TestGameState();
         var unlocker = new GJS.Unlocker({
-            gameName: 'testGame',
             needCommitUnlocks: false,
             conditions: [testUnlockCondition()]
         });
@@ -104,7 +81,6 @@ describe('Unlocker', function() {
     it('manually commits unlocks', function() {
         var gameState = new TestGameState();
         var unlocker = new GJS.Unlocker({
-            gameName: 'testGame',
             needCommitUnlocks: true,
             conditions: [testUnlockCondition()]
         });
@@ -126,7 +102,6 @@ describe('Unlocker', function() {
     
     it('loads from empty storage', function() {
         var unlocker = new GJS.Unlocker({
-            gameName: 'testGame',
             needCommitUnlocks: false,
             conditions: [testUnlockCondition()]
         });
@@ -144,7 +119,6 @@ describe('Unlocker', function() {
 
     it('loads from storage with unlocks', function() {
         var unlockerA = new GJS.Unlocker({
-            gameName: 'testGame',
             needCommitUnlocks: false,
             conditions: [testUnlockCondition()]
         });
@@ -159,7 +133,6 @@ describe('Unlocker', function() {
         saverA.saveTo(storage);
         
         var unlockerB = new GJS.Unlocker({
-            gameName: 'testGame',
             needCommitUnlocks: false,
             conditions: [testUnlockCondition()]
         });

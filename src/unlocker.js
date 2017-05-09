@@ -101,7 +101,6 @@ GJS.NeverUnlock.prototype = new GJS.UnlockCondition();
  */
 GJS.Unlocker = function(options) {
     var defaults = {
-        gameName: 'game',
         needCommitUnlocks: false,
         conditions: []
     };
