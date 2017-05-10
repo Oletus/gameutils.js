@@ -49,7 +49,7 @@ describe('Unlocker', function() {
         });
         expect(unlocker.needCommitUnlocks).toBe(true);
         expect(unlocker.unlocks['test']).toBe(false);
-        expect(unlocker.state.unlocksInOrder.length).toBe(0);
+        expect(unlocker.saveState.unlocksInOrder.length).toBe(0);
     });
     
     it('initializes with something unlocked by default', function() {
@@ -59,7 +59,7 @@ describe('Unlocker', function() {
         });
         expect(unlocker.needCommitUnlocks).toBe(false);
         expect(unlocker.unlocks['foo']).toBe(true);
-        expect(unlocker.state.unlocksInOrder[0]).toBe('foo');
+        expect(unlocker.saveState.unlocksInOrder[0]).toBe('foo');
     });
     
     
@@ -71,11 +71,11 @@ describe('Unlocker', function() {
         });
         unlocker.update(gameState, 1 / 60);
         expect(unlocker.unlocks['test']).toBe(false);
-        expect(unlocker.state.unlocksInOrder.length).toBe(0);
+        expect(unlocker.saveState.unlocksInOrder.length).toBe(0);
         gameState.unlocked = true;
         unlocker.update(gameState, 1 / 60);
         expect(unlocker.unlocks['test']).toBe(true);
-        expect(unlocker.state.unlocksInOrder[0]).toBe('test');
+        expect(unlocker.saveState.unlocksInOrder[0]).toBe('test');
     });
     
     it('manually commits unlocks', function() {
@@ -87,7 +87,7 @@ describe('Unlocker', function() {
         gameState.unlocked = true;
         unlocker.update(gameState, 1 / 60);
         expect(unlocker.unlocks['test']).toBe(false);
-        expect(unlocker.state.unlocksInOrder.length).toBe(0);
+        expect(unlocker.saveState.unlocksInOrder.length).toBe(0);
         expect(unlocker._fulfilledConditions.length).toBe(1);
 
         var fulfilled = unlocker.popFulfilledUnlockConditions();
@@ -97,7 +97,7 @@ describe('Unlocker', function() {
 
         unlocker.commitUnlock('test');
         expect(unlocker.unlocks['test']).toBe(true);
-        expect(unlocker.state.unlocksInOrder[0]).toBe('test');
+        expect(unlocker.saveState.unlocksInOrder[0]).toBe('test');
     });
     
     it('loads from empty storage', function() {
@@ -114,7 +114,7 @@ describe('Unlocker', function() {
         
         saver.loadFrom(storage);
         expect(unlocker.unlocks['test']).toBe(false);
-        expect(unlocker.state.unlocksInOrder.length).toBe(0);
+        expect(unlocker.saveState.unlocksInOrder.length).toBe(0);
     });
 
     it('loads from storage with unlocks', function() {
@@ -143,6 +143,6 @@ describe('Unlocker', function() {
         
         saverB.loadFrom(storage);
         expect(unlockerB.unlocks['test']).toBe(true);
-        expect(unlockerB.state.unlocksInOrder[0]).toBe('test');
+        expect(unlockerB.saveState.unlocksInOrder[0]).toBe('test');
     });
 });

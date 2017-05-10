@@ -101,6 +101,7 @@ GJS.NeverUnlock.prototype = new GJS.UnlockCondition();
  */
 GJS.Unlocker = function(options) {
     var defaults = {
+        gameName: 'game',
         needCommitUnlocks: false,
         conditions: []
     };
@@ -108,13 +109,13 @@ GJS.Unlocker = function(options) {
     this._fulfilledConditions = [];
     this.unlocks = {};
 
-    this.state = {
+    this.saveState = {
         unlocksInOrder: []
     };
-    this.stateDefaults = {
+    this.saveStateDefaults = {
         unlocksInOrder: []
     };
-    this.stateVersion = 1;
+    this.saveStateVersion = 1;
     this.saveName = 'gameutilsjs-unlocker';
 
     for (var i = 0; i < this.conditions.length; ++i) {
@@ -123,7 +124,7 @@ GJS.Unlocker = function(options) {
         // The conditions that are fulfilled by default are always committed.
         if (condition.fulfilled) {
             this.commitUnlock(condition.unlockId);
-            this.stateDefaults.unlocksInOrder.push(condition.unlockId);
+            this.saveStateDefaults.unlocksInOrder.push(condition.unlockId);
         }
     }
 };
@@ -201,7 +202,7 @@ GJS.Unlocker.prototype.popFulfilledUnlockConditions = function() {
 GJS.Unlocker.prototype.commitUnlock = function(unlockId) {
     if (this.unlocks.hasOwnProperty(unlockId)) {
         this.unlocks[unlockId] = true;
-        this.state.unlocksInOrder.push(unlockId);
+        this.saveState.unlocksInOrder.push(unlockId);
         return true;
     }
     return false;
@@ -211,8 +212,8 @@ GJS.Unlocker.prototype.commitUnlock = function(unlockId) {
  * Called after state has been loaded.
  */
 GJS.Unlocker.prototype.postLoadState = function() {
-    for (var i = 0; i < this.state.unlocksInOrder.length; ++i) {
-        var unlockId = this.state.unlocksInOrder[i];
+    for (var i = 0; i < this.saveState.unlocksInOrder.length; ++i) {
+        var unlockId = this.saveState.unlocksInOrder[i];
         this.unlocks[unlockId] = true;
     }
 };
