@@ -191,6 +191,21 @@ mathUtil.randomInt = function(max) {
 };
 
 /**
+ * @return {number} Binomial coefficient n over k (can be interpreted as number of unique combinations of k elements
+ * taken from a set of n elements)
+ */
+mathUtil.binomialCoefficient = function(n, k) {
+    // Use recursive method - don't need to worry about overflow.
+    if (k === 0) {
+        return 1;
+    }
+    if (n === k) {
+        return 1;
+    }
+    return mathUtil.binomialCoefficient(n - 1, k - 1) + mathUtil.binomialCoefficient(n - 1, k);
+};
+
+/**
  * @param {number} n Positive integer.
  * @return {number} Factorial of n.
  */

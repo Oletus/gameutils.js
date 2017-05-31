@@ -76,6 +76,23 @@ describe('util2d', function() {
             expect(mathUtil.bezierLength(0, 0, 0, 1, 1, 1, 16)).toBeNear(1.62, 0.01);
             expect(mathUtil.bezierLength(0, 0, 1, 0, 1, 1, 16)).toBeNear(1.62, 0.01);
         });
+
+        it('calculates factorial', function() {
+            expect(mathUtil.factorial(1)).toBe(1);
+            expect(mathUtil.factorial(2)).toBe(2);
+            expect(mathUtil.factorial(3)).toBe(6);
+            expect(mathUtil.factorial(4)).toBe(24);
+            expect(mathUtil.factorial(5)).toBe(120);
+            expect(mathUtil.factorial(6)).toBe(720);
+        });
+
+        it('calculates binomial coefficient', function() {
+            expect(mathUtil.binomialCoefficient(1, 1)).toBe(1);
+            expect(mathUtil.binomialCoefficient(10, 1)).toBe(10);
+            expect(mathUtil.binomialCoefficient(6, 4)).toBe(15);
+            expect(mathUtil.binomialCoefficient(20, 5)).toBe(15504);
+            expect(mathUtil.binomialCoefficient(40, 8)).toBe(76904685);
+        });
     });
 
     describe('cssUtil', function() {
