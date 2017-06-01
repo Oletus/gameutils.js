@@ -6,7 +6,7 @@ describe('arrayUtil', function() {
             expect(arr[i]).toBe(original[i]);
         }
     };
-    
+
     it('shuffles an array', function() {
         var arr = [1, 2, 3, 4, 5, 6];
         var original = arr.slice(0);
@@ -22,7 +22,7 @@ describe('arrayUtil', function() {
         expect(arr).not.toBe(shuffled);
         expectIdentical(arr, original);
     });
-    
+
     it('removes elements from an array', function() {
         var arr1 = [1, 2, 6, 5, 4, 3];
         var original = arr1.slice(0);
@@ -45,6 +45,26 @@ describe('arrayUtil', function() {
         expect(filtered.length).toBe(6);
         
         expectIdentical(arr1, original);
+    });
+    
+    it('generates subsets of an array in order', function() {
+        var arr = [1, 2, 3, 4, 5];
+        var original = arr.slice(0);
+
+        expectIdentical(arrayUtil.nthSubset(arr, 5, 0), [1, 2, 3, 4, 5]);
+
+        expectIdentical(arrayUtil.nthSubset(arr, 3, 0), [1, 2, 3]);
+        expectIdentical(arrayUtil.nthSubset(arr, 3, 1), [1, 2, 4]);
+        expectIdentical(arrayUtil.nthSubset(arr, 3, 2), [1, 2, 5]);
+        expectIdentical(arrayUtil.nthSubset(arr, 3, 3), [1, 3, 4]);
+        expectIdentical(arrayUtil.nthSubset(arr, 3, 4), [1, 3, 5]);
+        expectIdentical(arrayUtil.nthSubset(arr, 3, 5), [1, 4, 5]);
+        expectIdentical(arrayUtil.nthSubset(arr, 3, 6), [2, 3, 4]);
+        expectIdentical(arrayUtil.nthSubset(arr, 3, 7), [2, 3, 5]);
+        expectIdentical(arrayUtil.nthSubset(arr, 3, 8), [2, 4, 5]);
+        expectIdentical(arrayUtil.nthSubset(arr, 3, 9), [3, 4, 5]);
+
+        expectIdentical(arr, original);
     });
     
     it('stable sorts an array', function() {

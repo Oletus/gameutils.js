@@ -151,6 +151,45 @@ arrayUtil.stableSort = function(array, compareFunction) {
 };
 
 /**
+ * Get nth unique subset of length subsetLength from array.
+ * Reliable as long as there are less than 2^32 possible subsets.
+ * To get the number of possible subsets, use mathUtil.binomialCoefficient(array.length, subsetLength).
+ * @param {Array} array An array to get the subset from.
+ * @param {number} subsetLength Length of the subset.
+ * @param {number} n Index of the subset to generate, starting from 0.
+ * @return {Array} A new array that is the nth unique subset of subsetLength elements from the input array.
+ */
+arrayUtil.nthSubset = function(array, subsetLength, n) {
+    // Generate the combinations in a more natural order.
+    // TODO: the algorithm below could probably be adjusted to do things in different order, so this step would not be needed:
+    n = mathUtil.binomialCoefficient(array.length, subsetLength) - n - 1;
+
+    var subset = [];
+    var i = 0;
+    var remainingSubsetLength = subsetLength;
+    while (remainingSubsetLength > 0) {
+        if (array.length - i <= remainingSubsetLength) {
+            // Only one possible subset.
+            subset.push(array[i]);
+            --remainingSubsetLength;
+            ++i;
+            continue;
+        }
+        // Elements left in the array after element i:
+        var elementsLeftAfterI = array.length - i - 1;
+        // You can form (elementsLeft over remainingSubsetLength) combinations without using element i.
+        var combinationsWithoutI = mathUtil.binomialCoefficient(elementsLeftAfterI, remainingSubsetLength);
+        if (n >= combinationsWithoutI) {
+            subset.push(array[i]);
+            --remainingSubsetLength;
+            n -= combinationsWithoutI;
+        }
+        ++i;
+    }
+    return subset;
+};
+
+/**
  * @param {Array} array An array to permute.
  * @param {number} n Index of the permutation to generate.
  * @return {Array} A new array that is the nth permutation of the input array.
