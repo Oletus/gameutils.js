@@ -6,7 +6,8 @@ var convert = function(inputFile, outputFile, codecSettings) {
     if (codecSettings === undefined) {
         codecSettings = '';
     }
-    exec('ffmpeg -i ' + inputFile + ' -vn -ac 2 -b:a 128k ' + codecSettings + ' ' + outputFile)
+    var cmd = 'ffmpeg -i ' + inputFile + ' -y -vn -ac 2 -b:a 128k ' + codecSettings + ' ' + outputFile;
+    exec(cmd);
 };
 
 var oggToMp3 = function(inputFile) {
