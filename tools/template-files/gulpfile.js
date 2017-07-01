@@ -126,27 +126,3 @@ gulp.task('web2exe',
           shell.task([
     'web2exe-win.exe ' + fullOutDirJS + ' --main index.html --export-to windows-x32 --width 1280 --height 720 --nw-version 0.18.8 --output-dir ' + fullOutDirEXE + ' --app-name ' + packageJson.name
 ]));
-
-gulp.task('ogg2mp3', function () {
-    // transcode ogg files to mp3
-    return gulp.src('assets/audio/*.ogg')
-    .pipe(ffmpeg('mp3', function (cmd) {
-        return cmd
-        .audioBitrate('128k')
-        .audioChannels(2)
-        .audioCodec('libmp3lame')
-    }))
-    .pipe(gulp.dest('assets/audio/'));
-});
-
-gulp.task('mp32ogg', function () {
-    // transcode mp3 files to ogg
-    return gulp.src('assets/audio/*.mp3')
-    .pipe(ffmpeg('ogg', function (cmd) {
-        return cmd
-        .audioBitrate('128k')
-        .audioChannels(2)
-        .audioCodec('vorbis')
-    }))
-    .pipe(gulp.dest('assets/audio/'));
-});
