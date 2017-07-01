@@ -39,16 +39,16 @@ Note: use **cmd** for running gulp commands on Windows, NOT GitHub for Windows s
 To start a game project (it will be created in a new folder under gameutils.js):
 
 Step 1:
-* **gulp game-from-template --name <game name>** - create a game based on the basic template.
-* **gulp game-from-threejs-template --name <game name>** - create a game based on the three.js template.
+* **npm run game-from-template -- --name <game name>** - create a game based on the basic template.
+* **npm run game-from-threejs-template -- --name <game name>** - create a game based on the three.js template.
 
 Step 2 (install tools for the game):
 * In the newly created game folder, run **npm install**
 
 Things you can do with the tools for a game project:
 
-* **gulp ogg2mp3** - convert all ogg files under assets/audio to mp3.
-* **gulp mp32ogg** - convert all mp3 files under assets/audio to ogg.
-* **gulp compile** - compile the project as minified under out/js.
-* **gulp compile_js** - same as above, but process only JS, not assets. Good for incremental updates.
-* **gulp web2exe** - convert index.html to exe
+* **npm run ogg2mp3** - convert all ogg files under assets/audio to mp3.
+* **npm run mp32ogg** - convert all mp3 files under assets/audio to ogg.
+* **npm run compile** - compile the project as minified under out/js.
+* **npm run compile_js** - same as above, but process only JS, not assets. Good for incremental updates.
+* **npm run web2exe** - convert index.html to exe

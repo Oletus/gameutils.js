@@ -1,6 +1,6 @@
 {
   "name": "gameutils.js",
-  "version": "0.15.0",
+  "version": "0.16.0",
   "description": "Gameutils.js helper library",
   "repository": "https://github.com/Oletus/gameutils.js.git",
   "license": "MIT",
@@ -16,5 +16,9 @@
     "htmlparser2": "^3.8.3",
     "ncp": "^2.0.0",
     "yargs": "^6.4.0"
+  },
+  "scripts": {
+    "game-from-template": "gulp game-from-template",
+    "game-from-threejs-template": "gulp game-from-threejs-template"
   }
 }

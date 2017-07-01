@@ -6,8 +6,7 @@ var ncp = require('ncp');
 var argv = require('yargs').argv;
 
 var packageJson = require('./package.json');
-
-// TODO: Could be nice if some more of the dependency tasks could be hidden from the user somehow.
+var templateNpmScripts = require('./tools/template-files/npm-scripts.json');
 
 var checkValidGameName = function(name) {
     if (name === undefined) {
@@ -37,6 +36,7 @@ var createTemplateDirs = function(gameName) {
 
 var copyPackageJSON = function(gameName) {
     packageJsonCopy = JSON.parse(JSON.stringify(packageJson));
+    packageJsonCopy.scripts = JSON.parse(JSON.stringify(templateNpmScripts));
     packageJsonCopy.name = gameName;
     packageJsonCopy.version = '0.1.0';
     packageJsonCopy.description = 'Game project created using gameutils.js';
@@ -117,5 +117,3 @@ gulp.task('game-from-threejs-template',
     ['copy-template-threejs', 'init-game-from-template'],
     copySrcToGame
 );
-
-gulp.task('default', ['web2exe']);

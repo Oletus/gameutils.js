@@ -1,0 +1,7 @@
+{
+  "ogg2mp3": "gulp ogg2mp3",
+  "mp32ogg": "gulp mp32ogg",
+  "compile": "gulp compile",
+  "compile_js": "gulp compile_js",
+  "web2exe": "gulp web2exe"
+}
