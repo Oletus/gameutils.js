@@ -33,7 +33,10 @@ var getJsList = function(htmlContents) {
     var scriptSrc = [];
     var parser = new htmlparser.Parser({
         onopentag: function(name, attribs) {
-            if(name === "script"){
+            if (name === "script") {
+                if (attribs.src === undefined) {
+                    throw new Error('Unsupported: inline scripts in HTML. Move the script to a .js file.');
+                }
                 scriptSrc.push(attribs.src);
             }
         }
