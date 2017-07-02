@@ -81,7 +81,10 @@ var getJsList = function(htmlContents) {
     var scriptSrc = [];
     var parser = new htmlparser.Parser({
         onopentag: function(name, attribs) {
-            if(name === "script"){
+            if (name === "script") {
+                if (attribs.src === undefined) {
+                    throw new Error('Inline script tags not supported. Move the script to a separate .js file');
+                }
                 scriptSrc.push(attribs.src);
             }
         }
