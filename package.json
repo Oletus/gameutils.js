@@ -5,6 +5,7 @@
   "repository": "https://github.com/Oletus/gameutils.js.git",
   "license": "MIT",
   "devDependencies": {
+    "archiver": "^1.3.0",
     "google-closure-compiler": "^20151015.0.0",
     "gulp": "^3.9.0",
     "gulp-closure-compiler": "^0.3.1",

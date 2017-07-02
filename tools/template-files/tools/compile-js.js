@@ -3,6 +3,7 @@ const htmlparser = require("htmlparser2");
 const fs = require('fs');
 const path = require('path');
 const ncp = require('ncp');
+var archiver = require('archiver');
 
 var configPaths = {
     rootDir: '../',
@@ -10,17 +11,27 @@ var configPaths = {
     sourceIndexPath: 'index.html',  // must be a file located in rootDir
     outDir: 'out/',  // relative to rootDir
     outDirJS: 'js/',  // relative to outDir
+    outDirNWJS: 'nwjs/',  // relative to outDir
     outDirEXE: 'exe/'  // relative to outDir
 };
 
 const packageJson = require(path.join(__dirname, configPaths.rootDir, 'package.json'));
+const nwjsPackageJsonTemplate = require(path.join(__dirname, 'nwjs_package.json'));
 
 const rootDir = path.join(__dirname, configPaths.rootDir);
 const compilerPath = path.join(__dirname, configPaths.rootDir, 'node_modules/google-closure-compiler/compiler.jar');
 const sourceAssetsPath = path.join(__dirname, configPaths.rootDir, configPaths.sourceAssetsPath);
 const sourceIndexPath = path.join(__dirname, configPaths.rootDir, configPaths.sourceIndexPath);
 const outDirJS = path.join(__dirname, configPaths.rootDir, configPaths.outDir, configPaths.outDirJS);
+const outDirNWJS = path.join(__dirname, configPaths.rootDir, configPaths.outDir, configPaths.outDirNWJS);
 const outDirEXE = path.join(__dirname, configPaths.rootDir, configPaths.outDir, configPaths.outDirEXE);
+
+var tasksDone = {
+    copyAssets: false,
+    compileJS: false,
+    compileHTML: false,
+    createNWJSZip: false
+};
 
 /**
  * Returns the parent directory of a directory.
@@ -38,6 +49,29 @@ var mkdirIfNeeded = function(dir) {
         mkdirIfNeeded(pathParent(dir));
         fs.mkdirSync(dir);
     }
+};
+
+var startZipping = function(targetPath) {
+    var output = fs.createWriteStream(targetPath);
+    var archive = archiver('zip', {
+        store: true // Sets the compression method to STORE. 
+    });
+     
+    // listen for all archive data to be written 
+    output.on('close', function() {
+      console.log(archive.pointer() + ' total bytes');
+      console.log('archiver has been finalized and the output file descriptor has closed.');
+    });
+     
+    // good practice to catch this error explicitly 
+    archive.on('error', function(err) {
+      throw err;
+    });
+     
+    // pipe archive data to the file 
+    archive.pipe(output);
+    
+    return archive;
 };
 
 /**
@@ -106,14 +140,24 @@ var copyAssets = function() {
         if (err) {
             return console.error(err);
         }
-        console.log('done copying assets!');
+        tasksDone.copyAssets = true;
+        setTimeout(outDirJSTaskReady, 0);
     });
 };
 
-var compileHtml = function() {
+var compileHTML = function() {
     mkdirIfNeeded(outDirJS);
     var src = convertJsList(fs.readFileSync(sourceIndexPath), 'game.min.js');
     fs.writeFileSync(path.join(outDirJS, 'index.html'), src, 'utf8');
+    tasksDone.compileHTML = true;
+    setTimeout(outDirJSTaskReady, 0);
+};
+
+var getNWJSPackageJSON = function() {
+    var nwjsPackage = JSON.parse(JSON.stringify(nwjsPackageJsonTemplate));
+    nwjsPackage.version = packageJson.version;
+    nwjsPackage.name = packageJson.name;
+    return JSON.stringify(nwjsPackage);
 };
 
 var compileJS = function() {
@@ -132,6 +176,27 @@ var compileJS = function() {
     var compiledJS = fs.readFileSync(outputPath);
     compiledJS += '\n//# sourceMappingURL=../game.min.map';
     fs.writeFileSync(outputPath, compiledJS, 'utf8');
+    tasksDone.compileJS = true;
+    setTimeout(outDirJSTaskReady, 0);
+};
+
+var createNWJSZip = function() {
+    mkdirIfNeeded(outDirNWJS);
+    
+    //fs.writeFileSync(path.join(outDirNWJS, 'package.json'), getNWJSPackageJSON());
+    
+    var archive = startZipping(path.join(outDirNWJS, 'package.nw'));
+
+    // append source files
+    archive.directory(outDirJS, '/');
+
+    // append package.json for nw.js
+    archive.append(getNWJSPackageJSON(), {name: 'package.json'});
+
+    // finalize the archive (ie we are done appending files but streams have to finish yet) 
+    archive.finalize();
+    tasksDone.createNWJSZip = true;
+    setTimeout(outDirJSTaskReady, 0);
 };
 
 var args = process.argv.slice(2);
@@ -139,8 +204,18 @@ var onlyJS = false;
 if (args.length > 0 && args[0] == '--only-js') {
     onlyJS = true;
 }
+
+var outDirJSTaskReady = function() {
+    if (!tasksDone.copyAssets || !tasksDone.compileJS || !tasksDone.compileHTML) {
+        return;
+    }
+    if (!onlyJS && !tasksDone.createNWJSZip) {
+        createNWJSZip();
+    }
+};
+
 if (!onlyJS) {
     copyAssets();
-    compileHtml();
+    compileHTML();
 }
 compileJS();

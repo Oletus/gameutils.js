@@ -59,7 +59,7 @@ var copyUsefulExampleAssets = function(gameName) {
 };
 
 var copyTemplateFiles = function(gameName) {
-    ncp('./tools/template-files/gulpfile.js', './' + gameName + '/gulpfile.js', function(err) {
+    ncp('./tools/template-files/tools', './' + gameName + '/tools', function(err) {
         if (err) {
             return console.error(err);
         }
