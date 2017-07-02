@@ -1,7 +1,7 @@
 {
   "ogg2mp3": "node tools/ffmpeg-batch.js ogg2mp3 assets/audio/",
   "mp32ogg": "node tools/ffmpeg-batch.js mp32ogg assets/audio/",
-  "compile": "gulp compile",
-  "compile_js": "gulp compile_js",
+  "compile": "node tools/compile-js.js",
+  "compile_js": "node tools/compile-js.js --only-js",
   "web2exe": "gulp web2exe"
 }
