@@ -40,7 +40,7 @@ To start a game project (it will be created in a new folder under gameutils.js):
 
 Step 1:
 * **npm run game-from-template -- --name <game name>** - create a game based on the basic template.
-* **npm run game-from-threejs-template -- --name <game name>** - create a game based on the three.js template.
+* **npm run game-from-template -- --name <game name> --template threejs** - create a game based on the three.js template.
 
 Step 2 (install tools for the game):
 * In the newly created game folder, run **npm install**
@@ -49,6 +49,5 @@ Things you can do with the tools for a game project:
 
 * **npm run ogg2mp3** - convert all ogg files under assets/audio to mp3.
 * **npm run mp32ogg** - convert all mp3 files under assets/audio to ogg.
-* **npm run compile** - compile the project as minified under out/js.
+* **npm run compile** - compile the project as minified under out/js and creates an NW.JS package.
 * **npm run compile_js** - same as above, but process only JS, not assets. Good for incremental updates.
-* **npm run web2exe** - convert index.html to exe
