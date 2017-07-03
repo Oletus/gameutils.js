@@ -2,7 +2,8 @@ const { exec, execSync } = require('child_process');
 const htmlparser = require("htmlparser2");
 const fs = require('fs');
 const path = require('path');
-const ncp = require('ncp');
+const fse = require('fs-extra');
+const async = require('async');
 var archiver = require('archiver');
 
 var configPaths = {
@@ -25,13 +26,6 @@ const sourceIndexPath = path.join(__dirname, configPaths.rootDir, configPaths.so
 const outDirJS = path.join(__dirname, configPaths.rootDir, configPaths.outDir, configPaths.outDirJS);
 const outDirNWJS = path.join(__dirname, configPaths.rootDir, configPaths.outDir, configPaths.outDirNWJS);
 const outDirEXE = path.join(__dirname, configPaths.rootDir, configPaths.outDir, configPaths.outDirEXE);
-
-var tasksDone = {
-    copyAssets: false,
-    compileJS: false,
-    compileHTML: false,
-    createNWJSZip: false
-};
 
 /**
  * Returns the parent directory of a directory.
@@ -56,18 +50,15 @@ var startZipping = function(targetPath) {
     var archive = archiver('zip', {
         store: true // Sets the compression method to STORE. 
     });
-     
-    // listen for all archive data to be written 
+
     output.on('close', function() {
-      console.log(archive.pointer() + ' total bytes');
-      console.log('archiver has been finalized and the output file descriptor has closed.');
+      console.log('archive written: ' + archive.pointer() + ' total bytes');
     });
-     
-    // good practice to catch this error explicitly 
+
     archive.on('error', function(err) {
       throw err;
     });
-     
+
     // pipe archive data to the file 
     archive.pipe(output);
     
@@ -137,23 +128,15 @@ var convertJsList = function(htmlContents, jsReplacement) {
     return output.join('');
 };
 
-var copyAssets = function() {
+var copyAssets = function(callback) {
     mkdirIfNeeded(outDirJS);
-    ncp(sourceAssetsPath, path.join(outDirJS, 'assets'), function (err) {
-        if (err) {
-            return console.error(err);
-        }
-        tasksDone.copyAssets = true;
-        setTimeout(outDirJSTaskReady, 0);
-    });
+    fse.copy(sourceAssetsPath, path.join(outDirJS, 'assets'), callback);
 };
 
-var compileHTML = function() {
+var compileHTML = function(callback) {
     mkdirIfNeeded(outDirJS);
     var src = convertJsList(fs.readFileSync(sourceIndexPath), 'game.min.js');
-    fs.writeFileSync(path.join(outDirJS, 'index.html'), src, 'utf8');
-    tasksDone.compileHTML = true;
-    setTimeout(outDirJSTaskReady, 0);
+    fs.writeFile(path.join(outDirJS, 'index.html'), src, 'utf8', callback);
 };
 
 var getNWJSPackageJSON = function() {
@@ -163,7 +146,7 @@ var getNWJSPackageJSON = function() {
     return JSON.stringify(nwjsPackage);
 };
 
-var compileJS = function() {
+var compileJS = function(callback) {
     mkdirIfNeeded(outDirJS);
     var jsList = getJsList(fs.readFileSync(sourceIndexPath));
     for (var i = 0; i < jsList.length; ++i) {
@@ -178,12 +161,11 @@ var compileJS = function() {
     execSync(command.join(' '));
     var compiledJS = fs.readFileSync(outputPath);
     compiledJS += '\n//# sourceMappingURL=../game.min.map';
-    fs.writeFileSync(outputPath, compiledJS, 'utf8');
-    tasksDone.compileJS = true;
-    setTimeout(outDirJSTaskReady, 0);
+    fs.writeFile(outputPath, compiledJS, 'utf8', callback);
 };
 
-var createNWJSZip = function() {
+var createNWJSZip = function(callback) {
+    console.log('creating nw.js package');
     mkdirIfNeeded(outDirNWJS);
     
     //fs.writeFileSync(path.join(outDirNWJS, 'package.json'), getNWJSPackageJSON());
@@ -198,8 +180,11 @@ var createNWJSZip = function() {
 
     // finalize the archive (ie we are done appending files but streams have to finish yet) 
     archive.finalize();
-    tasksDone.createNWJSZip = true;
-    setTimeout(outDirJSTaskReady, 0);
+    setImmediate(function() {
+        if (callback !== undefined) {
+            callback(null);
+        }
+    });
 };
 
 var args = process.argv.slice(2);
@@ -208,17 +193,18 @@ if (args.length > 0 && args[0] == '--only-js') {
     onlyJS = true;
 }
 
-var outDirJSTaskReady = function() {
-    if (!tasksDone.copyAssets || !tasksDone.compileJS || !tasksDone.compileHTML) {
-        return;
-    }
-    if (!onlyJS && !tasksDone.createNWJSZip) {
+if (onlyJS) {
+    compileJS(function() {});
+} else {
+    async.parallel([
+        copyAssets,
+        compileHTML,
+        compileJS
+    ], function(err) {
+        if (err) {
+            console.error(err);
+            return;
+        }
         createNWJSZip();
-    }
-};
-
-if (!onlyJS) {
-    copyAssets();
-    compileHTML();
+    });
 }
-compileJS();

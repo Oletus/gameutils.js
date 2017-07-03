@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const ncp = require('ncp');
+const fse = require('fs-extra');
 
 var argv = require('yargs').argv;
 
@@ -63,12 +63,12 @@ var copyPackageJSON = function(gameDir, gameName) {
 };
 
 var copyUsefulExampleAssets = function(gameDir) {
-    ncp(path.join(rootDir, 'examples/assets/gfx/bitmapfont-medium.png'), path.join(gameDir, 'assets/gfx/bitmapfont-medium.png'), function(err) {
+    fse.copy(path.join(rootDir, 'examples/assets/gfx/bitmapfont-medium.png'), path.join(gameDir, 'assets/gfx/bitmapfont-medium.png'), function(err) {
         if (err) {
             return console.error(err);
         }
     });
-    ncp(path.join(rootDir, 'examples/assets/gfx/bitmapfont-tiny.png'), path.join(gameDir, 'assets/gfx/bitmapfont-tiny.png'), function(err) {
+    fse.copy(path.join(rootDir, 'examples/assets/gfx/bitmapfont-tiny.png'), path.join(gameDir, 'assets/gfx/bitmapfont-tiny.png'), function(err) {
         if (err) {
             return console.error(err);
         }
@@ -76,12 +76,12 @@ var copyUsefulExampleAssets = function(gameDir) {
 };
 
 var copyTemplateFiles = function(gameDir) {
-    ncp(path.join(rootDir, 'tools/template-files/tools'), path.join(gameDir, 'tools'), function(err) {
+    fse.copy(path.join(rootDir, 'tools/template-files/tools'), path.join(gameDir, 'tools'), function(err) {
         if (err) {
             return console.error(err);
         }
     });
-    ncp(path.join(rootDir, 'tools/template-files/gitignore.txt'), path.join(gameDir, '.gitignore'), function(err) {
+    fse.copy(path.join(rootDir, 'tools/template-files/gitignore.txt'), path.join(gameDir, '.gitignore'), function(err) {
         if (err) {
             return console.error(err);
         }
@@ -89,7 +89,7 @@ var copyTemplateFiles = function(gameDir) {
 };
 
 var copyTemplateIndex = function(gameDir, templateName) {
-    ncp(path.join(rootDir, templateName), path.join(gameDir, 'index.html'), function(err) {
+    fse.copy(path.join(rootDir, templateName), path.join(gameDir, 'index.html'), function(err) {
         if (err) {
             return console.error(err);
         }
@@ -97,7 +97,7 @@ var copyTemplateIndex = function(gameDir, templateName) {
 };
 
 var copySrcToGame = function() {
-    ncp(path.join(rootDir, 'src'), path.join(gameDir, 'src'), function(err) {
+    fse.copy(path.join(rootDir, 'src'), path.join(gameDir, 'src'), function(err) {
         if (err) {
             return console.error(err);
         }
