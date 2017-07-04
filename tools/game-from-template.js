@@ -1,3 +1,4 @@
+const htmlparser = require("htmlparser2");
 const fs = require('fs');
 const path = require('path');
 const fse = require('fs-extra');
@@ -88,12 +89,56 @@ var copyTemplateFiles = function(gameDir) {
     });
 };
 
-var copyTemplateIndex = function(gameDir, templateName) {
-    fse.copy(path.join(rootDir, templateName), path.join(gameDir, 'index.html'), function(err) {
-        if (err) {
-            return console.error(err);
+var putInlineJSToFile = function(htmlContents, targetHTMLPath, targetJSPath) {
+    var addedScriptRef = false;
+    var htmlOutput = [''];
+    var scriptOutput = [''];
+    var inScript = false;
+    var parser = new htmlparser.Parser({
+        onopentag: function(name, attribs) {
+            if (name == 'script' && attribs['src'] === undefined) {
+                if (addedScriptRef) {
+                    throw new Error('Multiple inline scripts not supported.');
+                }
+                var relativeJSPath = path.relative(path.dirname(targetHTMLPath), targetJSPath);
+                relativeJSPath = relativeJSPath.replace(/\\/g, "/");
+                htmlOutput.push('<script src="' + relativeJSPath + '">');
+                addedScriptRef = true;
+                inScript = true;
+            } else {
+                var tagOutput = '<' + name;
+                for (attr in attribs) {
+                    tagOutput += ' ' + attr + '="' + attribs[attr] + '"';
+                }
+                tagOutput += '>';
+                htmlOutput.push(tagOutput);
+            }
+        },
+        onclosetag: function(name) {
+            htmlOutput.push('</' + name + '>')
+            inScript = false;
+        },
+        ontext: function(text) {
+            if (inScript) {
+                scriptOutput.push(text);
+            } else {
+                htmlOutput.push(text)
+            }
+        },
+        onprocessinginstruction: function(name, data) {
+            htmlOutput.push('<' + data + '>')
         }
-    });
+    }, {decodeEntities: false});
+    parser.write(htmlContents);
+    parser.end();
+    fs.writeFileSync(targetJSPath, scriptOutput.join(''));
+    fs.writeFileSync(targetHTMLPath, htmlOutput.join(''));
+};
+
+var copyTemplateIndex = function(gameDir, templateName) {
+    mkdirIfNeeded(path.join(gameDir, 'src'));
+    var htmlContents = fs.readFileSync(path.join(rootDir, templateName));
+    htmlContents = putInlineJSToFile(htmlContents, path.join(gameDir, 'index.html'), path.join(gameDir, 'src/game.js'));
 };
 
 var copySrcToGame = function() {
