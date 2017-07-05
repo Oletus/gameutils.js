@@ -25,31 +25,13 @@ var checkValidGameName = function(name) {
     return true;
 };
 
-/**
- * Returns the parent directory of a directory.
- */
-var pathParent = function(dir) {
-    var parsedDir = path.parse(path.normalize(dir)).dir;
-    return parsedDir;
-};
-
-/**
- * Creates a directory if it doesn't exist yet, including parent directories.
- */
-var mkdirIfNeeded = function(dir) {
-    if (!fs.existsSync(dir)) {
-        mkdirIfNeeded(pathParent(dir));
-        fs.mkdirSync(dir);
-    }
-};
-
 var createTemplateDirs = function(gameDir) {
-    mkdirIfNeeded(gameDir);
-    mkdirIfNeeded(path.join(gameDir, 'assets'));
-    mkdirIfNeeded(path.join(gameDir, 'assets/audio'));
-    mkdirIfNeeded(path.join(gameDir, 'assets/fonts'));
-    mkdirIfNeeded(path.join(gameDir, 'assets/gfx'));
-    mkdirIfNeeded(path.join(gameDir, 'assets/models'));
+    fse.ensureDirSync(gameDir);
+    fse.ensureDirSync(path.join(gameDir, 'assets'));
+    fse.ensureDirSync(path.join(gameDir, 'assets/audio'));
+    fse.ensureDirSync(path.join(gameDir, 'assets/fonts'));
+    fse.ensureDirSync(path.join(gameDir, 'assets/gfx'));
+    fse.ensureDirSync(path.join(gameDir, 'assets/models'));
 };
 
 var copyPackageJSON = function(gameDir, gameName) {
@@ -136,7 +118,7 @@ var putInlineJSToFile = function(htmlContents, targetHTMLPath, targetJSPath) {
 };
 
 var copyTemplateIndex = function(gameDir, templateName) {
-    mkdirIfNeeded(path.join(gameDir, 'src'));
+    fse.ensureDirSync(path.join(gameDir, 'src'));
     var htmlContents = fs.readFileSync(path.join(rootDir, templateName));
     htmlContents = putInlineJSToFile(htmlContents, path.join(gameDir, 'index.html'), path.join(gameDir, 'src/game.js'));
 };
