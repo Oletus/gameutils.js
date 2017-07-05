@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const fse = require('fs-extra');
 const async = require('async');
+const nwfindpath = require('nw').findpath;
 var archiver = require('archiver');
 
 var configPaths = {
@@ -33,16 +34,6 @@ const outDirEXE = path.join(__dirname, configPaths.rootDir, configPaths.outDir, 
 var pathParent = function(dir) {
     var parsedDir = path.parse(path.normalize(dir)).dir;
     return parsedDir;
-};
-
-/**
- * Creates a directory if it doesn't exist yet, including parent directories.
- */
-var mkdirIfNeeded = function(dir) {
-    if (!fs.existsSync(dir)) {
-        mkdirIfNeeded(pathParent(dir));
-        fs.mkdirSync(dir);
-    }
 };
 
 var startZipping = function(targetPath) {
@@ -129,12 +120,12 @@ var convertJsList = function(htmlContents, jsReplacement) {
 };
 
 var copyAssets = function(callback) {
-    mkdirIfNeeded(outDirJS);
+    fse.ensureDirSync(outDirJS);
     fse.copy(sourceAssetsPath, path.join(outDirJS, 'assets'), callback);
 };
 
 var compileHTML = function(callback) {
-    mkdirIfNeeded(outDirJS);
+    fse.ensureDirSync(outDirJS);
     var src = convertJsList(fs.readFileSync(sourceIndexPath), 'game.min.js');
     fs.writeFile(path.join(outDirJS, 'index.html'), src, 'utf8', callback);
 };
@@ -147,7 +138,7 @@ var getNWJSPackageJSON = function() {
 };
 
 var compileJS = function(callback) {
-    mkdirIfNeeded(outDirJS);
+    fse.ensureDirSync(outDirJS);
     var jsList = getJsList(fs.readFileSync(sourceIndexPath));
     for (var i = 0; i < jsList.length; ++i) {
         jsList[i] = path.join(rootDir, jsList[i]);
@@ -166,7 +157,7 @@ var compileJS = function(callback) {
 
 var createNWJSZip = function(callback) {
     console.log('creating nw.js package');
-    mkdirIfNeeded(outDirNWJS);
+    fse.ensureDirSync(outDirNWJS);
     
     //fs.writeFileSync(path.join(outDirNWJS, 'package.json'), getNWJSPackageJSON());
     
@@ -180,7 +171,43 @@ var createNWJSZip = function(callback) {
 
     // finalize the archive (ie we are done appending files but streams have to finish yet) 
     archive.finalize();
-    setImmediate(function() {
+    
+    // Note that there's no way to wait for the zipping process to be completely done. So we use this hacky timeout
+    // instead. TODO: Clean this up! It can make the script unreliable.
+    setTimeout(function() {
+        if (callback !== undefined) {
+            callback(null);
+        }
+    }, 1000);
+};
+
+var appendNWJSZipToNWExe = function(callback) {
+    if (process.platform !== 'win32') {
+        console.log('Creating nw.js based exe on other platforms than Windows not supported.');
+        return;
+    }
+    var nwpath = nwfindpath();
+    var nwSourceDir = path.dirname(nwpath);
+    var packageNwSourcePath = path.join(outDirNWJS, 'package.nw');
+
+    var exeOutDir = path.join(outDirNWJS, 'win');
+    if (fs.existsSync(exeOutDir)) {
+        fse.removeSync(exeOutDir);
+    }
+    fse.copy(nwSourceDir, exeOutDir, function() {
+        var nwExePath = path.join(exeOutDir, 'nw.exe');
+        var outputExeName = packageJson.name + '.exe';
+        var outputExePath = path.join(exeOutDir, outputExeName);
+
+        // Alternative: just copy the package.nw into place and rename the exe.
+        //fse.copySync(packageNwSourcePath + path.join(exeOutDir, 'package.nw');
+        //fse.moveSync(nwExePath, outputExePath);
+
+        // Combine the binaries:
+        execSync('copy /b nw.exe+..\\package.nw ' + outputExeName,
+                 { cwd: exeOutDir });
+        fse.removeSync(nwExePath);
+
         if (callback !== undefined) {
             callback(null);
         }
@@ -205,6 +232,12 @@ if (onlyJS) {
             console.error(err);
             return;
         }
-        createNWJSZip();
+        createNWJSZip(function(err) {
+            if (err) {
+                console.error(err);
+                return;
+            }
+            appendNWJSZipToNWExe();
+        });
     });
 }
