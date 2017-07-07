@@ -31,7 +31,6 @@ To install:
 
 * Install [node.js](https://nodejs.org/en/) LTS version (tested with 6.10.2)
 * Install [ffmpeg](https://www.ffmpeg.org/) and add it to PATH
-* To use web2exe - install [web2exe Windows release](https://github.com/jyapayne/Web2Executable) and add it to PATH (tested with v0.5.4b Web2ExeWin-CMD)
 * Run **npm install** in the directory where package.json is.
 
 Note: use **cmd** for running gulp commands on Windows, NOT GitHub for Windows shell:
