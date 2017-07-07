@@ -169,16 +169,12 @@ var createNWJSZip = function(callback) {
     // append package.json for nw.js
     archive.append(getNWJSPackageJSON(), {name: 'package.json'});
 
-    // finalize the archive (ie we are done appending files but streams have to finish yet) 
-    archive.finalize();
-    
-    // Note that there's no way to wait for the zipping process to be completely done. So we use this hacky timeout
-    // instead. TODO: Clean this up! It can make the script unreliable.
-    setTimeout(function() {
+    // finalize the archive (ie we are done appending files but streams have to finish yet)
+    var ret = archive.finalize().then(function() {
         if (callback !== undefined) {
             callback(null);
         }
-    }, 1000);
+    });
 };
 
 var appendNWJSZipToNWExe = function(callback) {
