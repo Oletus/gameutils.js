@@ -5,28 +5,22 @@ const path = require('path');
 const fse = require('fs-extra');
 const async = require('async');
 const nwfindpath = require('nw').findpath;
-var archiver = require('archiver');
+const archiver = require('archiver');
 
-var configPaths = {
-    rootDir: '../',
-    sourceAssetsPath: 'assets/',  // relative to rootDir
-    sourceIndexPath: 'index.html',  // must be a file located in rootDir
-    outDir: 'out/',  // relative to rootDir
-    outDirJS: 'js/',  // relative to outDir
-    outDirNWJS: 'nwjs/',  // relative to outDir
-    outDirEXE: 'exe/'  // relative to outDir
-};
+const configPaths = require(path.join(__dirname, 'tools-config.json')).paths;
+const configCompileSettings = require(path.join(__dirname, 'tools-config.json')).compileSettings;
 
 const packageJson = require(path.join(__dirname, configPaths.rootDir, 'package.json'));
 const nwjsPackageJsonTemplate = require(path.join(__dirname, 'nwjs_package.json'));
 
-const rootDir = path.join(__dirname, configPaths.rootDir);
-const compilerPath = path.join(__dirname, configPaths.rootDir, 'node_modules/google-closure-compiler/compiler.jar');
-const sourceAssetsPath = path.join(__dirname, configPaths.rootDir, configPaths.sourceAssetsPath);
-const sourceIndexPath = path.join(__dirname, configPaths.rootDir, configPaths.sourceIndexPath);
-const outDirJS = path.join(__dirname, configPaths.rootDir, configPaths.outDir, configPaths.outDirJS);
-const outDirNWJS = path.join(__dirname, configPaths.rootDir, configPaths.outDir, configPaths.outDirNWJS);
-const outDirEXE = path.join(__dirname, configPaths.rootDir, configPaths.outDir, configPaths.outDirEXE);
+const compileUtils = require('./compile-utils.js');
+const rootDir = compileUtils.paths.rootDir;
+const compilerPath = compileUtils.paths.compilerPath;
+const sourceAssetsPath = compileUtils.paths.sourceAssetsPath;
+const sourceIndexPath = compileUtils.paths.sourceIndexPath;
+const cordovaDir = compileUtils.paths.cordovaDir;
+const outDirJS = compileUtils.paths.outDirJS;
+const outDirNWJS = compileUtils.paths.outDirNWJS;
 
 /**
  * Returns the parent directory of a directory.
@@ -102,16 +96,16 @@ var convertJsList = function(htmlContents, jsReplacement) {
         },
         onclosetag: function(name) {
             if (name != 'script') {
-                output.push('</' + name + '>')
+                output.push('</' + name + '>');
             }
         },
         ontext: function(text) {
             if (!isLineBreak(text) || !isLineBreak(output[output.length - 1])) {
-                output.push(text)
+                output.push(text);
             }
         },
         onprocessinginstruction: function(name, data) {
-            output.push('<' + data + '>')
+            output.push('<' + data + '>');
         }
     }, {decodeEntities: false});
     parser.write(htmlContents);
@@ -121,7 +115,21 @@ var convertJsList = function(htmlContents, jsReplacement) {
 
 var copyAssets = function(callback) {
     fse.ensureDirSync(outDirJS);
-    fse.copy(sourceAssetsPath, path.join(outDirJS, 'assets'), callback);
+    var destAssetsPath = path.join(outDirJS, 'assets');
+    if (fs.existsSync(destAssetsPath)) {
+        fse.removeSync(destAssetsPath);
+    }
+    var filterFn = function(src, dest) {
+        if (configCompileSettings.spritesInAtlas) {
+            var srcExt = path.extname(src);
+            var spritesInAtlasSrc = path.join(rootDir, configCompileSettings.spritesInAtlas);
+            if ((srcExt === '.png' || srcExt === '.jpg') && src != spritesInAtlasSrc) {
+                return false;
+            }
+        }
+        return true;
+    }
+    fse.copy(sourceAssetsPath, destAssetsPath, {filter: filterFn}, callback);
 };
 
 var compileHTML = function(callback) {
@@ -158,8 +166,6 @@ var compileJS = function(callback) {
 var createNWJSZip = function(callback) {
     console.log('creating nw.js package');
     fse.ensureDirSync(outDirNWJS);
-    
-    //fs.writeFileSync(path.join(outDirNWJS, 'package.json'), getNWJSPackageJSON());
     
     var archive = startZipping(path.join(outDirNWJS, 'package.nw'));
 
@@ -210,6 +216,18 @@ var appendNWJSZipToNWExe = function(callback) {
     });
 };
 
+var updateCordovaProject = function(callback) {
+    if (!fs.existsSync(cordovaDir)) {
+        console.log('Cordova project not initialized');
+    }
+
+    const compileUtils = require('./compile-utils.js');
+
+    compileUtils.updateCordovaPackageJSON();
+    compileUtils.updateCordovaConfigXML();
+    compileUtils.updateCordovaWWW(callback);
+};
+
 var args = process.argv.slice(2);
 var onlyJS = false;
 if (args.length > 0 && args[0] == '--only-js') {
@@ -228,6 +246,7 @@ if (onlyJS) {
             console.error(err);
             return;
         }
+        updateCordovaProject();
         createNWJSZip(function(err) {
             if (err) {
                 console.error(err);

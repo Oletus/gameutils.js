@@ -1,0 +1,15 @@
+{
+    "comment": "outDirJS and outDirNWJS are relative to outDir. Other paths are relative to rootDir.",
+    "paths": {
+        "rootDir": "../",
+        "sourceAssetsPath": "assets/",
+        "sourceIndexPath": "index.html",
+        "cordovaDir": "cordova/",
+        "outDir": "out/",
+        "outDirJS": "js/",
+        "outDirNWJS": "nwjs/"
+    },
+    "compileSettings": {
+        "spritesInAtlas": false
+    }
+}

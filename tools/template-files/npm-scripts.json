@@ -2,5 +2,6 @@
   "ogg2mp3": "node tools/ffmpeg-batch.js ogg2mp3 assets/audio/",
   "mp32ogg": "node tools/ffmpeg-batch.js mp32ogg assets/audio/",
   "compile": "node tools/compile-js.js",
-  "compile_js": "node tools/compile-js.js --only-js"
+  "compile_js": "node tools/compile-js.js --only-js",
+  "create_cordova_project": "node tools/create-cordova-project.js"
 }

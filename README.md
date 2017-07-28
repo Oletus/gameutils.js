@@ -30,7 +30,8 @@ The utilities include some tools to automate common development tasks.
 To install:
 
 * Install [node.js](https://nodejs.org/en/) LTS version (tested with 6.10.2)
-* Install [ffmpeg](https://www.ffmpeg.org/) and add it to PATH
+* Install [ffmpeg](https://www.ffmpeg.org/) and add it to PATH (needed for scripts to convert audio files)
+* Run **npm install -g cordova** (needed to package the game as a mobile app with Cordova)
 * Run **npm install** in the directory where package.json is.
 
 Note: use **cmd** for running gulp commands on Windows, NOT GitHub for Windows shell:
@@ -38,8 +39,8 @@ Note: use **cmd** for running gulp commands on Windows, NOT GitHub for Windows s
 To start a game project (it will be created in a new folder under gameutils.js):
 
 Step 1:
-* **npm run game-from-template -- --name <game name>** - create a game based on the basic template.
-* **npm run game-from-template -- --name <game name> --template threejs** - create a game based on the three.js template.
+* **npm run game-from-template -- --name *game name* ** - create a game based on the basic template.
+* **npm run game-from-template -- --name *game name* --template threejs** - create a game based on the three.js template.
 
 Step 2 (install tools for the game):
 * In the newly created game folder, run **npm install**
@@ -50,3 +51,4 @@ Things you can do with the tools for a game project:
 * **npm run mp32ogg** - convert all mp3 files under assets/audio to ogg.
 * **npm run compile** - compile the project as minified under out/js and creates an NW.JS package.
 * **npm run compile_js** - same as above, but process only JS, not assets. Good for incremental updates.
+* **npm run create_cordova_project** - create a cordova project. Subsequently running the compile script will also update the Cordova www directory. Under development.
