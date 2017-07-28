@@ -219,6 +219,7 @@ var appendNWJSZipToNWExe = function(callback) {
 var updateCordovaProject = function(callback) {
     if (!fs.existsSync(cordovaDir)) {
         console.log('Cordova project not initialized');
+        return;
     }
 
     const compileUtils = require('./compile-utils.js');
