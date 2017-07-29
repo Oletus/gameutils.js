@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * Using GJS.TileMap requires the Vec2 and Rect classes from util2d.
+ * Using GJS.TileMap requires the Vec2 and Rect classes and the CardinalDirection enum from util2d.
  */
 
 if (typeof GJS === "undefined") {
@@ -444,7 +444,7 @@ GJS.TileMap.prototype.getNearestTileDirection = function(originTile, matchFunc) 
 };
 
 /**
- * @return {boolean} True if matching tiles overlap the given rectangle.
+ * @return {boolean} True if any matching tiles overlap the given rectangle.
  */
 GJS.TileMap.prototype.overlapsTiles = function(rect, matchFunc) {
     var epsilon = GJS.TileMap.epsilon;

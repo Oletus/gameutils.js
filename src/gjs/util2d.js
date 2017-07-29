@@ -9,7 +9,8 @@ if (typeof GJS === "undefined") {
 }
 
 // This file contains following utilities:
-// GJS.CardinalDirection: An enum for storing and operating on a cardinal direction: up, down, left, right
+// mathUtil: Simple math functions.
+// GJS.CardinalDirection: An enum for storing and operating on a cardinal direction: up, down, left, right.
 // Vec2: A class for storing a two-dimensional vector.
 // AffineTransform: A scale/translate transform.
 // Rect: A class for storing a two-dimensional rectangle.
@@ -246,7 +247,7 @@ GJS.CardinalDirection.previous = function(direction) {
 
 /**
  * @param {GJS.CardinalDirection} direction
- * @return {Vec2}
+ * @return {Vec2} Vector where up corresponds to negative y direction.
  */
 GJS.CardinalDirection.toVec2 = function(direction) {
     if (direction === GJS.CardinalDirection.RIGHT) {
