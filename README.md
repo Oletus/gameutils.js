@@ -39,7 +39,7 @@ Note: use **cmd** for running gulp commands on Windows, NOT GitHub for Windows s
 To start a game project (it will be created in a new folder under gameutils.js):
 
 Step 1:
-* **npm run game-from-template -- --name *game name* ** - create a game based on the basic template.
+* **npm run game-from-template -- --name *game name*** - create a game based on the basic template.
 * **npm run game-from-template -- --name *game name* --template threejs** - create a game based on the three.js template.
 
 Step 2 (install tools for the game):
