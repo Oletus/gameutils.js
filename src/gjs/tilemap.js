@@ -69,8 +69,7 @@ GJS.TileMap.prototype.tileAt = function(x, y) {
 };
 
 /**
- * A function for debug rendering of the tiles. Will fill rectangles at the
- * coordinates of tiles that match.
+ * A function for debug rendering of the tiles. Will fill rectangles at the coordinates of tiles that match.
  * @param {CanvasRenderingContext2D} ctx Context to use.
  * @param {function} matchFunc Gets passed a tile and returns true if the tile should be drawn.
  * @param {number?} extraYTop How much to extend the drawn tiles in the y direction. Defaults to 0.

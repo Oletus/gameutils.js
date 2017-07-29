@@ -11,15 +11,15 @@ if (typeof GJS === "undefined") {
 GJS.PlatformingPhysics = {};
 
 /**
- * A character that moves in the platforming level, colliding into other objects and tile maps.
+ * An object that moves in the platforming level, colliding into other objects and tile maps.
  * @constructor
  */
 GJS.PlatformingObject = function() {
 };
 
 /**
- * Initialize the character.
- * @param {Object} options Options for the character. May contain:
+ * Initialize the object.
+ * @param {Object} options Options for the object. May contain:
  *   x: number
  *   y: number
  */
@@ -63,7 +63,8 @@ GJS.PlatformingObject.prototype.resetMovement = function() {
 };
 
 /**
- * Override this to control the this.dx value that the character uses on each frame.
+ * Override this to control the this.dx value, containing the x axis speed that the object uses. The function is
+ * called on each frame.
  * @param {number} deltaTime
  */
 GJS.PlatformingObject.prototype.decideDx = function(deltaTime) {
@@ -99,7 +100,8 @@ GJS.PlatformingObject.prototype.updateX = function(deltaTime, colliders) {
 };
 
 /**
- * Override this to control the this.dy value that the character uses on each frame.
+ * Override this to control the this.dy value, containing the y axis speed that the object uses. The function is
+ * called on each frame.
  * @param {number} deltaTime
  */
 GJS.PlatformingObject.prototype.decideDy = function(deltaTime) {
@@ -560,6 +562,7 @@ GJS.WallTile.prototype.isWallUp = function() {
 
 /**
  * Get a tile map initializer based on an array of character codes representing tiles.
+ * Example usage: new GJS.TileMap(GJS.PlatformingPhysics.tileMapOptionsFromData());
  * @param {Array} data Tile letter codes in an array in row-major form. Example:
  *         ['xxx.      /xxx ',
  *          '  xx^^^^^^xx   '],
@@ -575,16 +578,19 @@ GJS.WallTile.prototype.isWallUp = function() {
  *          : empty space.
  *
  * @param {boolean?} flippedX Set to true to flip the data in the x direction.
- * @return {function} Function that will initialize a GJS.TileMap with GJS.PlatformingTiles.
+ * @return {Object} Options for GJS.TileMap constructor that will construct a map of GJS.PlatformingTile objects.
  */
-GJS.PlatformingPhysics.initFromData = function(data, flippedX) {
+GJS.PlatformingPhysics.tileMapOptionsFromData = function(data, flippedX) {
     if (flippedX === undefined) {
         flippedX = false;
     }
     var transformedData = [];
+    var dataHeight = data.length;
+    var dataWidth = 0;
     for (var i = 0; i < data.length; ++i) {
         var row = data[i];
         var transformedRow = [];
+        dataWidth = row.length;
         for (var j = 0; j < row.length; ++j) {
             var tile = null;
             if (row[j] == 'x') {
@@ -615,7 +621,11 @@ GJS.PlatformingPhysics.initFromData = function(data, flippedX) {
         }
         transformedData.push(transformedRow);
     }
-    return GJS.TileMap.initFromData(transformedData, flippedX);
+    return {
+        width: dataWidth,
+        height: dataHeight,
+        initTile: GJS.TileMap.initFromData(transformedData, flippedX)
+    };
 };
 
 

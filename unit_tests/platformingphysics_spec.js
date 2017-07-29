@@ -76,86 +76,62 @@ describe('PlatformingPhysics', function() {
     
     
     var testPlatformingTileMapWithFloor = function(options) {
-        var initParams = {
-            width: 4,
-            height: 3,
-            initTile: GJS.PlatformingPhysics.initFromData(
+        var initParams = GJS.PlatformingPhysics.tileMapOptionsFromData(
                 [
                     '    ',
                     '    ',
                     'xxxx'
-                ], false)
-        };
+                ], false);
         return testPlatformingTileMap(options, initParams);
     };
     
     var testPlatformingTileMapWithWall = function(options) {
-        var initParams = {
-            width: 4,
-            height: 3,
-            initTile: GJS.PlatformingPhysics.initFromData(
+        var initParams = GJS.PlatformingPhysics.tileMapOptionsFromData(
                 [
                     '  x ',
                     '  x ',
                     '  x '
-                ], false)
-        };
+                ], false);
         return testPlatformingTileMap(options, initParams);
     };
     
     var testPlatformingTileMapWithDiagonalWall = function(options) {
-        var initParams = {
-            width: 4,
-            height: 3,
-            initTile: GJS.PlatformingPhysics.initFromData(
+        var initParams = GJS.PlatformingPhysics.tileMapOptionsFromData(
                 [
                     '   x',
                     ' xx ',
                     'x   '
-                ], false)
-        };
+                ], false);
         return testPlatformingTileMap(options, initParams);
     };
 
     var testPlatformingTileMapWithSlopeRight1 = function(options) {
-        var initParams = {
-            width: 4,
-            height: 3,
-            initTile: GJS.PlatformingPhysics.initFromData(
+        var initParams = GJS.PlatformingPhysics.tileMapOptionsFromData(
                 [
                     '   /',
                     '  /x',
                     'xxxx'
-                ], false)
-        };
+                ], false);
         return testPlatformingTileMap(options, initParams);
     };
 
     var testPlatformingTileMapWithSlopeLeft1 = function(options) {
-        var initParams = {
-            width: 4,
-            height: 3,
-            initTile: GJS.PlatformingPhysics.initFromData(
+        var initParams = GJS.PlatformingPhysics.tileMapOptionsFromData(
                 [
                     '.   ',
                     'x.  ',
                     'xxxx'
-                ], false)
-        };
+                ], false);
         return testPlatformingTileMap(options, initParams);
     };
     
     var testPlatformingTileMapWithSlopeFloor = function(options) {
-        var initParams = {
-            width: 4,
-            height: 3,
-            initTile: GJS.PlatformingPhysics.initFromData(
+        var initParams = GJS.PlatformingPhysics.tileMapOptionsFromData(
                 [
                     '    ',
                     '    ',
                     ' /. '
-                ], false)
-        };
+                ], false);
         return testPlatformingTileMap(options, initParams);
     };
 

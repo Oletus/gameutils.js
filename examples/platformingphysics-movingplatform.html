@@ -28,16 +28,11 @@ var Tester = function() {
     this.physicsLevel.init();
     
     this.platform = new GJS.PlatformingTileMap();
-    var tileMapInitParams = {
-        width: 6,
-        height: 3,
-        initTile: GJS.PlatformingPhysics.initFromData(
-            [
+    var tileMapInitParams = GJS.PlatformingPhysics.tileMapOptionsFromData([
                 '      ',
                 'l    r',
                 'xxxxxx'
-            ], false)
-    };
+            ], false);
     this.platform.init({
         x: 5,
         y: 10,
