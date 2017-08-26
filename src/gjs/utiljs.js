@@ -285,7 +285,7 @@ objectUtil.initWithDefaults = function(obj, defaults, options) {
  */
 objectUtil.fillIn = function(obj, fillIn) {
     for (var key in fillIn) {
-        if (!obj.hasOwnProperty(key)) {
+        if (!obj.hasOwnProperty(key) && fillIn.hasOwnProperty(key)) {
             objectUtil._copy(obj, fillIn, key);
         }
     }
