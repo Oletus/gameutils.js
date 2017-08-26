@@ -268,10 +268,12 @@ objectUtil._copy = function(target, source, key) {
  */
 objectUtil.initWithDefaults = function(obj, defaults, options) {
     for (var key in defaults) {
-        if (!options.hasOwnProperty(key)) {
-            objectUtil._copy(obj, defaults, key);
-        } else {
-            obj[key] = options[key];
+        if (defaults.hasOwnProperty(key)) {
+            if (!options.hasOwnProperty(key)) {
+                objectUtil._copy(obj, defaults, key);
+            } else {
+                obj[key] = options[key];
+            }
         }
     }
 };
