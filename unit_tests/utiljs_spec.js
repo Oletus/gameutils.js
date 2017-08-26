@@ -146,6 +146,21 @@ describe('objectUtil', function() {
         expect(obj.b).toBe(2);
         expect(obj.hasOwnProperty('c')).toBe(false);
     });
+
+    it("doesn't store references to default values in initialized values", function() {
+        var inited = {};
+        var defaults = {
+            obj: { field: 0 },
+            arr: [2, 3, 4]
+        };
+        objectUtil.initWithDefaults(inited, defaults, {});
+        expect(inited.obj).not.toBe(defaults.obj);
+        expect(inited.arr).not.toBe(defaults.arr);
+        expect(inited.obj.field).toBe(0);
+        expect(inited.arr[0]).toBe(2);
+        expect(inited.arr[1]).toBe(3);
+        expect(inited.arr[2]).toBe(4);
+    });
 });
 
 describe('querystringUtil', function() {

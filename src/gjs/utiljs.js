@@ -240,7 +240,28 @@ stringUtil.capitalizeFirstLetter = function(string) {
 };
 
 /**
- * Initialize an object with default values.
+ * @protected
+ */
+objectUtil._copy = function(target, source, key) {
+    if (source[key] !== null && typeof source[key] === 'object') {
+        if (Array.isArray(source[key])) {
+            target[key] = source[key].slice();
+            for (var i = 0; i < target[key].length; ++i) {
+                if (typeof target[key][i] === 'object') {
+                    throw new Error('copying an array of objects not supported');
+                }
+            }
+        } else {
+            target[key] = {};
+            objectUtil.initWithDefaults(target[key], source[key], {});
+        }
+    } else {
+        target[key] = source[key];
+    }
+};
+
+/**
+ * Initialize an object with default values. obj may end up referencing objects in "options".
  * @param {Object} obj Object to set properties on.
  * @param {Object} defaults Default properties. Every property needs to have a default value here.
  * @param {Object} options Options to override the default properties.
@@ -248,7 +269,7 @@ stringUtil.capitalizeFirstLetter = function(string) {
 objectUtil.initWithDefaults = function(obj, defaults, options) {
     for (var key in defaults) {
         if (!options.hasOwnProperty(key)) {
-            obj[key] = defaults[key];
+            objectUtil._copy(obj, defaults, key);
         } else {
             obj[key] = options[key];
         }
@@ -263,7 +284,7 @@ objectUtil.initWithDefaults = function(obj, defaults, options) {
 objectUtil.fillIn = function(obj, fillIn) {
     for (var key in fillIn) {
         if (!obj.hasOwnProperty(key)) {
-            obj[key] = fillIn[key];
+            objectUtil._copy(obj, fillIn, key);
         }
     }
 };
