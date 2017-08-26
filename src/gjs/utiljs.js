@@ -241,8 +241,9 @@ stringUtil.capitalizeFirstLetter = function(string) {
 
 /**
  * @protected
+ * Copy property identified by key from source to target.
  */
-objectUtil._copy = function(target, source, key) {
+objectUtil._copyProperty = function(target, source, key) {
     if (source[key] !== null && typeof source[key] === 'object') {
         if (Array.isArray(source[key])) {
             target[key] = source[key].slice();
@@ -252,6 +253,9 @@ objectUtil._copy = function(target, source, key) {
                 }
             }
         } else {
+            if (Object.getPrototypeOf(source[key]) !== Object.prototype) {
+                throw new Error('Copying an object with a prototype is not supported');
+            }
             target[key] = {};
             objectUtil.initWithDefaults(target[key], source[key], {});
         }
@@ -270,7 +274,7 @@ objectUtil.initWithDefaults = function(obj, defaults, options) {
     for (var key in defaults) {
         if (defaults.hasOwnProperty(key)) {
             if (!options.hasOwnProperty(key)) {
-                objectUtil._copy(obj, defaults, key);
+                objectUtil._copyProperty(obj, defaults, key);
             } else {
                 obj[key] = options[key];
             }
@@ -286,7 +290,7 @@ objectUtil.initWithDefaults = function(obj, defaults, options) {
 objectUtil.fillIn = function(obj, fillIn) {
     for (var key in fillIn) {
         if (!obj.hasOwnProperty(key) && fillIn.hasOwnProperty(key)) {
-            objectUtil._copy(obj, fillIn, key);
+            objectUtil._copyProperty(obj, fillIn, key);
         }
     }
 };
