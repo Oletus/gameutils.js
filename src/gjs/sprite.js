@@ -318,7 +318,7 @@ GJS.Sprite.prototype.draw = function(ctx, leftX, topY) {
  * @param {number} sHeight Height of the subrectangle in the source image.
  */
 GJS.Sprite.prototype.drawCropped = function(ctx, leftX, topY, sx, sy, sWidth, sHeight) {
-    if (this.loaded) {
+    if (this.loaded && sWidth > 0 && sHeight > 0) {
         ctx.drawImage(this.img, sx, sy, sWidth, sHeight, leftX, topY, sWidth, sHeight);
     }
 };
