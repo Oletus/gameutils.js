@@ -106,7 +106,11 @@ GJS.Sprite.prototype._reload = function() {
                 }
                 that.loaded = true;
                 that.missing = true;
-                GJS.Sprite.loadedCount++;
+                if (GJS.Sprite.requireAllSpritesLoaded) {
+                    console.log('Loading sprite failed ' + that.img.src);
+                } else {
+                    GJS.Sprite.loadedCount++;
+                }
                 that.img = GJS.Sprite.getMissingImg(that.filename);
                 that.width = that.img.width;
                 that.height = that.img.height;
@@ -137,6 +141,12 @@ GJS.Sprite.getMissingImg = function(filename) {
  * Path for graphics files. Set this before creating any GJS.Sprite objects.
  */
 GJS.Sprite.gfxPath = 'assets/gfx/';
+
+/**
+ * Whether to require that all constructed sprites load their images succesfully. Can be convenient to set to false for
+ * game jam type events, should set to true to target Cordova.
+ */
+GJS.Sprite.requireAllSpritesLoaded = false;
 
 /**
  * Baked atlas to load sprites from instead of loading them from relative filenames. GJS.SpriteAtlas.
