@@ -13,6 +13,10 @@ if (typeof GJS === "undefined") {
  *  mode: GJS.CanvasResizer.Mode (defaults to filling the window)
  *  width: number Width of the canvas coordinate space.
  *  height: number Height of the canvas coordinate space.
+ *  maxWidth: number Maximum width of the canvas coordinate space. Applied only
+ *      in MINIMUM_* modes.
+ *  maxHeight: number Maximum height of the canvas coordinate space. Applied
+ *      only in MINIMUM_* modes.
  *  parentElement: HTMLElement (defaults to the document body)
  *  wrapperElement: HTMLElement Optional wrapper element that tightly wraps
  *      the canvas. Useful for implementing HTML-based UI on top of the canvas.
@@ -32,6 +36,8 @@ GJS.CanvasResizer = function(options) {
         mode: GJS.CanvasResizer.Mode.DYNAMIC,
         width: 16,
         height: 9,
+        maxWidth: Infinity,
+        maxHeight: Infinity,
         parentElement: document.body,
         wrapperElement: null,
         maxInterpolatedScale: 2,
@@ -780,10 +786,10 @@ GJS.CanvasResizer.prototype._resizeFixedResolution = function() {
         if (this._isInMinMode()) {
             var w = this.width;
             var h = this.height;
-            while (scale * (w + 1) <= maxWidth && this.mode !== GJS.CanvasResizer.Mode.MINIMUM_HEIGHT) {
+            while (scale * (w + 1) <= maxWidth && (w + 1) < this.maxWidth && this.mode !== GJS.CanvasResizer.Mode.MINIMUM_HEIGHT) {
                 w++;
             }
-            while (scale * (h + 1) <= maxHeight && this.mode !== GJS.CanvasResizer.Mode.MINIMUM_WIDTH) {
+            while (scale * (h + 1) <= maxHeight && (w + 1) < this.maxHeight && this.mode !== GJS.CanvasResizer.Mode.MINIMUM_WIDTH) {
                 h++;
             }
             styleWidth = w * scale / window.devicePixelRatio;
