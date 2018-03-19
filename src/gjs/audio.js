@@ -81,6 +81,11 @@ GJS.Audio.defaultExtensions = ['ogg', 'mp3'];
 GJS.Audio.allMuted = false;
 
 /**
+ * Only applied to effects when they first start playing.
+ */
+GJS.Audio.effectsVolume = 1.0;
+
+/**
  * @param {boolean} mute Set to true to mute all audio.
  */
 GJS.Audio.muteAll = function(mute) {
@@ -142,6 +147,7 @@ GJS.Audio.prototype.addSourcesTo = function(audioElement) {
  */
 GJS.Audio.prototype.play = function () {
     if (this._howl) {
+        this._howl.volume(GJS.Audio.effectsVolume);
         this._howl.play();
         return;
     }
@@ -167,6 +173,7 @@ GJS.Audio.prototype.playSingular = function (loop) {
         if (this._howl.playing(0)) {
             return;
         }
+        this._howl.volume(GJS.Audio.effectsVolume);
         this._howl.play();
         this._howl.loop(loop);
         return;
