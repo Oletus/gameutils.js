@@ -63,7 +63,7 @@ GJS.utilTHREE.loadFont = function(fontName, objectCallback) {
 
     ++GJS.utilTHREE.createdCount;
 
-    loader.load(GJS.utilTHREE.fontsPath + fontName + '.js', function ( response ) {
+    loader.load(GJS.utilTHREE.fontsPath + fontName + '.json', function ( response ) {
         objectCallback(response);
         ++GJS.utilTHREE.loadedCount;
     });
