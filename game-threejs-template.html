@@ -66,7 +66,8 @@ var Game = function(resizer, renderer, loadingBar) {
 
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera( 75, resizer.canvas.width / resizer.canvas.height, 1, 10000 );
-    this.camera.position.z = 1000;
+    this.camera.position.z = 25;
+    this.camera.position.y = 3;
     
     this.pointerRaycaster = new THREE.Raycaster();
     
@@ -80,6 +81,15 @@ var Game = function(resizer, renderer, loadingBar) {
     //this.input.addListener(GJS.Gamepad.BUTTONS.UP_OR_ANALOG_UP, ['up', 'w'], this.upPress, this.upRelease);
     
     if (DEV_MODE) {
+        this.gridHelpers = new THREE.Object3D();
+        this.scene.add(this.gridHelpers);
+
+        var axesHelper = new THREE.AxesHelper(5);
+        this.gridHelpers.add(axesHelper);
+
+        var gridHelper = new THREE.GridHelper(20, 20);
+        this.gridHelpers.add(gridHelper);
+
         this.input.addListener(undefined, ['0'], this.devModeTakeScreenshot);
     }
     this.takeScreenshot = false;
@@ -89,13 +99,16 @@ Game.prototype.loadedInit = function() {
     // Called after all the assets like 3D models and fonts have been loaded.
 
     // Test geometry
-    var geometry = new THREE.BoxGeometry( 200, 200, 200 );
+    var geometry = new THREE.BoxGeometry( 5, 5, 5 );
     var material = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe: true } );
     this.mesh = new THREE.Mesh( geometry, material );
     this.scene.add(this.mesh);
 };
 
 Game.prototype.render = function() {
+    if (DEV_MODE) {
+        this.gridHelpers.visible = Game.parameters.get('gridHelpersVisible');
+    }
     this.renderer.render(this.scene, this.camera);
     
     var that = this;
@@ -175,6 +188,7 @@ Game.prototype.devModeTakeScreenshot = function() {
 
 // Parameters added here can be tuned at run time when in developer mode
 Game.parameters = new GJS.GameParameters({
+    'gridHelpersVisible': {initial: false},
     'muteAudio': {initial: false}
 });
 
