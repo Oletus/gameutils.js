@@ -58,6 +58,39 @@ GJS.TileMap.initFromData = function(data, flippedX) {
 };
 
 /**
+ * Resizes the tilemap to a new width / height.
+ * @param {number} width New width.
+ * @param {number} height New height.
+ * @param {function?} initTile Function that returns an initial tile. x and y parameters. If not set will use the initTile for the constructor.
+ */
+GJS.TileMap.prototype.resize = function(width, height, initTile) {
+    if (initTile === undefined) {
+        initTile = this.initTile;
+    }
+    if (height < this.height) {
+        this.tiles.splice(height);
+    }
+    for (var y = 0; y < this.height; ++y) {
+        while (width > this.tiles[y].length) {
+            this.tiles[y].push(initTile(this.tiles[y].length, y));
+        }
+        if (width < this.width) {
+            this.tiles[y].splice(width);
+        }
+    }
+    for (var y = this.height; y < height; ++y) {
+        var row = [];
+        for (var x = 0; x < width; ++x) {
+            var tile = initTile(x, y);
+            row.push(tile);
+        }
+        this.tiles.push(row);
+    }
+    this.width = width;
+    this.height = height;
+};
+
+/**
  * @param {number} x Horizontal float coordinate
  * @param {number} y Vertical float coordinate
  * @return {Vec2} Integer tile coordinates for the specified tile.
