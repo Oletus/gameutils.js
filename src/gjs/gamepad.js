@@ -1,22 +1,18 @@
 'use strict';
 
-if (typeof GJS === "undefined") {
-    var GJS = {};
-}
-
 /**
  * @constructor
  */
-GJS.Gamepad = function(callbackObj) {
+const Gamepad = function(callbackObj) {
     this.downListeners = [];
     this.indexToPlayer = {};
     this.players = [];
     this.callbackObj = callbackObj;
 };
 
-GJS.Gamepad.debugLogEnabled = false;
+Gamepad.debugLogEnabled = false;
 
-GJS.Gamepad.prototype.gamepadForPlayer = function(gamepads, playerNumber) {
+Gamepad.prototype.gamepadForPlayer = function(gamepads, playerNumber) {
     for (var i = 0; i < gamepads.length; ++i) {
         if (gamepads[i] !== undefined && gamepads[i] !== null && gamepads[i]['index'] === this.players[playerNumber]) {
             return gamepads[i];
@@ -28,7 +24,7 @@ GJS.Gamepad.prototype.gamepadForPlayer = function(gamepads, playerNumber) {
 /**
  * @protected
  */
-GJS.Gamepad.prototype._markDownAndCallback = function(l, p, value) {
+Gamepad.prototype._markDownAndCallback = function(l, p, value) {
     if (value > 0.5) {
         if (!l.isDown[p]) {
             l.isDown[p] = true;
@@ -46,7 +42,7 @@ GJS.Gamepad.prototype._markDownAndCallback = function(l, p, value) {
     }
 };
 
-GJS.Gamepad.prototype.update = function() {
+Gamepad.prototype.update = function() {
     var gamepads;
     if (navigator['getGamepads']) {
         gamepads = navigator['getGamepads']();
@@ -84,17 +80,17 @@ GJS.Gamepad.prototype.update = function() {
                     }
                 } catch(e) {
                     // Accessing pad.buttons seems to randomly fail in Firefox after long uptime sometimes.
-                    if (GJS.Gamepad.debugLogEnabled) {
+                    if (Gamepad.debugLogEnabled) {
                         console.log(e);
                         console.log('Accessing pad.buttons with number', buttonNumber, 'failed, pad.buttons is: ', pad['buttons']);
                     }
                     continue;
                 }
                 if (l.buttonNumber > 100) {
-                    var axis = (l.buttonNumber <= GJS.Gamepad.BUTTONS.DOWN_OR_ANALOG_DOWN) ? 1 : 0;
+                    var axis = (l.buttonNumber <= Gamepad.BUTTONS.DOWN_OR_ANALOG_DOWN) ? 1 : 0;
                     var axisValue = pad['axes'][axis];
                     // positive values are down/right, negative up/left
-                    if (l.buttonNumber % 2 === GJS.Gamepad.BUTTONS.UP_OR_ANALOG_UP % 2) {
+                    if (l.buttonNumber % 2 === Gamepad.BUTTONS.UP_OR_ANALOG_UP % 2) {
                         axisValue = -axisValue;
                     }
                     this._markDownAndCallback(l, p, Math.max(value, axisValue));
@@ -106,14 +102,14 @@ GJS.Gamepad.prototype.update = function() {
     }
 };
 
-GJS.Gamepad.prototype.addButtonChangeListener = function(buttonNumber, callbackDown, callbackUp) {
+Gamepad.prototype.addButtonChangeListener = function(buttonNumber, callbackDown, callbackUp) {
     this.downListeners.push({buttonNumber: buttonNumber, callback: callbackDown, callbackUp: callbackUp, isDown: [false, false, false, false]});
 };
 
 /**
  * Face button names according to the common XBox 360 gamepad.
  */
-GJS.Gamepad.BUTTONS = {
+Gamepad.BUTTONS = {
   A: 0, // Face (main) buttons
   B: 1,
   X: 2,
@@ -139,7 +135,7 @@ GJS.Gamepad.BUTTONS = {
 /**
  * Face button names according to the common XBox 360 gamepad.
  */
-GJS.Gamepad.BUTTON_INSTRUCTION = [
+Gamepad.BUTTON_INSTRUCTION = [
     'A',
     'B',
     'X',
@@ -157,3 +153,5 @@ GJS.Gamepad.BUTTON_INSTRUCTION = [
     'LEFT',
     'RIGHT'
 ];
+
+export { Gamepad }

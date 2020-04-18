@@ -1,16 +1,12 @@
 'use strict';
 
-// Requires utiljs.js, statesaver.js
-
-if (typeof GJS === "undefined") {
-    var GJS = {};
-}
+import { Saveable } from './statesaver.js';
 
 /**
  * Class to inherit to implement a condition for unlocking a single unlock.
  * @constructor
  */
-GJS.UnlockCondition = function(options) {
+const UnlockCondition = function(options) {
 };
 
 /**
@@ -18,7 +14,7 @@ GJS.UnlockCondition = function(options) {
  * @param {Object} options Object with the following keys:
  *   unlockId: string Identifier for the unlock.   
  */
-GJS.UnlockCondition.prototype.initCondition = function(options) {
+UnlockCondition.prototype.initCondition = function(options) {
     var defaults = {
         unlockId: '',
         difficulty: 0  // Higher number means more difficult to unlock. Can be used to sort unlocks.
@@ -30,7 +26,7 @@ GJS.UnlockCondition.prototype.initCondition = function(options) {
 /**
  * Compare the difficulty of two unlock conditions.
  */
-GJS.UnlockCondition.compareDifficulty = function(condA, condB) {
+UnlockCondition.compareDifficulty = function(condA, condB) {
     if (condA.difficulty < condB.difficulty) {
         return -1;
     } else if (condA.difficulty > condB.difficulty) {
@@ -41,10 +37,10 @@ GJS.UnlockCondition.compareDifficulty = function(condA, condB) {
 };
 
 /**
- * Set the unlock id for the condition. Only call before the condition is added to the GJS.Unlocker.
+ * Set the unlock id for the condition. Only call before the condition is added to the Unlocker.
  * @param {string} unlockId Identifier for the unlock.   
  */
-GJS.UnlockCondition.prototype.setId = function(unlockId) {
+UnlockCondition.prototype.setId = function(unlockId) {
     this.unlockId = unlockId;
 };
 
@@ -53,14 +49,14 @@ GJS.UnlockCondition.prototype.setId = function(unlockId) {
  * @param {Object} gameState Object that unlocking is based on.
  * @param {number} deltaTime Time that has passed since the last update in seconds.
  */
-GJS.UnlockCondition.prototype.update = function(gameState, deltaTime) {
+UnlockCondition.prototype.update = function(gameState, deltaTime) {
     return;
 };
 
 /**
  * @return {string} A description of the unlock condition.
  */
-GJS.UnlockCondition.prototype.getDescription = function() {
+UnlockCondition.prototype.getDescription = function() {
     return "";
 };
 
@@ -71,12 +67,12 @@ GJS.UnlockCondition.prototype.getDescription = function() {
  * @param {Object} options Object with the following keys:
  *   unlockId: string Identifier for the unlock.
  */
-GJS.UnlockByDefault = function(options) {
+UnlockByDefault = function(options) {
     this.initCondition(options);
     this.fulfilled = true;
 };
 
-GJS.UnlockByDefault.prototype = new GJS.UnlockCondition();
+UnlockByDefault.prototype = new UnlockCondition();
 
 
 /**
@@ -85,21 +81,21 @@ GJS.UnlockByDefault.prototype = new GJS.UnlockCondition();
  * @param {Object} options Object with the following keys:
  *   unlockId: string Identifier for the unlock.
  */
-GJS.NeverUnlock = function(options) {
+NeverUnlock = function(options) {
     this.initCondition(options);
 };
 
-GJS.NeverUnlock.prototype = new GJS.UnlockCondition();
+NeverUnlock.prototype = new UnlockCondition();
 
 
 /**
  * @constructor
  * Engine for managing game unlocks. Each unlock is identified by an id, has a condition that's an instance of
- * GJS.UnlockCondition based on game state and can be either unlocked (true) or locked (false).
+ * UnlockCondition based on game state and can be either unlocked (true) or locked (false).
  * If needCommitUnlocks is true, then all unlocks that are not unlocked by default need to be committed by calling
  * popFulfilledUnlockConditions and commitUnlock.
  */
-GJS.Unlocker = function(options) {
+Unlocker = function(options) {
     var defaults = {
         gameName: 'game',
         needCommitUnlocks: false,
@@ -129,13 +125,13 @@ GJS.Unlocker = function(options) {
     }
 };
 
-GJS.Unlocker.prototype = new GJS.Saveable();
+Unlocker.prototype = new Saveable();
 
 /**
- * @param {GJS.UnlockCondition} condition Check if a condition is fulfilled.
+ * @param {UnlockCondition} condition Check if a condition is fulfilled.
  * @protected
  */
-GJS.Unlocker.prototype._checkFulfilled = function(condition) {
+Unlocker.prototype._checkFulfilled = function(condition) {
     if (condition.fulfilled) {
         this._fulfilledConditions.push(condition.unlockId);
         if (!this.needCommitUnlocks) {
@@ -149,7 +145,7 @@ GJS.Unlocker.prototype._checkFulfilled = function(condition) {
  * @param {Object} gameState Object that unlocking is based on.
  * @param {number} deltaTime Time that has passed since the last update in seconds.
  */
-GJS.Unlocker.prototype.update = function(gameState, deltaTime) {
+Unlocker.prototype.update = function(gameState, deltaTime) {
     for (var i = 0; i < this.conditions.length; ++i) {
         var condition = this.conditions[i];
         if (!this.unlocks[condition.unlockId] && this._fulfilledConditions.indexOf(condition.unlockId) < 0) {
@@ -161,9 +157,9 @@ GJS.Unlocker.prototype.update = function(gameState, deltaTime) {
 
 /**
  * @param {string} unlockId Id of the condition to get the condition for.
- * @return {GJS.UnlockCondition} The unlock condition or null.
+ * @return {UnlockCondition} The unlock condition or null.
  */
-GJS.Unlocker.prototype.getCondition = function(unlockId) {
+Unlocker.prototype.getCondition = function(unlockId) {
     for (var i = 0; i < this.conditions.length; ++i) {
         var condition = this.conditions[i];
         if (condition.unlockId === unlockId) {
@@ -177,7 +173,7 @@ GJS.Unlocker.prototype.getCondition = function(unlockId) {
  * @param {string} unlockId Id of the condition to get the description for.
  * @return {string} A description of the unlock condition.
  */
-GJS.Unlocker.prototype.getDescription = function(unlockId) {
+Unlocker.prototype.getDescription = function(unlockId) {
     var condition = this.getCondition(unlockId);
     if (condition !== null) {
         return condition.getDescription();
@@ -189,7 +185,7 @@ GJS.Unlocker.prototype.getDescription = function(unlockId) {
  * @return {Array.<string>} List of unlockIds of the conditions that have been fulfilled since the last time this
  * function was called.
  */
-GJS.Unlocker.prototype.popFulfilledUnlockConditions = function() {
+Unlocker.prototype.popFulfilledUnlockConditions = function() {
     var fulfilledConditions = this._fulfilledConditions;
     this._fulfilledConditions = [];
     return fulfilledConditions;
@@ -199,7 +195,7 @@ GJS.Unlocker.prototype.popFulfilledUnlockConditions = function() {
  * @param {string} unlockId Id to mark as unlocked.
  * @return {boolean} True if the unlock was actually stored.
  */
-GJS.Unlocker.prototype.commitUnlock = function(unlockId) {
+Unlocker.prototype.commitUnlock = function(unlockId) {
     if (this.unlocks.hasOwnProperty(unlockId)) {
         this.unlocks[unlockId] = true;
         this.saveState.unlocksInOrder.push(unlockId);
@@ -211,9 +207,11 @@ GJS.Unlocker.prototype.commitUnlock = function(unlockId) {
 /**
  * Called after state has been loaded.
  */
-GJS.Unlocker.prototype.postLoadState = function() {
+Unlocker.prototype.postLoadState = function() {
     for (var i = 0; i < this.saveState.unlocksInOrder.length; ++i) {
         var unlockId = this.saveState.unlocksInOrder[i];
         this.unlocks[unlockId] = true;
     }
 };
+
+export { UnlockCondition, UnlockByDefault, NeverUnlock, Unlocker }

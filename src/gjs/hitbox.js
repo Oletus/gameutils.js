@@ -4,27 +4,21 @@
 
 'use strict';
 
-/**
- * Requires Rect, Vec2 and mathUtil from util2d.js.
- */
-
-if (typeof GJS === "undefined") {
-    var GJS = {};
-}
+import { Rect, Vec2, mathUtil } from './util2d.js';
 
 /**
  * A class to store a hit box that can be hit tested against other hit boxes.
  * It's called a box but can also represent other geometry.
  * @constructor
  */
-GJS.HitBox = function() {
+const HitBox = function() {
 };
 
 /**
  * Possible hitbox shapes
  * @enum {number}
  */
-GJS.HitBox.Shape = {
+HitBox.Shape = {
     VEC2: 0,
     RECT: 1,
     CIRCLE: 2,
@@ -35,16 +29,16 @@ GJS.HitBox.Shape = {
 /**
  * @param {Vec2} pos Position to set.
  */
-GJS.HitBox.prototype.setVec2 = function(pos) {
-    this._shape = GJS.HitBox.Shape.VEC2;
+HitBox.prototype.setVec2 = function(pos) {
+    this._shape = HitBox.Shape.VEC2;
     this._pos = pos;
 };
 
 /**
  * @param {Rect} rect Rect to set.
  */
-GJS.HitBox.prototype.setRect = function(rect) {
-    this._shape = GJS.HitBox.Shape.RECT;
+HitBox.prototype.setRect = function(rect) {
+    this._shape = HitBox.Shape.RECT;
     this.rect = rect;
 };
 
@@ -52,8 +46,8 @@ GJS.HitBox.prototype.setRect = function(rect) {
  * @param {Vec2} center Center of the circle to set.
  * @param {number} radius Radius of the circle.
  */
-GJS.HitBox.prototype.setCircle = function(center, radius) {
-    this._shape = GJS.HitBox.Shape.CIRCLE;
+HitBox.prototype.setCircle = function(center, radius) {
+    this._shape = HitBox.Shape.CIRCLE;
     this._center = center;
     this._radius = radius;
 };
@@ -65,8 +59,8 @@ GJS.HitBox.prototype.setCircle = function(center, radius) {
  * @param {number} angle1 Angle of one endpoint of the segment in radians.
  * @param {number} angle2 Angle of another endpoint of the segment in radians.
  */
-GJS.HitBox.prototype.setSegment = function(center, radius, angle1, angle2) {
-    this._shape = GJS.HitBox.Shape.SEGMENT;
+HitBox.prototype.setSegment = function(center, radius, angle1, angle2) {
+    this._shape = HitBox.Shape.SEGMENT;
     this._center = center;
     this._radius = radius;
     this._angle1 = mathUtil.fmod(angle1, Math.PI * 2);
@@ -103,10 +97,10 @@ GJS.HitBox.prototype.setSegment = function(center, radius, angle1, angle2) {
 
 /**
  * Set this hitBox to a combination (union) of multiple hitboxes.
- * @param {Array.<GJS.HitBox>} hitBoxes Collection to set.
+ * @param {Array.<HitBox>} hitBoxes Collection to set.
  */
-GJS.HitBox.prototype.setCombination = function(hitBoxes) {
-    this._shape = GJS.HitBox.Shape.COMBO;
+HitBox.prototype.setCombination = function(hitBoxes) {
+    this._shape = HitBox.Shape.COMBO;
     this.hitBoxes = hitBoxes;
 };
 
@@ -114,16 +108,16 @@ GJS.HitBox.prototype.setCombination = function(hitBoxes) {
  * @param {Object} target Arbitrary object that this hitbox has hit.
  * @return {Object} Get payload carried by this hitbox. Could be replaced by inheriting object.
  */
-GJS.HitBox.prototype.getPayload = function(target) {
+HitBox.prototype.getPayload = function(target) {
     return 1;
 };
 
 /**
- * @param {GJS.HitBox} other Hitbox to test.
+ * @param {HitBox} other Hitbox to test.
  * @return {boolean} True if this hitbox intersects the other one.
  */
-GJS.HitBox.prototype.intersects = function(other) {
-    if (this._shape === GJS.HitBox.Shape.COMBO) {
+HitBox.prototype.intersects = function(other) {
+    if (this._shape === HitBox.Shape.COMBO) {
         for (var i = 0; i < this.hitBoxes.length; ++i) {
             if (this.hitBoxes[i].intersects(other)) {
                 return true;
@@ -131,7 +125,7 @@ GJS.HitBox.prototype.intersects = function(other) {
         }
         return false;
     }
-    if (other._shape === GJS.HitBox.Shape.COMBO) {
+    if (other._shape === HitBox.Shape.COMBO) {
         return other.intersects(this);
     }
     var that = this;
@@ -139,14 +133,14 @@ GJS.HitBox.prototype.intersects = function(other) {
         that = other;
         other = this;
     }
-    if (that._shape === GJS.HitBox.Shape.VEC2) {
-        if (other._shape === GJS.HitBox.Shape.VEC2) {
+    if (that._shape === HitBox.Shape.VEC2) {
+        if (other._shape === HitBox.Shape.VEC2) {
             return that._shape.x === other._shape.x && that._shape.y === other._shape.y;
-        } else if (other._shape === GJS.HitBox.Shape.RECT) {
+        } else if (other._shape === HitBox.Shape.RECT) {
             return other.rect.containsVec2(that._pos);
-        } else if (other._shape === GJS.HitBox.Shape.CIRCLE) {
+        } else if (other._shape === HitBox.Shape.CIRCLE) {
             return other._center.distance(that._pos) < other._radius;
-        } else if (other._shape === GJS.HitBox.Shape.SEGMENT) {
+        } else if (other._shape === HitBox.Shape.SEGMENT) {
             // Test against circle
             var dist = other._center.distance(that._pos);
             if (dist > other._radius) {
@@ -159,7 +153,7 @@ GJS.HitBox.prototype.intersects = function(other) {
             pointAngle = mathUtil.angleDifference(pointAngle, segmentCenterAngle);
             var distAlongSegmentNormal = Math.cos(pointAngle) * dist;
             return distAlongSegmentNormal > other._lineSegmentCenter.distance(other._center);
-        } /*else if (other._shape === GJS.HitBox.Shape.SECTOR) { // TODO
+        } /*else if (other._shape === HitBox.Shape.SECTOR) { // TODO
             var dist = other._center.distance(that._pos);
             if (dist > other._radius) {
                 return false;
@@ -170,28 +164,28 @@ GJS.HitBox.prototype.intersects = function(other) {
                 return false;
             }
         }*/
-    } else if (that._shape === GJS.HitBox.Shape.RECT) {
-        if (other._shape === GJS.HitBox.Shape.RECT) {
+    } else if (that._shape === HitBox.Shape.RECT) {
+        if (other._shape === HitBox.Shape.RECT) {
             return other.rect.intersectsRect(that.rect);
-        } else if (other._shape === GJS.HitBox.Shape.CIRCLE) {
+        } else if (other._shape === HitBox.Shape.CIRCLE) {
             return that.rect.intersectsCircle(other._center, other._radius);
-        } else if (other._shape === GJS.HitBox.Shape.SEGMENT) {
+        } else if (other._shape === HitBox.Shape.SEGMENT) {
             if (!that.rect.intersectsCircle(other._center, other._radius)) {
                 return false;
             }
             return other._boundingPolygon.intersectsRect(that.rect);
         }
-    } else if (that._shape === GJS.HitBox.Shape.CIRCLE) {
-        if (other._shape === GJS.HitBox.Shape.CIRCLE) {
+    } else if (that._shape === HitBox.Shape.CIRCLE) {
+        if (other._shape === HitBox.Shape.CIRCLE) {
             return other._center.distance(that._center) < other._radius + that._radius;
-        } else if (other._shape === GJS.HitBox.Shape.SEGMENT) {
+        } else if (other._shape === HitBox.Shape.SEGMENT) {
             if (other._center.distance(that._center) >= other._radius + that._radius) {
                 return false;
             }
             return other._boundingPolygon.intersectsCircle(that._center, that._radius);
         }
-    } else if (that._shape === GJS.HitBox.Shape.SEGMENT) {
-        if (other._shape === GJS.HitBox.Shape.SEGMENT) {
+    } else if (that._shape === HitBox.Shape.SEGMENT) {
+        if (other._shape === HitBox.Shape.SEGMENT) {
             if (other._center.distance(that._center) >= other._radius + that._radius) {
                 return false;
             }
@@ -206,16 +200,16 @@ GJS.HitBox.prototype.intersects = function(other) {
 /**
  * @return {Vec2} The center point of this hitBox
  */
-GJS.HitBox.prototype.getCenter = function() {
-    if (this._shape === GJS.HitBox.Shape.VEC2) {
+HitBox.prototype.getCenter = function() {
+    if (this._shape === HitBox.Shape.VEC2) {
         return this._pos;
-    } else if (this._shape === GJS.HitBox.Shape.RECT) {
+    } else if (this._shape === HitBox.Shape.RECT) {
         return this.rect.getCenter();
-    } else if (this._shape === GJS.HitBox.Shape.CIRCLE) {
+    } else if (this._shape === HitBox.Shape.CIRCLE) {
         return this._center;
-    } else if (this._shape === GJS.HitBox.Shape.SEGMENT) {
+    } else if (this._shape === HitBox.Shape.SEGMENT) {
         return this._lineSegmentCenter;
-    } else if (this._shape === GJS.HitBox.Shape.COMBO) {
+    } else if (this._shape === HitBox.Shape.COMBO) {
         var center = new Vec2(0, 0);
         for (var i = 0; i < this.hitBoxes.length; ++i) {
             var subCenter = this.hitBoxes[i].getCenter();
@@ -231,26 +225,28 @@ GJS.HitBox.prototype.getCenter = function() {
  * @param {CanvasRenderingContext2D} ctx Canvas to draw to.
  * @param {number?} pointScale Scale to draw points at. Defaults to 1.
  */
-GJS.HitBox.prototype.render = function(ctx, pointScale) {
+HitBox.prototype.render = function(ctx, pointScale) {
     if (pointScale === undefined) {
         pointScale = 1;
     }
-    if (this._shape === GJS.HitBox.Shape.VEC2) {
+    if (this._shape === HitBox.Shape.VEC2) {
         var pos = this._pos;
         ctx.fillRect(pos.x - pointScale * 0.5, pos.y - pointScale * 0.5, pointScale, pointScale);
-    } else if (this._shape === GJS.HitBox.Shape.RECT) {
+    } else if (this._shape === HitBox.Shape.RECT) {
         ctx.fillRect(this.rect.left, this.rect.top, this.rect.width(), this.rect.height());
-    } else if (this._shape === GJS.HitBox.Shape.CIRCLE) {
+    } else if (this._shape === HitBox.Shape.CIRCLE) {
         ctx.beginPath();
         ctx.arc(this._center.x, this._center.y, this._radius, 0, Math.PI * 2);
         ctx.fill();
-    } else if (this._shape === GJS.HitBox.Shape.SEGMENT) {
+    } else if (this._shape === HitBox.Shape.SEGMENT) {
         ctx.beginPath();
         ctx.arc(this._center.x, this._center.y, this._radius, this._angle1, this._angle2);
         ctx.fill();
-    } else if (this._shape === GJS.HitBox.Shape.COMBO) {
+    } else if (this._shape === HitBox.Shape.COMBO) {
         for (var i = 0; i < this.hitBoxes.length; ++i) {
             this.hitBoxes[i].render(ctx, pointScale);
         }
     }
 };
+
+export { HitBox }

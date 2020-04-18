@@ -4,16 +4,14 @@
 
 'use strict';
 
-if (typeof GJS === "undefined") {
-    var GJS = {};
-}
-
 // This file contains following utilities:
+// TODO: Split into multiple files.
 // mathUtil: Simple math functions.
-// GJS.CardinalDirection: An enum for storing and operating on a cardinal direction: up, down, left, right.
+// CardinalDirection: An enum for storing and operating on a cardinal direction: up, down, left, right.
 // Vec2: A class for storing a two-dimensional vector.
 // AffineTransform: A scale/translate transform.
 // Rect: A class for storing a two-dimensional rectangle.
+// Polygon: A class for storing a two-dimensional polygon.
 // canvasUtil: Utilities for drawing to a 2D canvas.
 
 var mathUtil = {
@@ -218,7 +216,7 @@ mathUtil.factorial = function(n) {
 };
 
 
-GJS.CardinalDirection = {
+CardinalDirection = {
     RIGHT: 0,
     DOWN: 1,
     LEFT: 2,
@@ -226,18 +224,18 @@ GJS.CardinalDirection = {
 };
 
 /**
- * @param {GJS.CardinalDirection} direction
- * @return {GJS.CardinalDirection} next adjacent direction
+ * @param {CardinalDirection} direction
+ * @return {CardinalDirection} next adjacent direction
  */
-GJS.CardinalDirection.next = function(direction) {
+CardinalDirection.next = function(direction) {
     return (direction + 1) % 4;
 };
 
 /**
- * @param {GJS.CardinalDirection} direction
- * @return {GJS.CardinalDirection} previous adjacent direction
+ * @param {CardinalDirection} direction
+ * @return {CardinalDirection} previous adjacent direction
  */
-GJS.CardinalDirection.previous = function(direction) {
+CardinalDirection.previous = function(direction) {
     if (direction === 0) {
         return 3;
     } else {
@@ -246,40 +244,40 @@ GJS.CardinalDirection.previous = function(direction) {
 };
 
 /**
- * @param {GJS.CardinalDirection} direction
+ * @param {CardinalDirection} direction
  * @return {Vec2} Vector where up corresponds to negative y direction.
  */
-GJS.CardinalDirection.toVec2 = function(direction) {
-    if (direction === GJS.CardinalDirection.RIGHT) {
+CardinalDirection.toVec2 = function(direction) {
+    if (direction === CardinalDirection.RIGHT) {
         return new Vec2(1, 0);
     }
-    if (direction === GJS.CardinalDirection.LEFT) {
+    if (direction === CardinalDirection.LEFT) {
         return new Vec2(-1, 0);
     }
-    if (direction === GJS.CardinalDirection.UP) {
+    if (direction === CardinalDirection.UP) {
         return new Vec2(0, -1);
     }
-    if (direction === GJS.CardinalDirection.DOWN) {
+    if (direction === CardinalDirection.DOWN) {
         return new Vec2(0, 1);
     }
 };
 
 /**
  * @param {Vec2} vec
- * @return {GJS.CardinalDirection} The cardinal direction that is closest to the direction of vec.
+ * @return {CardinalDirection} The cardinal direction that is closest to the direction of vec.
  */
-GJS.CardinalDirection.fromVec2 = function(vec) {
+CardinalDirection.fromVec2 = function(vec) {
     if (Math.abs(vec.x) >= Math.abs(vec.y)) {
         if (vec.x >= 0) {
-            return GJS.CardinalDirection.RIGHT;
+            return CardinalDirection.RIGHT;
         } else {
-            return GJS.CardinalDirection.LEFT;
+            return CardinalDirection.LEFT;
         }
     } else {
         if (vec.y >= 0) {
-            return GJS.CardinalDirection.DOWN;
+            return CardinalDirection.DOWN;
         } else {
-            return GJS.CardinalDirection.UP;
+            return CardinalDirection.UP;
         }
     }
 };
@@ -1125,3 +1123,5 @@ canvasUtil.drawCoordinateSystemRef = function(ctx) {
     ctx.lineTo(0, 10);
     ctx.stroke();
 };
+
+export { mathUtil, CardinalDirection, Vec2, AffineTransform, Rect, Polygon, canvasUtil }

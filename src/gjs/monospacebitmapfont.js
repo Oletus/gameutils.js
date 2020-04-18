@@ -1,15 +1,11 @@
 'use strict';
 
-if (typeof GJS === "undefined") {
-    var GJS = {};
-}
-
 /**
  * Bitmap font that uses a simple ISO-8859-1 monospace grid sprite sheet.
  * @param {Object} options Constructor options.
  * @constructor
  */
-GJS.MonospaceBitmapFont = function(options) {
+const MonospaceBitmapFont = function(options) {
     var defaults = {
         spriteSrc: 'bitmapfont-tiny.png',
         characterHeight: 6,
@@ -21,9 +17,9 @@ GJS.MonospaceBitmapFont = function(options) {
     };
     objectUtil.initWithDefaults(this, defaults, options);
     if (this.color !== undefined) {
-        this.sprite = new GJS.Sprite(this.spriteSrc, GJS.Sprite.turnSolidColored(this.color));
+        this.sprite = new Sprite(this.spriteSrc, Sprite.turnSolidColored(this.color));
     } else {
-        this.sprite = new GJS.Sprite(this.spriteSrc);
+        this.sprite = new Sprite(this.spriteSrc);
     }
 };
 
@@ -32,7 +28,7 @@ GJS.MonospaceBitmapFont = function(options) {
  * @param {CanvasRenderingContext2D} ctx Context to draw to.
  * @param {string} A single-character string to draw.
  */
-GJS.MonospaceBitmapFont.prototype.drawCharacter = function(ctx, character) {
+MonospaceBitmapFont.prototype.drawCharacter = function(ctx, character) {
     if (this.sprite.loaded) {
         if (this.charactersPerRow === undefined) {
             this.charactersPerRow = this.sprite.width / this.characterWidth;
@@ -55,7 +51,7 @@ GJS.MonospaceBitmapFont.prototype.drawCharacter = function(ctx, character) {
  * @param {number} x Horizontal coordinate.
  * @param {number} y Vertical coordinate.
  */
-GJS.MonospaceBitmapFont.prototype.drawText = function(ctx, string, x, y) {
+MonospaceBitmapFont.prototype.drawText = function(ctx, string, x, y) {
     var drawnWidth = string.length * this.characterWidth;
     var kerningActive = this.closerKerningCharacters.length > 0 && this.kerningAmount != 0;
     var prevCharacterNarrow = false;
@@ -113,7 +109,7 @@ GJS.MonospaceBitmapFont.prototype.drawText = function(ctx, string, x, y) {
  * @param {number} maxRowLength Maximum length of row in characters.
  * @param {number} rowHeight Row height in coordinates.
  */
-GJS.MonospaceBitmapFont.prototype.drawTextInRows = function(ctx, textToRender, x, y, maxRowLength, rowHeight) {
+MonospaceBitmapFont.prototype.drawTextInRows = function(ctx, textToRender, x, y, maxRowLength, rowHeight) {
     var renderedRows = this._splitRows(textToRender, maxRowLength);
     for (var i = 0; i < renderedRows.length; ++i) {
         this.drawText(ctx, renderedRows[i], x, y + i * rowHeight);
@@ -125,7 +121,7 @@ GJS.MonospaceBitmapFont.prototype.drawTextInRows = function(ctx, textToRender, x
  * @param {number} maxRowLength Maximum length of row in characters.
  * @return {number} Number of rows that would get drawn if drawTextInRows is called with the same arguments.
  */
-GJS.MonospaceBitmapFont.prototype.getNumberOfRows = function(textToRender, maxRowLength) {
+MonospaceBitmapFont.prototype.getNumberOfRows = function(textToRender, maxRowLength) {
     return this._splitRows(textToRender, maxRowLength).length;
 };
 
@@ -135,7 +131,7 @@ GJS.MonospaceBitmapFont.prototype.getNumberOfRows = function(textToRender, maxRo
  * @param {number} maxRowLength Maximum length of row in characters.
  * @protected
  */
-GJS.MonospaceBitmapFont.prototype._splitRows = function(textToRender, maxRowLength) {
+MonospaceBitmapFont.prototype._splitRows = function(textToRender, maxRowLength) {
     var renderedRows = textToRender;
     if (!(renderedRows instanceof Array)) {
         if (maxRowLength < 0) {
@@ -158,3 +154,5 @@ GJS.MonospaceBitmapFont.prototype._splitRows = function(textToRender, maxRowLeng
     }
     return renderedRows;
 };
+
+export { MonospaceBitmapFont }

@@ -1,31 +1,27 @@
 'use strict';
 
-if (typeof GJS === "undefined") {
-    var GJS = {};
-}
-
 /**
  * A sprite that can be drawn on a 2D canvas.
  * @constructor
- * @param {string|HTMLImageElement|HTMLCanvasElement|GJS.Sprite} filename File to load, a graphical element that's already
- * loaded, or another GJS.Sprite.
- * @param {string=} filter Filter function to convert the sprite, for example GJS.Sprite.turnSolidColored('black')
+ * @param {string|HTMLImageElement|HTMLCanvasElement|Sprite} filename File to load, a graphical element that's already
+ * loaded, or another Sprite.
+ * @param {string=} filter Filter function to convert the sprite, for example Sprite.turnSolidColored('black')
  * @param {string|HTMLImageElement|HTMLCanvasElement=} fallback Fallback file to load or a graphical element that's
  * already loaded.
  */
-GJS.Sprite = function(filename, /* Optional */ filter, fallback) {
+const Sprite = function(filename, /* Optional */ filter, fallback) {
     this.filename = filename;
     this.bakeableFilepath = null;
     this.missing = false;
     this.fallback = fallback;
     this.filter = filter;
-    GJS.Sprite.createdCount++;
+    Sprite.createdCount++;
     this.loadedListeners = [];
     this.implementsGameutilsSprite = true;
     this._reload();
 };
 
-GJS.Sprite.prototype.addLoadedListener = function(callback) {
+Sprite.prototype.addLoadedListener = function(callback) {
     if (this.loaded) {
         callback();
     }
@@ -34,20 +30,20 @@ GJS.Sprite.prototype.addLoadedListener = function(callback) {
     }
 };
 
-GJS.Sprite.prototype._callLoadedListeners = function() {
+Sprite.prototype._callLoadedListeners = function() {
     for (var i = 0; i < this.loadedListeners.length; ++i) {
         this.loadedListeners[i]();
     }
 };
 
 /**
- * Reload the GJS.Sprite.
+ * Reload the Sprite.
  * @protected
  */
-GJS.Sprite.prototype._reload = function() {
+Sprite.prototype._reload = function() {
     if (typeof this.filename != typeof '') {
         this.img = this.filename;
-        if (this.img instanceof GJS.Sprite) {
+        if (this.img instanceof Sprite) {
             var that = this;
             this.img.addLoadedListener(function() {
                 that.filename = that.img.img;
@@ -56,7 +52,7 @@ GJS.Sprite.prototype._reload = function() {
             return;
         }
         this.loaded = true;
-        GJS.Sprite.loadedCount++;
+        Sprite.loadedCount++;
         this.width = this.img.width;
         this.height = this.img.height;
         if (this.filter !== undefined) {
@@ -67,12 +63,12 @@ GJS.Sprite.prototype._reload = function() {
         var isDataOrHTTP = this.filename.substring(0, 5) === 'data:' ||
                            this.filename.substring(0, 5) === 'http:' ||
                            this.filename.substring(0, 6) === 'https:';
-        if (!isDataOrHTTP && GJS.Sprite.atlas !== null && GJS.Sprite.atlas.hasSpriteImg(GJS.Sprite.gfxPath + this.filename)) {
+        if (!isDataOrHTTP && Sprite.atlas !== null && Sprite.atlas.hasSpriteImg(Sprite.gfxPath + this.filename)) {
             var that = this;
-            this.bakeableFilepath = GJS.Sprite.gfxPath + that.filename;
-            GJS.Sprite.bakeableSpritePaths.push(this.bakeableFilepath);
-            GJS.Sprite.atlas.img.addLoadedListener(function() {
-                that.filename = GJS.Sprite.atlas.getSpriteImg(that.bakeableFilepath);
+            this.bakeableFilepath = Sprite.gfxPath + that.filename;
+            Sprite.bakeableSpritePaths.push(this.bakeableFilepath);
+            Sprite.atlas.img.addLoadedListener(function() {
+                that.filename = Sprite.atlas.getSpriteImg(that.bakeableFilepath);
                 that._reload();
             });
             return;
@@ -81,15 +77,15 @@ GJS.Sprite.prototype._reload = function() {
             if (isDataOrHTTP) {
                 this.img.src = this.filename;
             } else {
-                this.bakeableFilepath = GJS.Sprite.gfxPath + this.filename;
+                this.bakeableFilepath = Sprite.gfxPath + this.filename;
                 this.img.src = this.bakeableFilepath;
-                GJS.Sprite.bakeableSpritePaths.push(this.bakeableFilepath);
+                Sprite.bakeableSpritePaths.push(this.bakeableFilepath);
             }
             var that = this;
             this.loaded = false;
             this.img.onload = function() {
                 that.loaded = true;
-                GJS.Sprite.loadedCount++;
+                Sprite.loadedCount++;
                 that.width = that.img.width;
                 that.height = that.img.height;
                 if (that.filter !== undefined) {
@@ -106,12 +102,12 @@ GJS.Sprite.prototype._reload = function() {
                 }
                 that.loaded = true;
                 that.missing = true;
-                if (GJS.Sprite.requireAllSpritesLoaded) {
+                if (Sprite.requireAllSpritesLoaded) {
                     console.log('Loading sprite failed ' + that.img.src);
                 } else {
-                    GJS.Sprite.loadedCount++;
+                    Sprite.loadedCount++;
                 }
-                that.img = GJS.Sprite.getMissingImg(that.filename);
+                that.img = Sprite.getMissingImg(that.filename);
                 that.width = that.img.width;
                 that.height = that.img.height;
                 that._callLoadedListeners();
@@ -124,7 +120,7 @@ GJS.Sprite.prototype._reload = function() {
  * @param {string} filename
  * @return {HTMLCanvasElement} Canvas element with the text "Missing: <filename>"
  */
-GJS.Sprite.getMissingImg = function(filename) {
+Sprite.getMissingImg = function(filename) {
     var img = document.createElement('canvas');
     img.width = 150;
     img.height = 20;
@@ -138,30 +134,30 @@ GJS.Sprite.getMissingImg = function(filename) {
 };
 
 /**
- * Path for graphics files. Set this before creating any GJS.Sprite objects.
+ * Path for graphics files. Set this before creating any Sprite objects.
  */
-GJS.Sprite.gfxPath = 'assets/gfx/';
+Sprite.gfxPath = 'assets/gfx/';
 
 /**
  * Whether to require that all constructed sprites load their images succesfully. Can be convenient to set to false for
  * game jam type events, should set to true to target Cordova.
  */
-GJS.Sprite.requireAllSpritesLoaded = false;
+Sprite.requireAllSpritesLoaded = false;
 
 /**
- * Baked atlas to load sprites from instead of loading them from relative filenames. GJS.SpriteAtlas.
+ * Baked atlas to load sprites from instead of loading them from relative filenames. SpriteAtlas.
  */
-GJS.Sprite.atlas = null;
+Sprite.atlas = null;
 
 /**
  * List of the paths of all bakeable sprites.
  */
-GJS.Sprite.bakeableSpritePaths = [];
+Sprite.bakeableSpritePaths = [];
 
 /**
  * Filter for turning the sprite solid colored.
  */
-GJS.Sprite.turnSolidColored = function(solidColor) {
+Sprite.turnSolidColored = function(solidColor) {
     return function(sprite) {
         var canvas = document.createElement('canvas');
         canvas.width = sprite.width;
@@ -178,7 +174,7 @@ GJS.Sprite.turnSolidColored = function(solidColor) {
 /**
  * Filter for generating a different hued variation of the sprite.
  */
-GJS.Sprite.varyHue = function(options) {
+Sprite.varyHue = function(options) {
     var defaults = {
         minHue: 0,
         maxHue: 1,
@@ -205,8 +201,8 @@ GJS.Sprite.varyHue = function(options) {
             var data = ctx.getImageData(0, 0, canvas.width, canvas.height);
         } catch (e) {
             if (e.name == 'SecurityError') {
-                if (!GJS.Sprite.reportedSecurityError) {
-                    GJS.Sprite.reportedSecurityError = true;
+                if (!Sprite.reportedSecurityError) {
+                    Sprite.reportedSecurityError = true;
                     console.log(e.message);
                 }
                 return;
@@ -234,12 +230,12 @@ GJS.Sprite.varyHue = function(options) {
 };
 
 /**
- * Filter for generating a variation of the GJS.Sprite with colors replaced with others.
+ * Filter for generating a variation of the Sprite with colors replaced with others.
  * @param {Object} paletteMap A mapping from RGB source color values to target values. Source colors should be strings
  * in "R, G, B" format. Target colors should be arrays [R, G, B]. In both cases the scale is 0-255.
  * @param {number=} tolerance Tolerance for detecting source colors.
  */
-GJS.Sprite.repalette = function(paletteMap, tolerance) {
+Sprite.repalette = function(paletteMap, tolerance) {
     if (tolerance === undefined) {
         tolerance = 10;
     }
@@ -283,26 +279,26 @@ GJS.Sprite.repalette = function(paletteMap, tolerance) {
     };
 };
 
-GJS.Sprite.reportedSecurityError = false;
+Sprite.reportedSecurityError = false;
 
 /**
- * How many GJS.Sprite objects have been created.
+ * How many Sprite objects have been created.
  */
-GJS.Sprite.createdCount = 0;
+Sprite.createdCount = 0;
 /**
- * How many GJS.Sprite objects have been fully loaded.
+ * How many Sprite objects have been fully loaded.
  */
-GJS.Sprite.loadedCount = 0;
+Sprite.loadedCount = 0;
 
 /**
- * @return {number} Amount of GJS.Sprite objects that have been fully loaded per amount that has been created.
+ * @return {number} Amount of Sprite objects that have been fully loaded per amount that has been created.
  * Name specified as string to support Closure compiler together with loadingbar.js.
  */
-GJS.Sprite['loadedFraction'] = function() {
-    if (GJS.Sprite.createdCount === 0) {
+Sprite['loadedFraction'] = function() {
+    if (Sprite.createdCount === 0) {
         return 1.0;
     }
-    return GJS.Sprite.loadedCount / GJS.Sprite.createdCount;
+    return Sprite.loadedCount / Sprite.createdCount;
 };
 
 /**
@@ -311,7 +307,7 @@ GJS.Sprite['loadedFraction'] = function() {
  * @param {number} leftX X coordinate of the left edge.
  * @param {number} topY Y coordinate of the top edge.
  */
-GJS.Sprite.prototype.draw = function(ctx, leftX, topY) {
+Sprite.prototype.draw = function(ctx, leftX, topY) {
     if (this.loaded) {
         ctx.drawImage(this.img, leftX, topY);
     }
@@ -327,7 +323,7 @@ GJS.Sprite.prototype.draw = function(ctx, leftX, topY) {
  * @param {number} sWidth Width of the subrectangle in the source image.
  * @param {number} sHeight Height of the subrectangle in the source image.
  */
-GJS.Sprite.prototype.drawCropped = function(ctx, leftX, topY, sx, sy, sWidth, sHeight) {
+Sprite.prototype.drawCropped = function(ctx, leftX, topY, sx, sy, sWidth, sHeight) {
     if (this.loaded && sWidth > 0 && sHeight > 0) {
         ctx.drawImage(this.img, sx, sy, sWidth, sHeight, leftX, topY, sWidth, sHeight);
     }
@@ -341,7 +337,7 @@ GJS.Sprite.prototype.drawCropped = function(ctx, leftX, topY, sx, sy, sWidth, sH
  * @param {number} angleRadians Angle to rotate the sprite with (relative to its center).
  * @param {number} scale Scale to scale the sprite with (relative to its center).
  */
-GJS.Sprite.prototype.drawRotated = function(ctx, centerX, centerY, angleRadians, /* optional */ scale) {
+Sprite.prototype.drawRotated = function(ctx, centerX, centerY, angleRadians, /* optional */ scale) {
     if (!this.loaded) {
         return;
     }
@@ -371,7 +367,7 @@ GJS.Sprite.prototype.drawRotated = function(ctx, centerX, centerY, angleRadians,
  * @param {number} scaleX Scale to scale the sprite with along the x axis (relative to its center).
  * @param {number} scaleY Scale to scale the sprite with along the y axis (relative to its center).
  */
-GJS.Sprite.prototype.drawRotatedNonUniform = function(ctx, centerX, centerY, angleRadians, scaleX, scaleY) {
+Sprite.prototype.drawRotatedNonUniform = function(ctx, centerX, centerY, angleRadians, scaleX, scaleY) {
     if (!this.loaded) {
         return;
     }
@@ -399,7 +395,7 @@ GJS.Sprite.prototype.drawRotatedNonUniform = function(ctx, centerX, centerY, ang
  * Fill the canvas with the sprite, preserving the sprite's aspect ratio, with the sprite centered on the canvas.
  * @param {CanvasRenderingContext2D} ctx
  */
-GJS.Sprite.prototype.fillCanvas = function(ctx) {
+Sprite.prototype.fillCanvas = function(ctx) {
     if (!this.loaded) {
         return;
     }
@@ -412,7 +408,7 @@ GJS.Sprite.prototype.fillCanvas = function(ctx) {
  * of the canvas.
  * @param {CanvasRenderingContext2D} ctx
  */
-GJS.Sprite.prototype.fillCanvasFitBottom = function(ctx) {
+Sprite.prototype.fillCanvasFitBottom = function(ctx) {
     if (!this.loaded) {
         return;
     }
@@ -425,7 +421,7 @@ GJS.Sprite.prototype.fillCanvasFitBottom = function(ctx) {
  * of the canvas.
  * @param {CanvasRenderingContext2D} ctx
  */
-GJS.Sprite.prototype.fillCanvasHorizontallyFitBottom = function(ctx) {
+Sprite.prototype.fillCanvasHorizontallyFitBottom = function(ctx) {
     if (!this.loaded) {
         return;
     }
@@ -434,7 +430,9 @@ GJS.Sprite.prototype.fillCanvasHorizontallyFitBottom = function(ctx) {
 };
 
 /**
- * Just here to make GJS.Sprite and GJS.AnimatedSpriteInstance interchangeable.
+ * Just here to make Sprite and AnimatedSpriteInstance interchangeable.
  */
-GJS.Sprite.prototype.update = function() {
+Sprite.prototype.update = function() {
 };
+
+export { Sprite }

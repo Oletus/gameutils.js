@@ -376,3 +376,5 @@ colorUtil.blendColorDodge = function(a, b) {
 colorUtil.blendLinearDodge = function(a, b) {
     return mathUtil.clamp(0, 255, a + b);
 };
+
+export { cssUtil, colorUtil }

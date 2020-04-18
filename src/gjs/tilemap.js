@@ -1,18 +1,12 @@
 'use strict';
 
-/**
- * Using GJS.TileMap requires the Vec2 and Rect classes and the CardinalDirection enum from util2d.
- */
-
-if (typeof GJS === "undefined") {
-    var GJS = {};
-}
+import { Vec2, Rect, CardinalDirection } from './util2d.js';
 
 /**
  * A 2D grid made out of tiles. Tiles can be of any type, but they are strings by default.
  * @constructor
  */
-GJS.TileMap = function(options)
+const TileMap = function(options)
 {
     var defaults = {
         width: 1,
@@ -40,9 +34,9 @@ GJS.TileMap = function(options)
 /**
  * @param {Array} data Tiles in an array in row-major form.
  * @param {boolean?} flippedX Set to true to flip the data in the x direction.
- * @return {function} Function to pass as an init function to GJS.TileMap constructor.
+ * @return {function} Function to pass as an init function to TileMap constructor.
  */
-GJS.TileMap.initFromData = function(data, flippedX) {
+TileMap.initFromData = function(data, flippedX) {
     if (flippedX === undefined) {
         flippedX = false;
     }
@@ -63,7 +57,7 @@ GJS.TileMap.initFromData = function(data, flippedX) {
  * @param {number} height New height.
  * @param {function?} initTile Function that returns an initial tile. x and y parameters. If not set will use the initTile for the constructor.
  */
-GJS.TileMap.prototype.resize = function(width, height, initTile) {
+TileMap.prototype.resize = function(width, height, initTile) {
     if (initTile === undefined) {
         initTile = this.initTile;
     }
@@ -95,7 +89,7 @@ GJS.TileMap.prototype.resize = function(width, height, initTile) {
  * @param {number} y Vertical float coordinate
  * @return {Vec2} Integer tile coordinates for the specified tile.
  */
-GJS.TileMap.prototype.tileAt = function(x, y) {
+TileMap.prototype.tileAt = function(x, y) {
     var tileX = Math.floor(x);
     var tileY = Math.floor(y);
     return new Vec2(tileX, tileY);
@@ -109,7 +103,7 @@ GJS.TileMap.prototype.tileAt = function(x, y) {
  * @param {number?} extraYBottom How much to extend the drawn tiles in the y direction. Defaults to 0.
  * @param {number?} extraX How much to extend the drawn tiles in the x direction. Defaults to 0.
  */
-GJS.TileMap.prototype.render = function(ctx, matchFunc, extraYTop, extraYBottom, extraX) {
+TileMap.prototype.render = function(ctx, matchFunc, extraYTop, extraYBottom, extraX) {
     if (extraYTop === undefined) {
         extraYTop = 0;
     }
@@ -142,7 +136,7 @@ GJS.TileMap.prototype.render = function(ctx, matchFunc, extraYTop, extraYBottom,
     }
 };
 
-GJS.TileMap.epsilon = 0.00001;
+TileMap.epsilon = 0.00001;
 
 /**
  * @param {Vec2} tileMin Integer coordinates for top left corner of the area.
@@ -151,7 +145,7 @@ GJS.TileMap.epsilon = 0.00001;
  * @return {boolean} True if there are matching tiles within the area limited by tileMin and tileMax
  * Coordinates are inclusive.
  */
-GJS.TileMap.prototype.isTileInArea = function(tileMin, tileMax, matchFunc) {
+TileMap.prototype.isTileInArea = function(tileMin, tileMax, matchFunc) {
     for (var y = tileMin.y; y <= tileMax.y; ++y) {
         if (y < 0) {
             y = -1;
@@ -183,7 +177,7 @@ GJS.TileMap.prototype.isTileInArea = function(tileMin, tileMax, matchFunc) {
  * @return {Array.<Vec2>} Coordinates of matching tiles within the area limited by tileMin and tileMax.
  * Coordinates are inclusive.
  */
-GJS.TileMap.prototype.getTileCoordsInArea = function(tileMin, tileMax, matchFunc) {
+TileMap.prototype.getTileCoordsInArea = function(tileMin, tileMax, matchFunc) {
     var tiles = [];
     for (var y = tileMin.y; y <= tileMax.y; ++y) {
         if (y < 0) {
@@ -216,7 +210,7 @@ GJS.TileMap.prototype.getTileCoordsInArea = function(tileMin, tileMax, matchFunc
  * @return {Array.<Object>} Matching tiles within the area limited by tileMin and tileMax.
  * Coordinates are inclusive.
  */
-GJS.TileMap.prototype.getTilesInArea = function(tileMin, tileMax, matchFunc) {
+TileMap.prototype.getTilesInArea = function(tileMin, tileMax, matchFunc) {
     var tileCoords = this.getTileCoordsInArea(tileMin, tileMax, matchFunc);
     var tiles = [];
     for (var i = 0; i < tileCoords.length; ++i) {
@@ -229,7 +223,7 @@ GJS.TileMap.prototype.getTilesInArea = function(tileMin, tileMax, matchFunc) {
  * @param {function} matchFunc Gets passed a tile and returns true if it matches.
  * @return {Array.<Vec2>} Coordinates of matching tiles within the tilemap.
  */
-GJS.TileMap.prototype.getTileCoords = function(matchFunc) {
+TileMap.prototype.getTileCoords = function(matchFunc) {
     return this.getTileCoordsInArea(new Vec2(0, 0), new Vec2(this.width, this.height), matchFunc);
 };
 
@@ -237,7 +231,7 @@ GJS.TileMap.prototype.getTileCoords = function(matchFunc) {
  * @param {function} matchFunc Gets passed a tile and returns true if it matches.
  * @return {Array.<Object>} Matching tiles within the tilemap.
  */
-GJS.TileMap.prototype.getTiles = function(matchFunc) {
+TileMap.prototype.getTiles = function(matchFunc) {
     return this.getTilesInArea(new Vec2(0, 0), new Vec2(this.width, this.height), matchFunc);
 };
 
@@ -247,8 +241,8 @@ GJS.TileMap.prototype.getTiles = function(matchFunc) {
  * @param {number} maxDistance How far from the rect to extend the search.
  * @return {number} x X coordinate of the matching tile, or -1 if no match found.
  */
-GJS.TileMap.prototype.nearestTileLeftFromRect = function(rect, matchFunc, maxDistance) {
-    var epsilon = GJS.TileMap.epsilon;
+TileMap.prototype.nearestTileLeftFromRect = function(rect, matchFunc, maxDistance) {
+    var epsilon = TileMap.epsilon;
     var tileMin = this.tileAt(rect.left + epsilon, rect.top + epsilon);
     var tileMax = this.tileAt(rect.left + epsilon, rect.bottom - epsilon);
     var match = false;
@@ -270,8 +264,8 @@ GJS.TileMap.prototype.nearestTileLeftFromRect = function(rect, matchFunc, maxDis
  * @param {number} maxDistance How far from the rect to extend the search.
  * @return {number} x X coordinate of the matching tile, or -1 if no match found.
  */
-GJS.TileMap.prototype.nearestTileRightFromRect = function(rect, matchFunc, maxDistance) {
-    var epsilon = GJS.TileMap.epsilon;
+TileMap.prototype.nearestTileRightFromRect = function(rect, matchFunc, maxDistance) {
+    var epsilon = TileMap.epsilon;
     var tileMin = this.tileAt(rect.right - epsilon, rect.top + epsilon);
     var tileMax = this.tileAt(rect.right - epsilon, rect.bottom - epsilon);
     var match = false;
@@ -293,8 +287,8 @@ GJS.TileMap.prototype.nearestTileRightFromRect = function(rect, matchFunc, maxDi
  * @param {number} maxDistance How far from the rect to extend the search.
  * @return {number} y Y coordinate of the matching tile, or -1 if no match found.
  */
-GJS.TileMap.prototype.nearestTileUpFromRect = function(rect, matchFunc, maxDistance) {
-    var epsilon = GJS.TileMap.epsilon;
+TileMap.prototype.nearestTileUpFromRect = function(rect, matchFunc, maxDistance) {
+    var epsilon = TileMap.epsilon;
     var tileMin = this.tileAt(rect.left + epsilon, rect.top + epsilon);
     var tileMax = this.tileAt(rect.right - epsilon, rect.top + epsilon);
     var match = false;
@@ -316,8 +310,8 @@ GJS.TileMap.prototype.nearestTileUpFromRect = function(rect, matchFunc, maxDista
  * @param {number} maxDistance How far from the rect to extend the search.
  * @return {number} y Y coordinate of the matching tile, or -1 if no match found.
  */
-GJS.TileMap.prototype.nearestTileDownFromRect = function(rect, matchFunc, maxDistance) {
-    var epsilon = GJS.TileMap.epsilon;
+TileMap.prototype.nearestTileDownFromRect = function(rect, matchFunc, maxDistance) {
+    var epsilon = TileMap.epsilon;
     var tileMin = this.tileAt(rect.left + epsilon, rect.bottom - epsilon);
     var tileMax = this.tileAt(rect.right - epsilon, rect.bottom - epsilon);
     var match = false;
@@ -340,8 +334,8 @@ GJS.TileMap.prototype.nearestTileDownFromRect = function(rect, matchFunc, maxDis
  * @param {number} maxDistance How far from the rect to extend the search.
  * @return {Array.<Object>} Nearest matching tiles. May be empty if none are found.
  */
-GJS.TileMap.prototype.getNearestTilesLeftFromRect = function(rect, matchFunc, maxDistance) {
-    var epsilon = GJS.TileMap.epsilon;
+TileMap.prototype.getNearestTilesLeftFromRect = function(rect, matchFunc, maxDistance) {
+    var epsilon = TileMap.epsilon;
     var tileMin = this.tileAt(rect.left + epsilon, rect.top + epsilon);
     var tileMax = this.tileAt(rect.left + epsilon, rect.bottom - epsilon);
     var tiles = [];
@@ -361,8 +355,8 @@ GJS.TileMap.prototype.getNearestTilesLeftFromRect = function(rect, matchFunc, ma
  * @param {number} maxDistance How far from the rect to extend the search.
  * @return {Array.<Object>} Nearest matching tiles. May be empty if none are found.
  */
-GJS.TileMap.prototype.getNearestTilesRightFromRect = function(rect, matchFunc, maxDistance) {
-    var epsilon = GJS.TileMap.epsilon;
+TileMap.prototype.getNearestTilesRightFromRect = function(rect, matchFunc, maxDistance) {
+    var epsilon = TileMap.epsilon;
     var tileMin = this.tileAt(rect.right - epsilon, rect.top + epsilon);
     var tileMax = this.tileAt(rect.right - epsilon, rect.bottom - epsilon);
     var tiles = [];
@@ -382,8 +376,8 @@ GJS.TileMap.prototype.getNearestTilesRightFromRect = function(rect, matchFunc, m
  * @param {number} maxDistance How far from the rect to extend the search.
  * @return {Array.<Object>} Nearest matching tiles. May be empty if none are found.
  */
-GJS.TileMap.prototype.getNearestTilesUpFromRect = function(rect, matchFunc, maxDistance) {
-    var epsilon = GJS.TileMap.epsilon;
+TileMap.prototype.getNearestTilesUpFromRect = function(rect, matchFunc, maxDistance) {
+    var epsilon = TileMap.epsilon;
     var tileMin = this.tileAt(rect.left + epsilon, rect.top + epsilon);
     var tileMax = this.tileAt(rect.right - epsilon, rect.top + epsilon);
     var tiles = [];
@@ -403,8 +397,8 @@ GJS.TileMap.prototype.getNearestTilesUpFromRect = function(rect, matchFunc, maxD
  * @param {number} maxDistance How far from the rect to extend the search.
  * @return {Array.<Object>} Nearest matching tiles. May be empty if none are found.
  */
-GJS.TileMap.prototype.getNearestTilesDownFromRect = function(rect, matchFunc, maxDistance) {
-    var epsilon = GJS.TileMap.epsilon;
+TileMap.prototype.getNearestTilesDownFromRect = function(rect, matchFunc, maxDistance) {
+    var epsilon = TileMap.epsilon;
     var tileMin = this.tileAt(rect.left + epsilon, rect.bottom - epsilon);
     var tileMax = this.tileAt(rect.right - epsilon, rect.bottom - epsilon);
     var tiles = [];
@@ -420,36 +414,36 @@ GJS.TileMap.prototype.getNearestTilesDownFromRect = function(rect, matchFunc, ma
 
 /**
  * @param {Vec2} originTile Integer coordinates of the tile to start the search from.
- * @return {Array} Map from GJS.CardinalDirection to how many tiles there are in between the originTile and the
+ * @return {Array} Map from CardinalDirection to how many tiles there are in between the originTile and the
  * first matching tile found in that direction.
  */
-GJS.TileMap.prototype.getDistancesByCardinalDirection = function(originTile, matchFunc) {
+TileMap.prototype.getDistancesByCardinalDirection = function(originTile, matchFunc) {
     var distances = [-1, -1, -1, -1];
     var distance = 1;
-    while (originTile.x + distance < this.width && distances[GJS.CardinalDirection.RIGHT] < 0) {
+    while (originTile.x + distance < this.width && distances[CardinalDirection.RIGHT] < 0) {
         if (matchFunc(this.tiles[originTile.y][originTile.x + distance])) {
-            distances[GJS.CardinalDirection.RIGHT] = distance;
+            distances[CardinalDirection.RIGHT] = distance;
         }
         ++distance;
     }
     distance = 1;
-    while (originTile.x - distance >= 0 && distances[GJS.CardinalDirection.LEFT] < 0) {
+    while (originTile.x - distance >= 0 && distances[CardinalDirection.LEFT] < 0) {
         if (matchFunc(this.tiles[originTile.y][originTile.x - distance])) {
-            distances[GJS.CardinalDirection.LEFT] = distance;
+            distances[CardinalDirection.LEFT] = distance;
         }
         ++distance;
     }
     distance = 1;
-    while (originTile.y + distance < this.height && distances[GJS.CardinalDirection.DOWN] < 0) {
+    while (originTile.y + distance < this.height && distances[CardinalDirection.DOWN] < 0) {
         if (matchFunc(this.tiles[originTile.y + distance][originTile.x])) {
-            distances[GJS.CardinalDirection.DOWN] = distance;
+            distances[CardinalDirection.DOWN] = distance;
         }
         ++distance;
     }
     distance = 0;
-    while (originTile.y - distance >= 0 && distances[GJS.CardinalDirection.UP] < 0) {
+    while (originTile.y - distance >= 0 && distances[CardinalDirection.UP] < 0) {
         if (matchFunc(this.tiles[originTile.y - distance][originTile.x])) {
-            distances[GJS.CardinalDirection.UP] = distance;
+            distances[CardinalDirection.UP] = distance;
         }
         ++distance;
     }
@@ -459,10 +453,10 @@ GJS.TileMap.prototype.getDistancesByCardinalDirection = function(originTile, mat
 /**
  * @param {Vec2} originTile Integer coordinates for the tile to start searching from.
  * @param {function} matchFunc Gets passed a tile and returns true if it matches.
- * @return {GJS.CardinalDirection} The cardinal direction of the nearest matching tile, or undefined if no matching
+ * @return {CardinalDirection} The cardinal direction of the nearest matching tile, or undefined if no matching
  * tiles found.
  */
-GJS.TileMap.prototype.getNearestTileDirection = function(originTile, matchFunc) {
+TileMap.prototype.getNearestTileDirection = function(originTile, matchFunc) {
     var distances = this.getDistancesByCardinalDirection(originTile, matchFunc);
     var nearest = -1;
     var nearestDirection = undefined;
@@ -478,8 +472,8 @@ GJS.TileMap.prototype.getNearestTileDirection = function(originTile, matchFunc) 
 /**
  * @return {boolean} True if any matching tiles overlap the given rectangle.
  */
-GJS.TileMap.prototype.overlapsTiles = function(rect, matchFunc) {
-    var epsilon = GJS.TileMap.epsilon;
+TileMap.prototype.overlapsTiles = function(rect, matchFunc) {
+    var epsilon = TileMap.epsilon;
     var tile = this.tileAt(rect.left + epsilon, rect.top + epsilon);
     var tileMax = this.tileAt(rect.right - epsilon, rect.bottom - epsilon);
     return this.isTileInArea(tile, tileMax, matchFunc);
@@ -488,7 +482,7 @@ GJS.TileMap.prototype.overlapsTiles = function(rect, matchFunc) {
 /**
  * @return {Rect} tileMap rect representing the size of the tilemap.
  */
-GJS.TileMap.prototype.getRect = function() {
+TileMap.prototype.getRect = function() {
     return new Rect(0.0, this.width, 0.0, this.height);
 };
 
@@ -501,7 +495,7 @@ GJS.TileMap.prototype.getRect = function() {
  * @param {function} matchFunc Gets passed a tile and returns true if it should be grouped.
  * @return {Array.<Rect>} Rectangles into which all tiles are grouped.
  */
-GJS.TileMap.prototype.groupTilesToRectangles = function(matchFunc) {
+TileMap.prototype.groupTilesToRectangles = function(matchFunc) {
     var row, tile;
     var groups = [];
     var currentMatch = undefined;
@@ -557,3 +551,5 @@ GJS.TileMap.prototype.groupTilesToRectangles = function(matchFunc) {
     }
     return groups;
 };
+
+export { TileMap }

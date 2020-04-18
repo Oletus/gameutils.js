@@ -228,3 +228,5 @@ var startMainLoop = function(updateables, options) {
     };
     frame();
 };
+
+export { startMainLoop }

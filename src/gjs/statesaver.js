@@ -1,15 +1,11 @@
 'use strict';
 
-// Requires utiljs.js
-
-if (typeof GJS === "undefined") {
-    var GJS = {};
-}
+import { objectUtil } from './utiljs.js';
 
 /**
  * @constructor
  */
-GJS.Saveable = function() {
+const Saveable = function() {
     // An object containing state that can be passed to JSON.stringify for serialization and loaded by JSON.parse.
     // Any previous state will be cleared completely when loading.
     this.saveState = {};
@@ -32,13 +28,13 @@ GJS.Saveable = function() {
 /**
  * Called after state has been loaded (for example, to initialize values dependent on state).
  */
-GJS.Saveable.prototype.postLoadState = function() {};
+Saveable.prototype.postLoadState = function() {};
 
 /**
  * @return {function(Object):Object} Function to convert from one version of state to another. null if initializing the
  * new parts of state with their default values is enough.
  */
-GJS.Saveable.prototype.getStateVersionConversion = function(loadedStateVersion, targetStateVersion) {
+Saveable.prototype.getStateVersionConversion = function(loadedStateVersion, targetStateVersion) {
     return null;
 };
 
@@ -46,13 +42,13 @@ GJS.Saveable.prototype.getStateVersionConversion = function(loadedStateVersion, 
 /**
  * @constructor
  * @param {Object} options. Options with the following keys:
- *   savedObjects (Array.<GJS.Saveable>) The objects that get loaded or saved. Each object is handled independently -
+ *   savedObjects (Array.<Saveable>) The objects that get loaded or saved. Each object is handled independently -
  *     the version of the save state of one object can't have an effect on the loading of another object.
  *   prepareSaveState (function) Function to call just before state is saved. Intended to be used if some parts of state
  *     are populated only on demand. May be null.
  *   gameName (string): For identifying the game in local storage.
  */
-GJS.StateSaver = function(options) {
+StateSaver = function(options) {
     var defaults = {
         savedObjects: [],
         prepareSaveState: null,
@@ -65,7 +61,7 @@ GJS.StateSaver = function(options) {
  * Load state from storage.
  * @param {Storage} storage Storage object to load from.
  */
-GJS.StateSaver.prototype.loadFrom = function(storage) {
+StateSaver.prototype.loadFrom = function(storage) {
     var parsed = {};
     try {
         parsed = JSON.parse(storage.getItem(this.gameName + '-gameutilsjs-state'));
@@ -115,7 +111,7 @@ GJS.StateSaver.prototype.loadFrom = function(storage) {
  * Save state to storage.
  * @param {Storage} storage Storage object to save to.
  */
-GJS.StateSaver.prototype.saveTo = function(storage) {
+StateSaver.prototype.saveTo = function(storage) {
     if (this.prepareSaveState) {
         this.prepareSaveState();
     }
@@ -137,6 +133,8 @@ GJS.StateSaver.prototype.saveTo = function(storage) {
  * Erase save state in storage.
  * @param {Storage} storage Storage object to erase from.
  */
-GJS.StateSaver.prototype.eraseSave = function(storage) {
+StateSaver.prototype.eraseSave = function(storage) {
     storage.setItem(this.gameName + '-gameutilsjs-state', JSON.stringify({}));
 };
+
+export { Saveable, StateSaver }

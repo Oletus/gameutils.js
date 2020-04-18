@@ -1,9 +1,5 @@
 'use strict';
 
-if (typeof GJS === "undefined") {
-    var GJS = {};
-}
-
 /**
  * A class for runtime developer settings and tuning game parameters.
  * @constructor
@@ -13,7 +9,7 @@ if (typeof GJS === "undefined") {
  *    'muteAudio': false
  *  }
  */
-GJS.GameParameters = function(params) {
+const GameParameters = function(params) {
     this._params = params;
     this._values = {};
     for (var key in params) {
@@ -31,7 +27,7 @@ GJS.GameParameters = function(params) {
  * Add dat.gui for changing the parameters.
  * @param {Object=} preset Preset data for dat.GUI.
  */
-GJS.GameParameters.prototype.initGUI = function(preset) {
+GameParameters.prototype.initGUI = function(preset) {
     if (preset !== undefined) {
         preset = {load: preset};
     }
@@ -65,7 +61,7 @@ GJS.GameParameters.prototype.initGUI = function(preset) {
  * @param {string} key Key for the parameter.
  * @return {Object} The current value of a parameter.
  */
-GJS.GameParameters.prototype.get = function(key) {
+GameParameters.prototype.get = function(key) {
     return this._values[key];
 };
 
@@ -73,7 +69,7 @@ GJS.GameParameters.prototype.get = function(key) {
  * @param {string} key Key for the parameter.
  * @param {Object} value The value of a parameter to set.
  */
-GJS.GameParameters.prototype.set = function(key, value) {
+GameParameters.prototype.set = function(key, value) {
     if (this._values.hasOwnProperty(key)) {
         this._values[key] = value;
     }
@@ -83,9 +79,11 @@ GJS.GameParameters.prototype.set = function(key, value) {
  * @param {string} key Key for the parameter.
  * @return {function} Function that returns the value of the parameter.
  */
-GJS.GameParameters.prototype.wrap = function(key) {
+GameParameters.prototype.wrap = function(key) {
     var values = this._values;
     return function() {
         return values[key];
     };
 };
+
+export { GameParameters }

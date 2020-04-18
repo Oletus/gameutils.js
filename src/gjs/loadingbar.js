@@ -1,26 +1,22 @@
 'use strict';
 
-if (typeof GJS === "undefined") {
-    var GJS = {};
-}
-
 /**
  * Loading bar.
  * @param {Array.<Object>=} objectsToPoll Objects that contain loadedFraction()
  * function that returns 1 when the object is fully loaded.
  * @constructor
  */
-GJS.LoadingBar = function(objectsToPoll) {
+const LoadingBar = function(objectsToPoll) {
     if (objectsToPoll === undefined) {
         objectsToPoll = [];
-        if (typeof GJS.Sprite !== 'undefined') {
-            objectsToPoll.push(GJS.Sprite);
+        if (typeof Sprite !== 'undefined') {
+            objectsToPoll.push(Sprite);
         }
-        if (typeof GJS.Audio !== 'undefined') {
-            objectsToPoll.push(GJS.Audio);
+        if (typeof Audio !== 'undefined') {
+            objectsToPoll.push(Audio);
         }
-        if (typeof GJS.utilTHREE !== 'undefined') {
-            objectsToPoll.push(GJS.utilTHREE);
+        if (typeof utilTHREE !== 'undefined') {
+            objectsToPoll.push(utilTHREE);
         }
     }
     this.objectsToPoll = objectsToPoll;
@@ -34,7 +30,7 @@ GJS.LoadingBar = function(objectsToPoll) {
  * @param {number} deltaTime Time passed from the last frame.
  * @return {boolean} True when fully loaded.
  */
-GJS.LoadingBar.prototype.update = function(deltaTime) {
+LoadingBar.prototype.update = function(deltaTime) {
     this.sinceStarted += deltaTime;
     if (this.allLoaded) {
         this.sinceLoaded += deltaTime;
@@ -56,7 +52,7 @@ GJS.LoadingBar.prototype.update = function(deltaTime) {
 /**
  * @return {boolean} True when fully loaded.
  */
-GJS.LoadingBar.prototype.finished = function() {
+LoadingBar.prototype.finished = function() {
     return this.allLoaded;
 };
 
@@ -64,7 +60,7 @@ GJS.LoadingBar.prototype.finished = function() {
  * Draw the loading bar.
  * @param {CanvasRenderingContext2D} ctx Context to draw the loading bar to.
  */
-GJS.LoadingBar.prototype.render = function(ctx) {
+LoadingBar.prototype.render = function(ctx) {
     if (ctx === undefined) {
         return;
     }
@@ -138,3 +134,5 @@ GJS.LoadingBar.prototype.render = function(ctx) {
         ctx.restore();
     }
 };
+
+export { LoadingBar }

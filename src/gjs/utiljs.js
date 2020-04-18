@@ -1,9 +1,5 @@
 'use strict';
 
-if (typeof GJS === "undefined") {
-    var GJS = {};
-}
-
 var arrayUtil = {}; // Utilities for working with JS arrays
 var stringUtil = {}; // Utilities for working with JS strings
 var objectUtil = {}; // Utilities for working with JS objects
@@ -311,6 +307,7 @@ objectUtil.initWithDefaults = function(obj, defaults, options) {
     }
 };
 
+// TODO: Can probably get rid of this - replace with usage of spread operator.
 /**
  * Fill in properties missing from an object.
  * @param {Object} obj Object that may already have some properties set.
@@ -381,68 +378,14 @@ querystringUtil.get = function(key, querystring) {
     return undefined;
 };
 
-
-
-/**
- * Request fullscreen on a given element.
- * @param {HTMLElement} elem Element to make fullscreen.
- */
-GJS.requestFullscreen = function(elem) {
-    if (elem.requestFullscreen) {
-        elem.requestFullscreen();
-    } else if (elem.msRequestFullscreen) {
-        elem.msRequestFullscreen();
-    } else if (elem.mozRequestFullScreen) {
-        elem.mozRequestFullScreen();
-    } else if (elem.webkitRequestFullscreen) {
-        elem.webkitRequestFullscreen();
-    }
-};
-
-/**
- * Exit fullscreen.
- */
-GJS.exitFullscreen = function() {
-    if(document.exitFullscreen) {
-        document.exitFullscreen();
-    } else if(document.mozCancelFullScreen) {
-        document.mozCancelFullScreen();
-    } else if(document.webkitExitFullscreen) {
-        document.webkitExitFullscreen();
-    }
-};
-
-/**
- * @param {function} listener Listener to call when fullscreen state changes.
- */
-GJS.addFullscreenChangeListener = function(listener) {
-    document.addEventListener('fullscreenchange', listener);
-    document.addEventListener('mozfullscreenchange', listener);
-    document.addEventListener('webkitfullscreenchange', listener);
-};
-
-/**
- * @return {boolean} True if document is currently fullscreen.
- */
-GJS.isFullscreen = function() {
-    if (document.fullscreenElement ||
-        document.webkitFullscreenElement ||
-        document.mozFullScreenElement ||
-        document.webkitCurrentFullScreenElement)
-    {
-        return true;
-    }
-    return false;
-};
-
 /**
  * Change a value towards zero by a certain delta value.
  * @param {number} value Value to change.
  * @param {number} delta How much to change the value.
  * @return {number} Changed value.
  */
-GJS.towardsZero = function(value, delta) {
-    return GJS.towardsValue(value, 0, delta);
+towardsZero = function(value, delta) {
+    return towardsValue(value, 0, delta);
 };
 
 /**
@@ -452,7 +395,7 @@ GJS.towardsZero = function(value, delta) {
  * @param {number} delta How much to change the value.
  * @return {number} Changed value.
  */
-GJS.towardsValue = function(value, targetValue, delta) {
+towardsValue = function(value, targetValue, delta) {
     if (value > targetValue) {
         value -= delta;
         if (value < targetValue)
@@ -466,32 +409,4 @@ GJS.towardsValue = function(value, targetValue, delta) {
     return value;
 };
 
-GJS.debugLog = function(output) {
-    if ( window.console && console.log ) {
-        console.log(output);
-    }
-};
-
-
-/*-----------*/
-/* Polyfills */
-/*-----------*/
-
-if (!String.prototype.startsWith) {
-    String.prototype.startsWith = function(searchString, position){
-      position = position || 0;
-      return this.substr(position, searchString.length) === searchString;
-  };
-}
-
-if (!String.prototype.endsWith) {
-  String.prototype.endsWith = function(searchString, position) {
-      var subjectString = this.toString();
-      if (typeof position !== 'number' || !isFinite(position) || Math.floor(position) !== position || position > subjectString.length) {
-        position = subjectString.length;
-      }
-      position -= searchString.length;
-      var lastIndex = subjectString.indexOf(searchString, position);
-      return lastIndex !== -1 && lastIndex === position;
-  };
-}
+export { arrayUtil, stringUtil, objectUtil, querystringUtil, towardsZero, towardsValue }
