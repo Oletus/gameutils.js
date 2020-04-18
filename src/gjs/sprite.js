@@ -1,5 +1,7 @@
 'use strict';
 
+import { hslToRgb, rgbToHsl } from '../lib/hsl.js'
+
 /**
  * A sprite that can be drawn on a 2D canvas.
  * @constructor
