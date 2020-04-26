@@ -3,32 +3,34 @@
 <title>Gameutils.js: Using the GJS.PlatformingPhysics classes to implement a moving platform</title>
 <meta charset="UTF-8">
 <link rel="stylesheet" type="text/css" href="assets/default.css">
-<script src="../src/gjs/utiljs.js"></script>
-<script src="../src/gjs/util2d.js"></script>
-<script src="../src/gjs/tilemap.js"></script>
-<script src="../src/gjs/platformingphysics.js"></script>
 
 <!-- These are just for input -->
 <script src="../src/lib/mousetrap.js"></script>
 <script src="../src/lib/mousetrap-global-bind.js"></script>
-<script src="../src/gjs/gamepad.js"></script>
-<script src="../src/gjs/inputmapper.js"></script>
-<script>
-'use strict';
+<script type="module">
 
-var ctx;
-var tester;
+// Physics related imports
+import { towardsValue } from "../src/gjs/utiljs.js";
+import { TileMap } from "../src/gjs/tilemap.js";
+import { PlatformingLevel, PlatformingObject, PlatformingPhysics, PlatformingTileMap } from "../src/gjs/platformingphysics.js";
 
-var Tester = function() {
-    this.input = new GJS.InputMapper(this, 1);
-    this.input.addListener(GJS.Gamepad.BUTTONS.LEFT_OR_ANALOG_LEFT, ['left', 'a'], this.leftPress, this.leftRelease);
-    this.input.addListener(GJS.Gamepad.BUTTONS.RIGHT_OR_ANALOG_RIGHT, ['right', 'd'], this.rightPress, this.rightRelease);
+// Input imports
+import { Gamepad } from "../src/gjs/gamepad.js";
+import { InputMapper } from "../src/gjs/inputmapper.js";
 
-    this.physicsLevel = new GJS.PlatformingLevel();
+let ctx;
+let tester;
+
+const Tester = function() {
+    this.input = new InputMapper(this, 1);
+    this.input.addListener(Gamepad.BUTTONS.LEFT_OR_ANALOG_LEFT, ['left', 'a'], this.leftPress, this.leftRelease);
+    this.input.addListener(Gamepad.BUTTONS.RIGHT_OR_ANALOG_RIGHT, ['right', 'd'], this.rightPress, this.rightRelease);
+
+    this.physicsLevel = new PlatformingLevel();
     this.physicsLevel.init();
     
-    this.platform = new GJS.PlatformingTileMap();
-    var tileMapInitParams = GJS.PlatformingPhysics.tileMapOptionsFromData([
+    this.platform = new PlatformingTileMap();
+    const tileMapInitParams = PlatformingPhysics.tileMapOptionsFromData([
                 '      ',
                 'l    r',
                 'xxxxxx'
@@ -37,7 +39,7 @@ var Tester = function() {
         x: 5,
         y: 10,
         color: '#fff',
-        tileMap: new GJS.TileMap(tileMapInitParams)
+        tileMap: new TileMap(tileMapInitParams)
     });
     var that = this;
     this.platformFlingSpeed = 1.0;
@@ -51,7 +53,7 @@ var Tester = function() {
         this.dy = -Math.cos(this.decisionTime * 3.0) * 3.0 * that.platformFlingSpeed;
     };
 
-    this.character = new GJS.PlatformingObject();
+    this.character = new PlatformingObject();
     this.character.init({
         x: 8,
         y: 10
@@ -69,12 +71,12 @@ var Tester = function() {
     this.character.decideDx = function(deltaTime) { // Normally this would be in an inherited class
         if (this.onGround) {
             this.dx += this.groundPlatform.frameDeltaDeltaX / deltaTime;
-            this.dx = GJS.towardsValue(this.dx, this.playerMoveIntent * 5.0 + this.groundPlatform.frameDeltaX / deltaTime, deltaTime * 200.0);
+            this.dx = towardsValue(this.dx, this.playerMoveIntent * 5.0 + this.groundPlatform.frameDeltaX / deltaTime, deltaTime * 200.0);
         } else {
             if (this.playerMoveIntent < 0) {
-                this.dx = GJS.towardsValue(this.dx, Math.min(this.dx, this.playerMoveIntent * 5.0), deltaTime * 20.0);
+                this.dx = towardsValue(this.dx, Math.min(this.dx, this.playerMoveIntent * 5.0), deltaTime * 20.0);
             } else if (this.playerMoveIntent > 0) {
-                this.dx = GJS.towardsValue(this.dx, Math.max(this.dx, this.playerMoveIntent * 5.0), deltaTime * 20.0);
+                this.dx = towardsValue(this.dx, Math.max(this.dx, this.playerMoveIntent * 5.0), deltaTime * 20.0);
             }
         }
     };
@@ -118,14 +120,15 @@ Tester.prototype.update = function() {
     this.physicsLevel.update(1 / 60);
 };
 
-var frame = function() {
+const frame = function() {
     tester.update();
     requestAnimationFrame(frame);
 };
 
-var start = function() {
+window.start = function() {
     tester = new Tester();
-    var canvas = document.createElement('canvas');
+    window.tester = tester;
+    const canvas = document.createElement('canvas');
     canvas.width = 600;
     canvas.height = 600;
     ctx = canvas.getContext('2d');
@@ -134,10 +137,10 @@ var start = function() {
 };
 </script>
 </head>
-<body onload="start()">
-<h2>Using the GJS.PlatformingPhysics classes to implement a moving platform</h2>
-<p>Compatibility: Chrome 47, Firefox 43, IE 11.</p>
-<input type="button" value="Fling character" onclick="tester.platformFlingSpeed = 5.0;"></input>
+<body onload="window.start()">
+<h2>Using the PlatformingPhysics classes to implement a moving platform</h2>
+<p>Keyboard controls: Left/right buttons to move character.</p>
+<input type="button" value="Fling character" onclick="window.tester.platformFlingSpeed = 5.0;"></input>
 <br />
 </body>
 </html>
