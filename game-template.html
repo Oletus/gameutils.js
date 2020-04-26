@@ -53,7 +53,7 @@ var Game = function(resizer) {
 };
 
 Game.prototype.render = function(ctx) {
-    // GJS.CanvasResizer passes a wrapped 2D context to use here when run in FIXED_COORDINATE_SYSTEM mode,
+    // CanvasResizer passes a wrapped 2D context to use here when run in FIXED_COORDINATE_SYSTEM mode,
     // where ctx.canvas.width/height are set to the coordinate system width/height.
     // Otherwise the context initialized here is used.
     if (ctx === undefined) {
