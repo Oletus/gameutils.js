@@ -5,7 +5,6 @@
 <title>Gameutils.js game</title>
 <meta charset="UTF-8">
 <!-- output -->
-<script src="src/lib/hsl.js"></script>
 <script src="src/lib/howler.core.js"></script>
 <script src="src/lib/tween.min.js"></script>
 <script src="src/lib/three.min.js"></script>
@@ -23,17 +22,10 @@
 <!-- dev mode helpers -->
 <script src="src/lib/dat.gui.js"></script>
 <script src="src/lib/FileSaver.js"></script>
-<script src="src/gjs/gameparameters.js"></script>
 
 <!-- input -->
 <script src="src/lib/mousetrap.js"></script>
 <script src="src/lib/mousetrap-global-bind.js"></script>
-<script src="src/gjs/gamepad.js"></script>
-<script src="src/gjs/inputmapper.js"></script>
-
-<script src="src/gjs/threejs/utilthree.js"></script>
-<script src="src/gjs/threejs/orbitcameracontrol.js"></script>
-<script src="src/gjs/threejs/threesceneobject.js"></script>
 
 <script type="module">
 
@@ -46,6 +38,8 @@ import { GameParameters } from "./src/gjs/gameparameters.js";
 import { Gamepad } from "./src/gjs/gamepad.js";
 import { InputMapper } from "./src/gjs/inputmapper.js";
 import { startMainLoop } from "./src/gjs/mainloop.js";
+
+import { utilTHREE } from "./src/gjs/threejs/utilthree.js";
 
 import { seedrandom, random } from "./src/lib/seedrandom.js";
 

@@ -1,6 +1,7 @@
 
 import { Audio } from './legacy/audio.js';
 import { Sprite } from './sprite.js';
+import { utilTHREE } from "./threejs/utilthree.js";
 
 /**
  * Loading bar.
@@ -10,16 +11,7 @@ import { Sprite } from './sprite.js';
  */
 const LoadingBar = function(objectsToPoll) {
     if (objectsToPoll === undefined) {
-        objectsToPoll = [];
-        if (typeof Sprite !== 'undefined') {
-            objectsToPoll.push(Sprite);
-        }
-        if (typeof Audio !== 'undefined') {
-            objectsToPoll.push(Audio);
-        }
-        if (typeof utilTHREE !== 'undefined') {
-            objectsToPoll.push(utilTHREE);
-        }
+        objectsToPoll = [Sprite, Audio, utilTHREE];
     }
     this.objectsToPoll = objectsToPoll;
     this.loadedFraction = 0;
