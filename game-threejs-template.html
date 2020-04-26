@@ -6,18 +6,7 @@
 <meta charset="UTF-8">
 <!-- output -->
 <script src="src/lib/hsl.js"></script>
-<script src="src/gjs/utilcolor.js"></script>
-<script src="src/gjs/sprite.js"></script>
-<script src="src/gjs/animatedsprite.js"></script>
 <script src="src/lib/howler.core.js"></script>
-<script src="src/gjs/audio.js"></script>
-<script src="src/gjs/canvasresizer.js"></script>
-<script src="src/gjs/loadingbar.js"></script>
-<script src="src/gjs/particle.js"></script>
-<script src="src/gjs/canvasui.js"></script>
-<script src="src/gjs/commonui.js"></script>
-<script src="src/gjs/monospacebitmapfont.js"></script>
-<script src="src/gjs/statesaver.js"></script>
 <script src="src/lib/tween.min.js"></script>
 <script src="src/lib/three.min.js"></script>
 <script src="src/lib/threejs/SkyShader.js"></script>
@@ -46,18 +35,19 @@
 <script src="src/gjs/threejs/orbitcameracontrol.js"></script>
 <script src="src/gjs/threejs/threesceneobject.js"></script>
 
-<script src="src/gjs/statemachine.js"></script>
-<script src="src/gjs/mainloop.js"></script>
-<script src="src/gjs/util2d.js"></script>
-<script src="src/lib/seedrandom.js"></script>
-<script src="src/gjs/utiljs.js"></script>
-<script src="src/gjs/hitbox.js"></script>
-<script src="src/gjs/tilemap.js"></script>
-<script src="src/gjs/platformingphysics.js"></script>
-<script src="src/gjs/unlocker.js"></script>
-<script src="src/gjs/renderableobject.js"></script>
-<script>
-'use strict';
+<script type="module">
+
+import { querystringUtil } from "./src/gjs/utiljs.js";
+import { Audio } from "./src/gjs/legacy/audio.js";
+import { LoadingBar } from "./src/gjs/loadingbar.js";
+import { CanvasResizer } from "./src/gjs/canvasresizer.js";
+import { commonUI } from "./src/gjs/commonui.js";
+import { GameParameters } from "./src/gjs/gameparameters.js";
+import { Gamepad } from "./src/gjs/gamepad.js";
+import { InputMapper } from "./src/gjs/inputmapper.js";
+import { startMainLoop } from "./src/gjs/mainloop.js";
+
+import { seedrandom, random } from "./src/lib/seedrandom.js";
 
 var Game = function(resizer, renderer, loadingBar) {
     this.renderer = renderer;
@@ -76,9 +66,9 @@ var Game = function(resizer, renderer, loadingBar) {
     this.initializedAfterLoad = false;
 
     var numPlayers = 1;
-    this.input = new GJS.InputMapper(this, numPlayers);
-    // Example usage of GJS.InputMapper
-    //this.input.addListener(GJS.Gamepad.BUTTONS.UP_OR_ANALOG_UP, ['up', 'w'], this.upPress, this.upRelease);
+    this.input = new InputMapper(this, numPlayers);
+    // Example usage of InputMapper
+    //this.input.addListener(Gamepad.BUTTONS.UP_OR_ANALOG_UP, ['up', 'w'], this.upPress, this.upRelease);
     
     if (DEV_MODE) {
         this.gridHelpers = new THREE.Object3D();
@@ -134,7 +124,7 @@ Game.prototype.update = function(deltaTime) {
         this.mesh.material.wireframe = (intersects.length === 0);
     }
 
-    GJS.Audio.muteAll(Game.parameters.get('muteAudio'));
+    Audio.muteAll(Game.parameters.get('muteAudio'));
 
     // Call initialization function after all model assets have been loaded.
     if (this.loadingBar.finished() && !this.initializedAfterLoad) {
@@ -187,7 +177,7 @@ Game.prototype.devModeTakeScreenshot = function() {
 };
 
 // Parameters added here can be tuned at run time when in developer mode
-Game.parameters = new GJS.GameParameters({
+Game.parameters = new GameParameters({
     'gridHelpersVisible': {initial: false},
     'muteAudio': {initial: false}
 });
@@ -198,7 +188,7 @@ window['start'] = function() {
     var DEBUG_MAIN_LOOP = DEV_MODE && true; // Set to true to allow fast-forwarding main loop with 'f'
     Game.parameters.set('muteAudio', (DEV_MODE && true)); // Set to true if sounds annoy developers
     
-    mathUtil.seedrandom();
+    seedrandom();
     
     var game;
     
@@ -206,7 +196,7 @@ window['start'] = function() {
     var canvasWrapper = document.createElement('div');
     canvasWrapper.appendChild(renderer.domElement);
 
-    GJS.commonUI.createUI({
+    commonUI.createUI({
         parent: canvasWrapper,
         fullscreenElement: document.body,
         twitterAccount: 'Oletus',
@@ -215,8 +205,8 @@ window['start'] = function() {
         scale: 1
     });
 
-    var resizer = new GJS.CanvasResizer({
-        mode: GJS.CanvasResizer.Mode.FIXED_ASPECT_RATIO,
+    var resizer = new CanvasResizer({
+        mode: CanvasResizer.Mode.FIXED_ASPECT_RATIO,
         canvas: renderer.domElement,
         wrapperElement: canvasWrapper,
         width: 16,
@@ -229,12 +219,12 @@ window['start'] = function() {
             }
         }
     });
-    var loadingBar = new GJS.LoadingBar();
+    var loadingBar = new LoadingBar();
     game = new Game(resizer, renderer, loadingBar);
     
     // Create event handlers for mouse and touch based input that will call on the canvas* members of game.
     resizer.createPointerEventListener(game, true,
-                                       GJS.CanvasResizer.EventCoordinateSystem.WEBGL_NORMALIZED_DEVICE_COORDINATES);
+                                       CanvasResizer.EventCoordinateSystem.WEBGL_NORMALIZED_DEVICE_COORDINATES);
 
     // Initialize after CanvasResizer so it is always drawn on top
     if (DEV_MODE) {
