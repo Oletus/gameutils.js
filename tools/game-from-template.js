@@ -11,7 +11,7 @@ const packageJson = require(path.join(rootDir, 'package.json'));
 const templateNpmScripts = require(path.join(rootDir, 'tools/template-files/npm-scripts.json'));
 
 const checkValidGameName = function(name) {
-    var gameDir = path.join(rootDir, name);
+    const gameDir = path.join(rootDir, name);
     if (name === undefined) {
         console.error('possible arguments: --name <game name> [--template threejs]');
         return false;
@@ -84,7 +84,7 @@ const putInlineJSToFile = function(htmlContents, targetHTMLPath, targetJSPath) {
                 }
                 let relativeJSPath = path.relative(path.dirname(targetHTMLPath), targetJSPath);
                 relativeJSPath = relativeJSPath.replace(/\\/g, "/");
-                htmlOutput.push('<script src="' + relativeJSPath + '">');
+                htmlOutput.push('<script type="module" src="' + relativeJSPath + '">');
                 addedScriptRef = true;
                 inScript = true;
             } else {
@@ -102,7 +102,8 @@ const putInlineJSToFile = function(htmlContents, targetHTMLPath, targetJSPath) {
         },
         ontext: function(text) {
             if (inScript) {
-                // TODO: Replace import paths in script
+                // Replace import statement relative paths.
+                text = text.replace(/ from \"\.\/src\/(.*)\";/gi, "from \"./$1\"");
                 scriptOutput.push(text);
             } else {
                 htmlOutput.push(text)
@@ -124,7 +125,7 @@ const copyTemplateIndex = function(gameDir, templateName) {
     htmlContents = putInlineJSToFile(htmlContents, path.join(gameDir, 'index.html'), path.join(gameDir, 'src/game.js'));
 };
 
-const copySrcToGame = function() {
+const copySrcToGame = function(gameDir) {
     fse.copy(path.join(rootDir, 'src'), path.join(gameDir, 'src'), function(err) {
         if (err) {
             return console.error(err);
