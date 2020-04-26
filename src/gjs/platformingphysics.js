@@ -1,5 +1,8 @@
 'use strict';
 
+import { TileMap } from "./tilemap.js";
+import { mathUtil, Vec2, Rect } from "./util2d.js";
+
 /**
  * Helpers for doing platforming physics, including tile classes and a function to evaluate movement with collisions.
  * Using the platforming physics classes requires TileMap.
