@@ -1,10 +1,5 @@
-'use strict';
 
-// Requires utiljs.js
-
-if (typeof GJS === "undefined") {
-    var GJS = {};
-}
+import { objectUtil } from './utiljs.js';
 
 /**
  * A very simple state machine. Tracks state and the time that the machine has been in that state.
@@ -14,7 +9,7 @@ if (typeof GJS === "undefined") {
  *     { IDLE: 0, RUNNING: 1 }
  *   id: Number that identifies the initial state.
  */
-GJS.StateMachine = function(options) {
+const StateMachine = function(options) {
     var defaults = {
         id: null,
         stateSet: {}
@@ -35,7 +30,7 @@ GJS.StateMachine = function(options) {
 /**
  * @param {number} newStateId Id of the new state.
  */
-GJS.StateMachine.prototype.change = function(newStateId) {
+StateMachine.prototype.change = function(newStateId) {
     this.id = newStateId;
     this.time = 0;
 };
@@ -43,7 +38,7 @@ GJS.StateMachine.prototype.change = function(newStateId) {
 /**
  * @param {number} newStateId Id of the new state.
  */
-GJS.StateMachine.prototype.changeIfDifferent = function(newStateId) {
+StateMachine.prototype.changeIfDifferent = function(newStateId) {
     if (this.id !== newStateId) {
         this.change(newStateId);
     }
@@ -53,7 +48,7 @@ GJS.StateMachine.prototype.changeIfDifferent = function(newStateId) {
  * Call this regularly to update the state machine.
  * @param {number} deltaTime Time change since last call to this function.
  */
-GJS.StateMachine.prototype.update = function(deltaTime) {
+StateMachine.prototype.update = function(deltaTime) {
     this.time += deltaTime;
     this.lifeTime += deltaTime;
 };
@@ -62,6 +57,8 @@ GJS.StateMachine.prototype.update = function(deltaTime) {
  * Return amount of time passed since this.lifeTime was lifeTime.
  * @param {number} lifeTime Timestamp to compare against.
  */
-GJS.StateMachine.prototype.timeSince = function(lifeTime) {
+StateMachine.prototype.timeSince = function(lifeTime) {
     return this.lifeTime - lifeTime;
 };
+
+export { StateMachine }

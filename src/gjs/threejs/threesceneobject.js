@@ -1,16 +1,11 @@
-'use strict';
 
-// Requires utiljs.js
-
-if (typeof GJS === "undefined") {
-    var GJS = {};
-}
+import { objectUtil } from "../utiljs.js";
 
 /**
  * An object that owns a THREE.Object3D.
  * @constructor
  */
-GJS.ThreeSceneObject = function() {
+const ThreeSceneObject = function() {
 };
 
 /**
@@ -19,7 +14,7 @@ GJS.ThreeSceneObject = function() {
  *   sceneParent (Object3D): Parent of the object in the scene.
  *   object (Object3D): Object that this object will own and add under sceneParent.
  */
-GJS.ThreeSceneObject.prototype.initThreeSceneObject = function(options) {
+ThreeSceneObject.prototype.initThreeSceneObject = function(options) {
     var defaults = {
         sceneParent: null,
         object: null
@@ -31,7 +26,7 @@ GJS.ThreeSceneObject.prototype.initThreeSceneObject = function(options) {
 /**
  * Add this object to the scene if it is not there.
  */
-GJS.ThreeSceneObject.prototype.addToScene = function() {
+ThreeSceneObject.prototype.addToScene = function() {
     if (!this._inScene) {
         this.sceneParent.add(this.object);
         this._inScene = true;
@@ -41,7 +36,7 @@ GJS.ThreeSceneObject.prototype.addToScene = function() {
 /**
  * Remove this object from the scene if it is in there.
  */
-GJS.ThreeSceneObject.prototype.removeFromScene = function() {
+ThreeSceneObject.prototype.removeFromScene = function() {
     if (this._inScene) {
         this.sceneParent.remove(this.object);
         this._inScene = false;
@@ -52,7 +47,7 @@ GJS.ThreeSceneObject.prototype.removeFromScene = function() {
  * @param {THREE.Object3D} object Object to query.
  * @return {boolean} True if object is in the owned part of the scene graph.
  */
-GJS.ThreeSceneObject.prototype.ownsSceneObject = function(object) {
+ThreeSceneObject.prototype.ownsSceneObject = function(object) {
     var matches = false;
     this.getOwnQueryObject().traverse(function(obj) {
         if (obj === object) {
@@ -67,32 +62,32 @@ GJS.ThreeSceneObject.prototype.ownsSceneObject = function(object) {
  * ownsSceneObject.
  * @return {THREE.Object3D} object this object owns
  */
-GJS.ThreeSceneObject.prototype.getOwnQueryObject = function() {
+ThreeSceneObject.prototype.getOwnQueryObject = function() {
     return this.object;
 };
 
 /**
  * Update the object. Override this to do time-based updates.
  */
-GJS.ThreeSceneObject.prototype.update = function(deltaTime) {
+ThreeSceneObject.prototype.update = function(deltaTime) {
 };
 
 
 
 /**
  * Base type for objects that display a text string as a Three.js mesh.
- * Use classes that inherit this class, like GJS.ThreeExtrudedTextObject to display text in the 3D scene.
+ * Use classes that inherit this class, like ThreeExtrudedTextObject to display text in the 3D scene.
  * @constructor
  */
-GJS.ThreeTextObject = function() {
+const ThreeTextObject = function() {
 };
 
-GJS.ThreeTextObject.prototype = new GJS.ThreeSceneObject();
+ThreeTextObject.prototype = new ThreeSceneObject();
 
 /**
  * @param {Object} options
  */
-GJS.ThreeTextObject.prototype.initThreeTextObject = function(options) {
+ThreeTextObject.prototype.initThreeTextObject = function(options) {
     var defaults = {
         string: "",
         maxRowLength: -1,
@@ -112,14 +107,14 @@ GJS.ThreeTextObject.prototype.initThreeTextObject = function(options) {
 /** 
  * @param {string} string String to display.
  */
-GJS.ThreeTextObject.prototype.setString = function(string) {
+ThreeTextObject.prototype.setString = function(string) {
     this.string = string;
     this.stringSplitToRows = stringUtil.splitToRows(this.string, this.maxRowLength);
 };
 
 /**
  * An object that displays a text string as an extruded Three.js mesh.
- * To use this, first set GJS.ThreeExtrudedTextObject.defaultFont. You can use GJS.utilTHREE.loadFont to load the font.
+ * To use this, first set ThreeExtrudedTextObject.defaultFont. You can use utilTHREE.loadFont to load the font.
  * The scene object that acts as a parent to the text will be stored under the property "object" and can be accessed
  * directly to set its model transform or to add additional children.
  * @param {Object} options Options with the following keys, in addition to THREE.TextGeometry and ThreeSceneObject
@@ -132,10 +127,10 @@ GJS.ThreeTextObject.prototype.setString = function(string) {
  *   castShadow (boolean)
  * @constructor
  */
-GJS.ThreeExtrudedTextObject = function(options) {
+const ThreeExtrudedTextObject = function(options) {
     var defaults = {
-        material: GJS.ThreeExtrudedTextObject.defaultMaterial,
-        font: GJS.ThreeExtrudedTextObject.defaultFont,
+        material: ThreeExtrudedTextObject.defaultMaterial,
+        font: ThreeExtrudedTextObject.defaultFont,
         extrusionHeight: 0.1,
         curveSegments: 1,
         bevelEnabled: false,
@@ -147,17 +142,17 @@ GJS.ThreeExtrudedTextObject = function(options) {
     this.initThreeTextObject(options);
 };
 
-GJS.ThreeExtrudedTextObject.defaultMaterial = new THREE.MeshPhongMaterial( { color: 0x333333, specular: 0x000000 } );
-GJS.ThreeExtrudedTextObject.defaultFont = null;
+ThreeExtrudedTextObject.defaultMaterial = new THREE.MeshPhongMaterial( { color: 0x333333, specular: 0x000000 } );
+ThreeExtrudedTextObject.defaultFont = null;
 
-GJS.ThreeExtrudedTextObject.prototype = new GJS.ThreeTextObject();
+ThreeExtrudedTextObject.prototype = new ThreeTextObject();
 
 /** 
  * @param {string} string String to display.
  */
-GJS.ThreeExtrudedTextObject.prototype.setString = function(string) {
+ThreeExtrudedTextObject.prototype.setString = function(string) {
     if (string != this.string) {
-        GJS.ThreeTextObject.prototype.setString.call(this, string);
+        ThreeTextObject.prototype.setString.call(this, string);
         for (var i = 0; i < this.rowMeshes.length; ++i) {
             this.object.remove(this.rowMeshes[i]);
         }
@@ -180,7 +175,7 @@ GJS.ThreeExtrudedTextObject.prototype.setString = function(string) {
  * @param {string} string String to create a mesh for.
  * @return {THREE.Object3D} Text geometry object.
  */
-GJS.ThreeExtrudedTextObject.prototype._createTextMesh = function(string) {
+ThreeExtrudedTextObject.prototype._createTextMesh = function(string) {
     var textGeo = new THREE.TextGeometry( string, {
         font: this.font,
         size: 1,
@@ -195,3 +190,5 @@ GJS.ThreeExtrudedTextObject.prototype._createTextMesh = function(string) {
     textMesh.receiveShadow = this.receiveShadow;
     return textMesh;
 };
+
+export { ThreeSceneObject, ThreeTextObject, ThreeExtrudedTextObject }

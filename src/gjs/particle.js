@@ -1,8 +1,5 @@
-'use strict';
 
-if (typeof GJS === "undefined") {
-    var GJS = {};
-}
+import { Sprite } from "./sprite.js";
 
 /**
  * A particle engine to run particle effects.
@@ -11,7 +8,7 @@ if (typeof GJS === "undefined") {
  * @constructor
  * @param {Object} options Options for the particle engine.
  */
-GJS.ParticleEngine = function(options) {
+const ParticleEngine = function(options) {
     var defaults = {
         gravityX: 0,
         gravityY: 1
@@ -28,23 +25,23 @@ GJS.ParticleEngine = function(options) {
 };
 
 // This scale value is applied to movement and size of particle effects created
-// in the effects editor. It is particularly useful if the GJS.ParticleEngine is
+// in the effects editor. It is particularly useful if the ParticleEngine is
 // run in world space which has a considerably different scale than the editor.
-GJS.ParticleEngine.defaultEditorEffectScale = 1.0;
+ParticleEngine.defaultEditorEffectScale = 1.0;
 
 /**
  * Add a particle to update and draw with this engine.
- * @param {GJS.Particle} particle GJS.Particle to add.
+ * @param {Particle} particle Particle to add.
  */
-GJS.ParticleEngine.prototype.addParticle = function(particle) {
+ParticleEngine.prototype.addParticle = function(particle) {
     this.particles.push(particle);
 };
 
 /**
  * Add an effect to update and draw with this engine.
- * @param {GJS.ParticleEffect} effect GJS.Particle effect to add.
+ * @param {ParticleEffect} effect Particle effect to add.
  */
-GJS.ParticleEngine.prototype.addEffect = function(effect) {
+ParticleEngine.prototype.addEffect = function(effect) {
     this.effects.push(effect);
 };
 
@@ -52,7 +49,7 @@ GJS.ParticleEngine.prototype.addEffect = function(effect) {
  * Update the particle effects.
  * @param {number} deltaTime Time since the last update in seconds.
  */
-GJS.ParticleEngine.prototype.update = function(deltaTime) {
+ParticleEngine.prototype.update = function(deltaTime) {
     var i = 0;
     while (i < this.effects.length) {
         this.effects[i].update(deltaTime);
@@ -78,7 +75,7 @@ GJS.ParticleEngine.prototype.update = function(deltaTime) {
  * @param {CanvasRenderingContext2D|Object} ctx A context to draw the particles to. In case you have a custom
  * appearance function, the context will be passed to that.
  */
-GJS.ParticleEngine.prototype.render = function(ctx) {
+ParticleEngine.prototype.render = function(ctx) {
     if (ctx instanceof CanvasRenderingContext2D) {
         ctx.save();
     }
@@ -91,17 +88,17 @@ GJS.ParticleEngine.prototype.render = function(ctx) {
 };
 
 /**
- * GJS.Particle emitter class to control emitting particles with respect to time.
+ * Particle emitter class to control emitting particles with respect to time.
  * @constructor
  * @param {Object} options Options for the emitter.
  */
-GJS.ParticleTimedEmitter = function(options) {
+const ParticleTimedEmitter = function(options) {
     var defaults = {
         emitter: null,
         engine: null,
         x: 0,
         y: 0,
-        directionMode: GJS.ParticleTimedEmitter.DirectionMode.RELATIVE,
+        directionMode: ParticleTimedEmitter.DirectionMode.RELATIVE,
         particleInterval: 1 / 60, // seconds
         lifetime: -1, // seconds, can be negative for infinite duration
         waitTime: 0, // seconds, time to wait until first starting
@@ -117,16 +114,16 @@ GJS.ParticleTimedEmitter = function(options) {
     this.restart();
 };
 
-GJS.ParticleTimedEmitter.DirectionMode = {
+ParticleTimedEmitter.DirectionMode = {
     RELATIVE: 0,
     ABSOLUTE: 1
 };
 
 /** 
- * Update the emitter. This is called by GJS.ParticleEffect.
+ * Update the emitter. This is called by ParticleEffect.
  * @param {number} deltaTime Time since the last update in seconds.
  */
-GJS.ParticleTimedEmitter.prototype.update = function(deltaTime) {
+ParticleTimedEmitter.prototype.update = function(deltaTime) {
     if (this.dead) {
         return;
     }
@@ -141,7 +138,7 @@ GJS.ParticleTimedEmitter.prototype.update = function(deltaTime) {
         this._lastY = this.y;
     }
     var directionBase = 0;
-    if (this.directionMode === GJS.ParticleTimedEmitter.DirectionMode.RELATIVE) {
+    if (this.directionMode === ParticleTimedEmitter.DirectionMode.RELATIVE) {
         if (this.x != this._lastX || this.y != this._lastY) {
             directionBase = Math.atan2(this.y - this._lastY, this.x - this._lastX) * 180 / Math.PI;
         }
@@ -171,7 +168,7 @@ GJS.ParticleTimedEmitter.prototype.update = function(deltaTime) {
  * @param {number} x Horizontal coordinate
  * @param {number} y Vertical coordinate
  */
-GJS.ParticleTimedEmitter.prototype.setCoords = function(x, y) {
+ParticleTimedEmitter.prototype.setCoords = function(x, y) {
     this.x = x;
     this.y = y;
 };
@@ -179,7 +176,7 @@ GJS.ParticleTimedEmitter.prototype.setCoords = function(x, y) {
 /**
  * Restart this emitter.
  */
-GJS.ParticleTimedEmitter.prototype.restart = function() {
+ParticleTimedEmitter.prototype.restart = function() {
     this._lastX = undefined;
     this._lastY = undefined;
     this._time = 0;
@@ -193,16 +190,16 @@ GJS.ParticleTimedEmitter.prototype.restart = function() {
  * Complex particle effect composed of multiple timed emitters.
  * @constructor
  */
-GJS.ParticleEffect = function() {
+const ParticleEffect = function() {
     this.emitters = [];
     this.dead = false;
 };
 
 /** 
- * Update the effect. This is called by GJS.ParticleEngine for effects that have been added to the engine.
+ * Update the effect. This is called by ParticleEngine for effects that have been added to the engine.
  * @param {number} deltaTime Time since the last update in seconds.
  */
-GJS.ParticleEffect.prototype.update = function(deltaTime) {
+ParticleEffect.prototype.update = function(deltaTime) {
     if (!this.dead) {
         this.dead = true;
         for (var i = 0; i < this.emitters.length; ++i) {
@@ -217,7 +214,7 @@ GJS.ParticleEffect.prototype.update = function(deltaTime) {
 /**
  * @return {boolean} True if the effect never stops.
  */
-GJS.ParticleEffect.prototype.isInfinite = function() {
+ParticleEffect.prototype.isInfinite = function() {
     for (var i = 0; i < this.emitters.length; ++i) {
         if (this.emitters[i].lifetime < 0) {
             return true;
@@ -231,7 +228,7 @@ GJS.ParticleEffect.prototype.isInfinite = function() {
  * @param {number} x Horizontal coordinate
  * @param {number} y Vertical coordinate
  */
-GJS.ParticleEffect.prototype.setCoords = function(x, y) {
+ParticleEffect.prototype.setCoords = function(x, y) {
     for (var i = 0; i < this.emitters.length; ++i) {
         this.emitters[i].setCoords(x, y);
     }
@@ -240,7 +237,7 @@ GJS.ParticleEffect.prototype.setCoords = function(x, y) {
 /**
  * Stop this effect.
  */
-GJS.ParticleEffect.prototype.stop = function() {
+ParticleEffect.prototype.stop = function() {
     this.dead = true;
 };
 
@@ -249,9 +246,9 @@ GJS.ParticleEffect.prototype.stop = function() {
  * The class only has parameters for generating particles - you need to call emitParticle
  * when you actually want to create a particle based on the parameters.
  * @constructor
- * @param {Object} options Options to use on this GJS.ParticleEmitter.
+ * @param {Object} options Options to use on this ParticleEmitter.
  */
-GJS.ParticleEmitter = function(options) {
+const ParticleEmitter = function(options) {
     var defaults = {
         x: 0,
         y: 0,
@@ -263,8 +260,8 @@ GJS.ParticleEmitter = function(options) {
         minLifetime: 1, // seconds
         maxLifetime: 3, // seconds
         rotation: 0, // degrees
-        rotationMode: GJS.Particle.RotationMode.STATIC,
-        appearance: GJS.Particle.defaultAppearance,
+        rotationMode: Particle.RotationMode.STATIC,
+        appearance: Particle.defaultAppearance,
         inertia: 1,
         weight: 1
     };
@@ -280,10 +277,10 @@ GJS.ParticleEmitter = function(options) {
 
 /**
  * Spawn a single particle using this emitter.
- * @param {Object} options Options to override ones set on this GJS.ParticleEmitter.
- * @return {GJS.Particle} The created particle.
+ * @param {Object} options Options to override ones set on this ParticleEmitter.
+ * @return {Particle} The created particle.
  */
-GJS.ParticleEmitter.prototype.emitParticle = function(options) {
+ParticleEmitter.prototype.emitParticle = function(options) {
     var spawnOptions = {};
     for(var key in this.options) {
         if (options.hasOwnProperty(key)) {
@@ -306,8 +303,8 @@ GJS.ParticleEmitter.prototype.emitParticle = function(options) {
         spawnOptions.x += Math.cos(spreadAngle) * spreadDistance;
         spawnOptions.y += Math.sin(spreadAngle) * spreadDistance;
     }
-    var part = new GJS.Particle(spawnOptions);
-    if (part.rotationMode === GJS.Particle.RotationMode.INITIAL_DIRECTION) {
+    var part = new Particle(spawnOptions);
+    if (part.rotationMode === Particle.RotationMode.INITIAL_DIRECTION) {
         // Determine rotation also if velocity is zero.
         if (spawnOptions.rotation !== undefined) {
             part.rotation = spawnOptions.rotation * Math.PI / 180 + direction;
@@ -322,7 +319,7 @@ GJS.ParticleEmitter.prototype.emitParticle = function(options) {
  * Flexible class for implementing particle effects.
  * @constructor
  */
-GJS.Particle = function(options) {
+const Particle = function(options) {
     var defaults = {
         lifetime: 2, // seconds
         timeAlive: 0,
@@ -333,9 +330,9 @@ GJS.Particle = function(options) {
         inertia: 1,
         weight: 1,
         rotation: 0, // degrees
-        rotationMode: GJS.Particle.RotationMode.STATIC,
+        rotationMode: Particle.RotationMode.STATIC,
         seed: 0,
-        appearance: GJS.Particle.defaultAppearance
+        appearance: Particle.defaultAppearance
     };
     for(var key in defaults) {
         if (!options.hasOwnProperty(key)) {
@@ -345,16 +342,16 @@ GJS.Particle = function(options) {
         }
     }
     this.rotation *= Math.PI / 180;
-    if (this.rotationMode === GJS.Particle.RotationMode.INITIAL_DIRECTION) {
+    if (this.rotationMode === Particle.RotationMode.INITIAL_DIRECTION) {
         this.rotation += Math.atan2(this.velY, this.velX);
     }
-    if (this.rotationMode === GJS.Particle.RotationMode.RANDOM) {
+    if (this.rotationMode === Particle.RotationMode.RANDOM) {
         this.rotation = Math.random() * Math.PI * 2;
     }
     this.dead = false;
 };
 
-GJS.Particle.RotationMode = {
+Particle.RotationMode = {
     STATIC: 0,
     INITIAL_DIRECTION: 1,
     CURRENT_DIRECTION: 2,
@@ -362,18 +359,18 @@ GJS.Particle.RotationMode = {
 };
 
 /**
- * Appearance that uses the GJS.Sprite class from gameutils.js
- * @param {GJS.Sprite} sprite GJS.Sprite to draw.
+ * Appearance that uses the Sprite class from gameutils.js
+ * @param {Sprite} sprite Sprite to draw.
  * @param {Object} options Appearence options.
  * @return {function} An appearance function that draws the sprite centered on the particle position.
  */
-GJS.Particle.spriteAppearance = function(sprite, options) {
+Particle.spriteAppearance = function(sprite, options) {
     var defaults = {
         size: 5,
-        sizeFunc: GJS.Particle.fadeOutLinear,
+        sizeFunc: Particle.fadeOutLinear,
         sizeFuncInverse: false,
         opacity: 1,
-        opacityFunc: GJS.Particle.fastAppearSlowDisappear,
+        opacityFunc: Particle.fastAppearSlowDisappear,
         opacityFuncInverse: false,
         additive: false
     };
@@ -408,14 +405,14 @@ GJS.Particle.spriteAppearance = function(sprite, options) {
 };
 
 /**
- * Prerendered circle using the GJS.Sprite class from gameutils.js.
+ * Prerendered circle using the Sprite class from gameutils.js.
  * May be faster than drawing a circle as a path.
  * @param {string} color CSS color string for the circle.
  * @param {number} resolution Resolution of the sprite to create in pixels. Will not affect the size of the particle
  * when drawing.
  * @param {Object} options Appearence options.
  */
-GJS.Particle.prerenderedCircleAppearance = function(color, resolution, options) {
+Particle.prerenderedCircleAppearance = function(color, resolution, options) {
     if (color === undefined) {
         color = '#fff';
     }
@@ -427,7 +424,7 @@ GJS.Particle.prerenderedCircleAppearance = function(color, resolution, options) 
     helperCtx.beginPath();
     helperCtx.arc(resolution * 0.5, resolution * 0.5, resolution * 0.5, 0, Math.PI * 2);
     helperCtx.fill();
-    var sprite = new GJS.Sprite(helperCanvas);
+    var sprite = new Sprite(helperCanvas);
     var spriteOptions = {};
     for (var key in options) {
         if (options.hasOwnProperty(key)) {
@@ -438,7 +435,7 @@ GJS.Particle.prerenderedCircleAppearance = function(color, resolution, options) 
         spriteOptions.size = 5;
     }
     spriteOptions.size /= resolution;
-    return GJS.Particle.spriteAppearance(sprite, spriteOptions);
+    return Particle.spriteAppearance(sprite, spriteOptions);
 };
 
 /**
@@ -446,7 +443,7 @@ GJS.Particle.prerenderedCircleAppearance = function(color, resolution, options) 
  * @param {number} t Time.
  * @param {number} seed Random seed.
  */
-GJS.Particle.fastAppearSlowDisappear = function(t, seed) {
+Particle.fastAppearSlowDisappear = function(t, seed) {
     return Math.sin(Math.sqrt(t) * Math.PI);
 };
 
@@ -455,7 +452,7 @@ GJS.Particle.fastAppearSlowDisappear = function(t, seed) {
  * @param {number} t Time.
  * @param {number} seed Random seed.
  */
-GJS.Particle.fadeOutLinear = function(t, seed) {
+Particle.fadeOutLinear = function(t, seed) {
     return 1.0 - t;
 };
 
@@ -464,17 +461,17 @@ GJS.Particle.fadeOutLinear = function(t, seed) {
  * @param {number} t Time.
  * @param {number} seed Random seed.
  */
-GJS.Particle.constant = function(t, seed) {
+Particle.constant = function(t, seed) {
     return 1.0;
 };
 
 /** 
- * Update a particle. This is called by GJS.ParticleEngine.
+ * Update a particle. This is called by ParticleEngine.
  * @param {number} deltaTime Time since the last update in seconds.
  * @param {number} forceX Force to apply to the particle in horizontal direction.
  * @param {number} forceY Force to apply to the particle in vertical direction.
  */
-GJS.Particle.prototype.update = function (deltaTime, forceX, forceY) {
+Particle.prototype.update = function (deltaTime, forceX, forceY) {
     this.timeAlive += deltaTime;
     if (this.timeAlive > this.lifetime) {
         this.dead = true;
@@ -492,13 +489,15 @@ GJS.Particle.prototype.update = function (deltaTime, forceX, forceY) {
  * @param {CanvasRenderingContext2D|Object} ctx A context to draw the particles to. In case you have a custom
  * appearance function, the context will be passed to that.
  */
-GJS.Particle.prototype.draw = function(ctx) {
+Particle.prototype.draw = function(ctx) {
     var t = this.timeAlive / this.lifetime;
     var rotation = this.rotation;
-    if (this.rotationMode === GJS.Particle.RotationMode.CURRENT_DIRECTION) {
+    if (this.rotationMode === Particle.RotationMode.CURRENT_DIRECTION) {
         rotation += Math.atan2(this.velY, this.velX);
     }
     this.appearance(ctx, this.x, this.y, rotation, this.seed, t);
 };
 
-GJS.Particle.defaultAppearance = GJS.Particle.prerenderedCircleAppearance('#fff', 8, {});
+Particle.defaultAppearance = Particle.prerenderedCircleAppearance('#fff', 8, {});
+
+export { ParticleEngine, ParticleEmitter, ParticleTimedEmitter, ParticleEffect, Particle }

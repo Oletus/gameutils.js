@@ -1,23 +1,22 @@
 <html>
 <head>
-<title>Gameutils.js: Using GJS.ParticleEngine</title>
+<title>Gameutils.js: Using ParticleEngine</title>
 <link rel="stylesheet" type="text/css" href="assets/default.css">
-<script src="../src/gjs/sprite.js"></script><!-- required for GJS.Particle.prerenderedCircleAppearance -->
-<script src="../src/gjs/particle.js"></script>
-<script>
-'use strict';
+<script type="module">
 
-var ctx;
-var tester;
+import { Particle, ParticleEmitter, ParticleEngine } from "../src/gjs/particle.js";
 
-var Tester = function() {
+let ctx;
+let tester;
+
+const Tester = function() {
     this.time = 0;
-    this.particles = new GJS.ParticleEngine({gravityY: 100});
-    this.emitter = new GJS.ParticleEmitter({
+    this.particles = new ParticleEngine({gravityY: 100});
+    this.emitter = new ParticleEmitter({
         minVelocity: 10,
         maxVelocity: 80,
         positionSpread: 10,
-        appearance: GJS.Particle.prerenderedCircleAppearance('#4fd', 8, {})
+        appearance: Particle.prerenderedCircleAppearance('#4fd', 8, {})
     });
 };
 
@@ -28,11 +27,11 @@ Tester.prototype.update = function() {
     // Update:
 
     this.particles.update(deltaTime);
-    var width = ctx.canvas.width;
-    var height = ctx.canvas.height;
-    var posX = width * 0.5 + Math.sin(this.time * 2.9) * width * 0.4;
-    var posY = height * 0.5 + Math.cos(this.time * 1.9) * height * 0.4;
-    for (var i = 0; i < 5; ++i) {
+    const width = ctx.canvas.width;
+    const height = ctx.canvas.height;
+    const posX = width * 0.5 + Math.sin(this.time * 2.9) * width * 0.4;
+    const posY = height * 0.5 + Math.cos(this.time * 1.9) * height * 0.4;
+    for (let i = 0; i < 5; ++i) {
         this.particles.addParticle(this.emitter.emitParticle({x: posX, y: posY}));
     }
 
@@ -43,14 +42,14 @@ Tester.prototype.update = function() {
     this.particles.render(ctx);
 };
 
-var frame = function() {
+const frame = function() {
     tester.update();
     requestAnimationFrame(frame);
 };
 
-var start = function() {
+window.start = function() {
     tester = new Tester();
-    var canvas = document.createElement('canvas');
+    const canvas = document.createElement('canvas');
     canvas.width = 600;
     canvas.height = 600;
     ctx = canvas.getContext('2d');
@@ -59,8 +58,7 @@ var start = function() {
 };
 </script>
 </head>
-<body onload="start()">
-<h2>Using the GJS.ParticleEngine</h2>
-<p>Compatibility: Chrome 41, Firefox 36, IE 11.</p>
+<body onload="window.start()">
+<h2>Using the ParticleEngine</h2>
 </body>
 </html>

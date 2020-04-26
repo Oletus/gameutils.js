@@ -1,21 +1,21 @@
 <html>
 <head>
-<title>Gameutils.js: Using GJS.AnimatedSprite and GJS.AnimatedSpriteInstance</title>
+<title>Gameutils.js: Using AnimatedSprite and AnimatedSpriteInstance</title>
 <link rel="stylesheet" type="text/css" href="assets/default.css">
-<script src="../src/gjs/sprite.js"></script>
-<script src="../src/gjs/animatedsprite.js"></script>
-<script>
-'use strict';
+<script type="module">
 
-var ctx;
-var tester;
+import { AnimatedSprite, AnimatedSpriteInstance } from '../src/gjs/animatedsprite.js';
+import { Sprite } from '../src/gjs/sprite.js';
 
-GJS.Sprite.gfxPath = 'assets/gfx/';
-GJS.AnimatedSprite.frameConstructor = GJS.Sprite;
+let ctx;
+let tester;
 
-var Tester = function() {
+Sprite.gfxPath = 'assets/gfx/';
+AnimatedSprite.frameConstructor = Sprite;
+
+const Tester = function() {
     this.time = 0;
-    this.carrotSprite = new GJS.AnimatedSprite({
+    this.carrotSprite = new AnimatedSprite({
         'idle': [{src: 'carrot.png', duration: 0}],
         'animated': [{src: 'carrot.png'},
                      {src: 'carrotflex1.png'},
@@ -26,7 +26,7 @@ var Tester = function() {
         durationMultiplier: 1000 / 60,
         defaultDuration: 5
     });
-    this.carrotInstance = new GJS.AnimatedSpriteInstance(this.carrotSprite);
+    this.carrotInstance = new AnimatedSpriteInstance(this.carrotSprite);
     this.animated = false;
     this.toggleAnimation();
 };
@@ -56,25 +56,30 @@ Tester.prototype.toggleAnimation = function() {
     }
 };
 
-var frame = function() {
+const frame = function() {
     tester.update();
     requestAnimationFrame(frame);
 };
 
-var start = function() {
+const start = function() {
     tester = new Tester();
-    var canvas = document.createElement('canvas');
+
+    // Quick-n-dirty way of exposing the class to event listeners in HTML.
+    window.tester = tester;
+
+    const canvas = document.createElement('canvas');
     canvas.width = 400;
     canvas.height = 300;
     ctx = canvas.getContext('2d');
     document.body.appendChild(canvas);
     frame();
 };
+
+window.start();
 </script>
 </head>
-<body onload="start()">
-<h2>Using GJS.AnimatedSprite and GJS.AnimatedSpriteInstance</h2>
-<p>Compatibility: Chrome 41, Firefox 36, IE 11.</p>
-<p><input type="button" value="Toggle animation" onclick="tester.toggleAnimation()"></input></p>
+<body>
+<h2>Using AnimatedSprite and AnimatedSpriteInstance</h2>
+<p><input type="button" value="Toggle animation" onclick="window.tester.toggleAnimation()"></input></p>
 </body>
 </html>

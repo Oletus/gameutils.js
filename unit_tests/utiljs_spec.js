@@ -1,4 +1,5 @@
-'use strict';
+
+import { arrayUtil, stringUtil, objectUtil, querystringUtil } from "../src/gjs/utiljs.js";
 
 describe('arrayUtil', function() {
     var expectIdentical = function(arr, original) {

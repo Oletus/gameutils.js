@@ -9,20 +9,20 @@ version 2.3.10
 Author: David Bau (fork with a simplified interface for gameutils.js by Olli Etuaho)
 Date: 2016 Feb 20
 
-// Sets mathUtil.random to a PRNG initialized using the given explicit seed.
-mathUtil.seedrandom('hello.');
-console.log(mathUtil.random());          // Always 0.9282578795792454
-console.log(mathUtil.random());          // Always 0.3752569768646784
+// Sets random to a PRNG initialized using the given explicit seed.
+seedrandom('hello.');
+console.log(random());          // Always 0.9282578795792454
+console.log(random());          // Always 0.3752569768646784
 
-// Sets mathUtil.random to an ARC4-based PRNG that is autoseeded using the
+// Sets random to an ARC4-based PRNG that is autoseeded using the
 // current time, dom state, and other accumulated local entropy.
 // The generated seed string is returned.
-mathUtil.seedrandom();
-console.log(mathUtil.random());          // Reasonably unpredictable.
+seedrandom();
+console.log(random());          // Reasonably unpredictable.
 
 // Seeds using the given explicit seed mixed with accumulated entropy.
-mathUtil.seedrandom('added entropy.', { entropy: true });
-console.log(mathUtil.random());          // As unpredictable as added entropy.
+seedrandom('added entropy.', { entropy: true });
+console.log(random());          // As unpredictable as added entropy.
 
 LICENSE (MIT)
 -------------
@@ -50,25 +50,26 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
 
-/**
- * All code is in an anonymous closure to keep the global namespace clean.
- */
-(function (
-    pool, width, chunks, digits) {
+const pool = [];     // pool: entropy pool starts empty
+const width = 256;    // width: each RC4 output is 0 <= x < 256
+const chunks = 6;      // chunks: at least six RC4 outputs for each double
+const digits = 52;     // digits: there are 52 significant digits in a double
 
 //
 // The following constants are related to IEEE 754 limits.
 //
-var startdenom = Math.pow(width, chunks),
+let startdenom = Math.pow(width, chunks),
     significance = Math.pow(2, digits),
     overflow = significance * 2,
     mask = width - 1;
+
+let random;
 
 //
 // seedrandom()
 // This is the seedrandom function described above.
 //
-mathUtil.seedrandom = function(seed, entropy) {
+const seedrandom = function(seed, entropy) {
   var key = [];
 
   // Flatten the seed string or build one from local entropy if needed.
@@ -84,7 +85,7 @@ mathUtil.seedrandom = function(seed, entropy) {
 
   // This function returns a random double in [0, 1) that contains
   // randomness in every bit of the mantissa of the IEEE 754 value.
-  mathUtil.random = function() {
+  random = function() {
     var n = arc4.g(chunks),             // Start with a numerator n < 2 ^ 48
         d = startdenom,                 //   and denominator d = 2 ^ 48.
         x = 0;                          //   and no 'extra last byte'.
@@ -198,10 +199,4 @@ function tostring(a) {
   return String.fromCharCode.apply(0, a);
 }
 
-// End anonymous scope, and pass initial values.
-})(
-  [],     // pool: entropy pool starts empty
-  256,    // width: each RC4 output is 0 <= x < 256
-  6,      // chunks: at least six RC4 outputs for each double
-  52     // digits: there are 52 significant digits in a double
-);
+export { seedrandom, random };

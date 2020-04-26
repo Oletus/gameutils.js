@@ -5,47 +5,35 @@
 <title>Gameutils.js game</title>
 <meta charset="UTF-8">
 <!-- output -->
-<script src="src/lib/hsl.js"></script>
-<script src="src/gjs/utilcolor.js"></script>
-<script src="src/gjs/sprite.js"></script>
-<script src="src/gjs/animatedsprite.js"></script>
 <script src="src/lib/howler.core.js"></script>
-<script src="src/gjs/audio.js"></script>
-<script src="src/gjs/canvasresizer.js"></script>
-<script src="src/gjs/loadingbar.js"></script>
-<script src="src/gjs/particle.js"></script>
-<script src="src/gjs/canvasui.js"></script>
-<script src="src/gjs/commonui.js"></script>
-<script src="src/gjs/monospacebitmapfont.js"></script>
 <script src="src/lib/tween.min.js"></script>
-<script src="src/gjs/statesaver.js"></script>
 <!-- dev mode helpers -->
 <script src="src/lib/dat.gui.js"></script>
 <script src="src/lib/FileSaver.js"></script>
-<script src="src/gjs/gameparameters.js"></script>
 <!-- input -->
 <script src="src/lib/mousetrap.js"></script>
 <script src="src/lib/mousetrap-global-bind.js"></script>
-<script src="src/gjs/gamepad.js"></script>
-<script src="src/gjs/inputmapper.js"></script>
+<script type="module">
 
-<script src="src/gjs/statemachine.js"></script>
-<script src="src/gjs/mainloop.js"></script>
-<script src="src/gjs/util2d.js"></script>
-<script src="src/lib/seedrandom.js"></script>
-<script src="src/gjs/utiljs.js"></script>
-<script src="src/gjs/hitbox.js"></script>
-<script src="src/gjs/tilemap.js"></script>
-<script src="src/gjs/platformingphysics.js"></script>
-<script src="src/gjs/unlocker.js"></script>
-<script src="src/gjs/renderableobject.js"></script>
-<script>
-'use strict';
+import { querystringUtil } from "./src/gjs/utiljs.js";
+import { Audio } from "./src/gjs/legacy/audio.js";
+import { Sprite } from "./src/gjs/sprite.js";
+import { LoadingBar } from "./src/gjs/loadingbar.js";
+import { CanvasUI } from "./src/gjs/canvasui.js";
+import { CanvasResizer } from "./src/gjs/canvasresizer.js";
+import { commonUI } from "./src/gjs/commonui.js";
+import { GameParameters } from "./src/gjs/gameparameters.js";
+import { Gamepad } from "./src/gjs/gamepad.js";
+import { InputMapper } from "./src/gjs/inputmapper.js";
+import { startMainLoop } from "./src/gjs/mainloop.js";
+import { cssUtil } from "./src/gjs/utilcolor.js";
+
+import { seedrandom, random } from "./src/lib/seedrandom.js";
 
 var Game = function(resizer) {
     this.canvas = resizer.getCanvas();
     this.realCtx = this.canvas.getContext('2d');
-    this.canvasUI = new GJS.CanvasUI({
+    this.canvasUI = new CanvasUI({
         element: this.canvas,
         getCanvasPositionFromEvent: function(event) {
             return resizer.getCanvasPosition(event);
@@ -54,9 +42,9 @@ var Game = function(resizer) {
     this.time = 0;
 
     var numPlayers = 1;
-    this.input = new GJS.InputMapper(this, numPlayers);
-    // Example usage of GJS.InputMapper
-    //this.input.addListener(GJS.Gamepad.BUTTONS.UP_OR_ANALOG_UP, ['up', 'w'], this.upPress, this.upRelease);
+    this.input = new InputMapper(this, numPlayers);
+    // Example usage of InputMapper
+    //this.input.addListener(Gamepad.BUTTONS.UP_OR_ANALOG_UP, ['up', 'w'], this.upPress, this.upRelease);
     
     if (DEV_MODE) {
         this.input.addListener(undefined, ['0'], this.devModeTakeScreenshot);
@@ -65,7 +53,7 @@ var Game = function(resizer) {
 };
 
 Game.prototype.render = function(ctx) {
-    // GJS.CanvasResizer passes a wrapped 2D context to use here when run in FIXED_COORDINATE_SYSTEM mode,
+    // CanvasResizer passes a wrapped 2D context to use here when run in FIXED_COORDINATE_SYSTEM mode,
     // where ctx.canvas.width/height are set to the coordinate system width/height.
     // Otherwise the context initialized here is used.
     if (ctx === undefined) {
@@ -93,7 +81,7 @@ Game.prototype.update = function(deltaTime) {
     this.time += deltaTime;
     this.input.update();
     // Update your level here
-    GJS.Audio.muteAll(Game.parameters.get('muteAudio'));
+    Audio.muteAll(Game.parameters.get('muteAudio'));
 };
 
 /**
@@ -137,7 +125,7 @@ Game.prototype.devModeTakeScreenshot = function() {
 };
 
 // Parameters added here can be tuned at run time when in developer mode
-Game.parameters = new GJS.GameParameters({
+Game.parameters = new GameParameters({
     'muteAudio': {initial: false}
 });
 
@@ -147,13 +135,13 @@ window['start'] = function() {
     var DEBUG_MAIN_LOOP = DEV_MODE && true; // Set to true to allow fast-forwarding main loop with 'f'
     Game.parameters.set('muteAudio', (DEV_MODE && true)); // Set to true if sounds annoy developers
 
-    mathUtil.seedrandom();
+    seedrandom();
 
     var canvas = document.createElement('canvas');
     var canvasWrapper = document.createElement('div');
     canvasWrapper.appendChild(canvas);
 
-    GJS.commonUI.createUI({
+    commonUI.createUI({
         parent: canvasWrapper,
         fullscreenElement: document.body,
         twitterAccount: 'Oletus',
@@ -162,8 +150,8 @@ window['start'] = function() {
         scale: 1
     });
     
-    var resizer = new GJS.CanvasResizer({
-        mode: GJS.CanvasResizer.Mode.DYNAMIC,
+    var resizer = new CanvasResizer({
+        mode: CanvasResizer.Mode.DYNAMIC,
         canvas: canvas,
         wrapperElement: canvasWrapper
     });
@@ -177,12 +165,12 @@ window['start'] = function() {
         Game.parameters.initGUI();
     }
 
-    startMainLoop([resizer, game, new GJS.LoadingBar(), resizer.pixelator()], {debugMode: DEBUG_MAIN_LOOP});
+    startMainLoop([resizer, game, new LoadingBar(), resizer.pixelator()], {debugMode: DEBUG_MAIN_LOOP});
 };
 </script>
 </head>
 
-<body onload="start()" style="background: black; height: 100%">
+<body onload="window.start()" style="background: black; height: 100%">
 </body>
 
 </html>

@@ -2,19 +2,19 @@
 <head>
 <title>Gameutils.js: Using the startMainLoop function and GJS.LoadingBar class</title>
 <link rel="stylesheet" type="text/css" href="assets/default.css">
-<script src="../src/gjs/mainloop.js"></script>
-<script src="../src/gjs/loadingbar.js"></script>
 <!-- Including mousetrap is optional and is only used for debug mode key bindings in mainloop.js -->
 <script src="../src/lib/mousetrap.js"></script>
 <script src="../src/lib/mousetrap-global-bind.js"></script>
-<script>
-'use strict';
+<script type="module">
+
+import { startMainLoop } from "../src/gjs/mainloop.js";
+import { LoadingBar } from "../src/gjs/loadingbar.js";
 
 /**
  * Game class.
  * @constructor
  */
-var GameExample = function() {
+const GameExample = function() {
     this.canvas = document.createElement('canvas');
     this.ctx = this.canvas.getContext('2d');
     this.canvas.width = 1000;
@@ -57,17 +57,17 @@ GameExample.prototype.loadedFraction = function() {
     return this.timeSinceCreated * 0.4;
 };
 
-var start = function() {
-    var game = new GameExample();
+window.start = function() {
+    const game = new GameExample();
     // Pass the game to GJS.LoadingBar since in this example the Game class
     // implements loadedFraction().
-    game.loadingBar = new GJS.LoadingBar([game]);
+    game.loadingBar = new LoadingBar([game]);
     startMainLoop([game, game.loadingBar], {debugMode: true, frameLog: true, updateFPS: {min: 59, max: 121}});
 };
 </script>
 </head>
 <body onload="start();">
-<h2>Using the startMainLoop function and GJS.LoadingBar</h2>
+<h2>Using the startMainLoop function and LoadingBar</h2>
 <p>The optional debug mode bar on the top shows a log of render/update frames the main loop has processed.</p>
 <ul>
 <li>Green lines are updates which were rendered to the screen.</li>
@@ -75,6 +75,5 @@ var start = function() {
 <li>White lines are frames on which the game state was not updated.</li>
 </ul>
 <p>Press f to fast-forward time in the debug mode.</p>
-<p>Compatibility: Chrome 41, Firefox 36, IE 11.</p>
 </body>
 </html>

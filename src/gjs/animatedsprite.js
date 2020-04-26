@@ -1,8 +1,5 @@
-'use strict';
 
-if (typeof GJS === "undefined") {
-    var GJS = {};
-}
+import { Sprite } from './sprite.js';
 
 /**
  * An object for storing animations.
@@ -21,14 +18,14 @@ if (typeof GJS === "undefined") {
  * }
  * @param {Object} options Object with the following optional keys:
  *  frameConstructor: function Constructor for single frames that takes the
- *      frame source as a parameter. Defaults to GJS.AnimatedSprite.frameConstructor.
+ *      frame source as a parameter. Defaults to AnimatedSprite.frameConstructor.
  *  durationMultiplier: number Multiplier for specified frame durations. Useful if you
  *      want to have frame times relative to fixed FPS, for example. Defaults to 1.
  *  defaultDuration: number Default duration for a single frame. Defaults to 1.
  */
-GJS.AnimatedSprite = function(animationData, options) {
+const AnimatedSprite = function(animationData, options) {
     var defaults = {
-        frameConstructor: GJS.AnimatedSprite.frameConstructor,
+        frameConstructor: AnimatedSprite.frameConstructor,
         durationMultiplier: 1,
         defaultDuration: 1
     };
@@ -64,7 +61,7 @@ GJS.AnimatedSprite = function(animationData, options) {
                 }
             }
             for (var i = 0; i < frameSrc.length; ++i) {
-                var frame = GJS.AnimatedSprite._getFrame(frameSrc[i].src, this.frameConstructor);
+                var frame = AnimatedSprite._getFrame(frameSrc[i].src, this.frameConstructor);
                 animation.push({frame: frame, duration: frameSrc[i].duration * this.durationMultiplier});
             }
             this.animations[key] = animation;
@@ -78,12 +75,9 @@ GJS.AnimatedSprite = function(animationData, options) {
 /**
  * Default constructor for single frames. Set this before loading any animations.
  */
-GJS.AnimatedSprite.frameConstructor = null;
-if (typeof GJS.Sprite !== 'undefined') {
-    GJS.AnimatedSprite.frameConstructor = GJS.Sprite;
-}
+AnimatedSprite.frameConstructor = Sprite;
 
-GJS.AnimatedSprite._getFrame = (function() {
+AnimatedSprite._getFrame = (function() {
     var frameCaches = [];
 
     return (function(src, frameConstructor) {
@@ -109,17 +103,17 @@ GJS.AnimatedSprite._getFrame = (function() {
 /**
  * An object that stores the current state of an animated sprite.
  * @constructor
- * @param {GJS.AnimatedSprite} animatedSprite The animated sprite to use.
+ * @param {AnimatedSprite} animatedSprite The animated sprite to use.
  * @param {function=} finishedFrameCallback A callback to execute when an animation has finished. Can be used to
  * switch to a different animation, for example. Takes the finished animation key as a parameter.
  */
-GJS.AnimatedSpriteInstance = function(animatedSprite, finishedAnimationCallback) {
+const AnimatedSpriteInstance = function(animatedSprite, finishedAnimationCallback) {
     this.animatedSprite = animatedSprite;
     this.finishedAnimationCallback = finishedAnimationCallback;
     this.setAnimation(this.animatedSprite.defaultAnimation);
     var frame = this.animatedSprite.animations[this.animationKey][this.frame].frame;
 
-    // Add draw functions from GJS.Sprite if they are defined
+    // Add draw functions from Sprite if they are defined
     // A bit slow way to do this but needed to make the animation classes more generic.
     if (frame.implementsGameutilsSprite)
     {
@@ -141,9 +135,9 @@ GJS.AnimatedSpriteInstance = function(animatedSprite, finishedAnimationCallback)
 
 /**
  * Start playing an animation.
- * @param {string} animationKey The animation id in the GJS.AnimatedSprite.
+ * @param {string} animationKey The animation id in the AnimatedSprite.
  */
-GJS.AnimatedSpriteInstance.prototype.setAnimation = function(animationKey) {
+AnimatedSpriteInstance.prototype.setAnimation = function(animationKey) {
     this.animationKey = animationKey;
     this.frame = 0;
     this.framePos = 0;
@@ -153,7 +147,7 @@ GJS.AnimatedSpriteInstance.prototype.setAnimation = function(animationKey) {
  * Update the current animation frame.
  * @param {number} deltaTime Time that has passed since the last update.
  */
-GJS.AnimatedSpriteInstance.prototype.update = function(deltaTime) {
+AnimatedSpriteInstance.prototype.update = function(deltaTime) {
     this._scrubInternal(deltaTime, this.finishedAnimationCallback);
 };
 
@@ -162,7 +156,7 @@ GJS.AnimatedSpriteInstance.prototype.update = function(deltaTime) {
  * @param {function(string)} callback A callback to execute when an animation has finished. Can be used to
  * switch to a different animation, for example. Takes the finished animation key as a parameter.
  */
-GJS.AnimatedSpriteInstance.prototype.setFinishedAnimationCallback = function(callback) {
+AnimatedSpriteInstance.prototype.setFinishedAnimationCallback = function(callback) {
     this.finishedAnimationCallback = callback;
 };
 
@@ -170,11 +164,11 @@ GJS.AnimatedSpriteInstance.prototype.setFinishedAnimationCallback = function(cal
  * Scrub the animation backwards or forwards.
  * @param {number} deltaTime Amount to scrub by.
  */
-GJS.AnimatedSpriteInstance.prototype.scrub = function(deltaTime) {
+AnimatedSpriteInstance.prototype.scrub = function(deltaTime) {
     this._scrubInternal(deltaTime);
 };
 
-GJS.AnimatedSpriteInstance.prototype._scrubInternal = function(deltaTime, finishCallback) {
+AnimatedSpriteInstance.prototype._scrubInternal = function(deltaTime, finishCallback) {
     var currentAnimation = this.animatedSprite.animations[this.animationKey];
     if (currentAnimation[this.frame].duration > 0) {
         this.framePos += deltaTime * 1000;
@@ -209,13 +203,15 @@ GJS.AnimatedSpriteInstance.prototype._scrubInternal = function(deltaTime, finish
 /**
  * @return {string} The current animation key.
  */
-GJS.AnimatedSpriteInstance.prototype.getCurrentAnimation = function() {
+AnimatedSpriteInstance.prototype.getCurrentAnimation = function() {
     return this.animationKey;
 };
 
 /**
  * @return {Object} The current frame of the animation.
  */
-GJS.AnimatedSpriteInstance.prototype.getCurrentFrame = function() {
+AnimatedSpriteInstance.prototype.getCurrentFrame = function() {
     return this.animatedSprite.animations[this.animationKey][this.frame].frame;
 };
+
+export { AnimatedSprite, AnimatedSpriteInstance };

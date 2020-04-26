@@ -1,16 +1,13 @@
-'use strict';
 
-// Requires util2d.js
-
-if (typeof GJS === "undefined") {
-    var GJS = {};
-}
+import * as mathUtil from './math/math_util.js';
+import { Rect } from './math/rect.js';
+import { Vec2 } from './math/vec2.js';
 
 /**
  * Class for rendering and interacting with UI elements on a canvas.
  * @constructor
  */
-GJS.CanvasUI = function(options) {
+const CanvasUI = function(options) {
     this.clear();
 };
 
@@ -18,7 +15,7 @@ GJS.CanvasUI = function(options) {
  * Update UI element state and animations.
  * @param {number} deltaTime Time passed since the last update in seconds.
  */
-GJS.CanvasUI.prototype.update = function(deltaTime) {
+CanvasUI.prototype.update = function(deltaTime) {
     for (var i = 0; i < this.uiElements.length; ++i) {
         this.uiElements[i].update(deltaTime);
     }
@@ -29,7 +26,7 @@ GJS.CanvasUI.prototype.update = function(deltaTime) {
  * @param {CanvasRenderingContext2D} ctx The canvas rendering context to use.
  * @param {function=} matchFunc Set this to only render the matching elements. By default all elements are rendered.
  */
-GJS.CanvasUI.prototype.render = function(ctx, matchFunc) {
+CanvasUI.prototype.render = function(ctx, matchFunc) {
     var activeCursors = this._getActiveCursors();
     var draggedElements = [];
     var i;
@@ -51,7 +48,7 @@ GJS.CanvasUI.prototype.render = function(ctx, matchFunc) {
  * @return {Array.<Object>} Active cursors.
  * @protected
  */
-GJS.CanvasUI.prototype._getActiveCursors = function() {
+CanvasUI.prototype._getActiveCursors = function() {
     var activeCursors = [];
     for (var i = 0; i < this.cursors.length; ++i) {
         if (this.cursors[i].active) {
@@ -64,12 +61,12 @@ GJS.CanvasUI.prototype._getActiveCursors = function() {
 /**
  * Clear the UI from all elements.
  */
-GJS.CanvasUI.prototype.clear = function() {
+CanvasUI.prototype.clear = function() {
     this.uiElements = [];
     this.cursors = [];
 };
 
-GJS.CanvasUI.prototype.addElement = function(element) {
+CanvasUI.prototype.addElement = function(element) {
     this.uiElements.push(element);
 };
 
@@ -79,9 +76,9 @@ GJS.CanvasUI.prototype.addElement = function(element) {
  *   index: numerical index identifying the pointer.
  * @return {boolean} True if an element was pressed.
  */
-GJS.CanvasUI.prototype.canvasPress = function(cursor) {
+CanvasUI.prototype.canvasPress = function(cursor) {
     while (this.cursors.length <= cursor.index) {
-        this.cursors.push(new GJS.CanvasUICursor(this));
+        this.cursors.push(new CanvasUICursor(this));
     }
     this.cursors[cursor.index].active = true;
     return this.cursors[cursor.index].press(cursor.currentPosition);
@@ -92,9 +89,9 @@ GJS.CanvasUI.prototype.canvasPress = function(cursor) {
  *   index: numerical index identifying the pointer.
  * @param {boolean} makeInactive Set to true to make the cursor inactive at the same time. Useful for touch cursors.
  */
-GJS.CanvasUI.prototype.canvasRelease = function(cursor, makeInactive) {
+CanvasUI.prototype.canvasRelease = function(cursor, makeInactive) {
     while (this.cursors.length <= cursor.index) {
-        this.cursors.push(new GJS.CanvasUICursor(this));
+        this.cursors.push(new CanvasUICursor(this));
     }
     this.cursors[cursor.index].release();
     this.cursors[cursor.index].active = !makeInactive;
@@ -105,9 +102,9 @@ GJS.CanvasUI.prototype.canvasRelease = function(cursor, makeInactive) {
  *   currentPosition: an x,y vector indicating the last known position of the pointer.
  *   index: numerical index identifying the pointer.
  */
-GJS.CanvasUI.prototype.canvasMove = function(cursor) {
+CanvasUI.prototype.canvasMove = function(cursor) {
     while (this.cursors.length <= cursor.index) {
-        this.cursors.push(new GJS.CanvasUICursor(this));
+        this.cursors.push(new CanvasUICursor(this));
     }
     this.cursors[cursor.index].active = true;
     this.cursors[cursor.index].setPosition(cursor.currentPosition);
@@ -115,10 +112,10 @@ GJS.CanvasUI.prototype.canvasMove = function(cursor) {
 
 /**
  * A single cursor.
- * @param {GJS.CanvasUI} ui UI this cursor belongs to.
+ * @param {CanvasUI} ui UI this cursor belongs to.
  * @constructor
  */
-GJS.CanvasUICursor = function(ui) {
+const CanvasUICursor = function(ui) {
     this.ui = ui;
     this.active = false;
     this.x = -Infinity;
@@ -131,7 +128,7 @@ GJS.CanvasUICursor = function(ui) {
  * Set the cursor position.
  * @param {Vec2} vec New position to set. Relative to the canvas coordinate space.
  */
-GJS.CanvasUICursor.prototype.setPosition = function(pos) {
+CanvasUICursor.prototype.setPosition = function(pos) {
     this.x = pos.x;
     this.y = pos.y;
     if (this.dragging) {
@@ -156,7 +153,7 @@ GJS.CanvasUICursor.prototype.setPosition = function(pos) {
  * space.
  * @return {boolean} True if an element was pressed.
  */
-GJS.CanvasUICursor.prototype.press = function(pos) {
+CanvasUICursor.prototype.press = function(pos) {
     this.setPosition(pos);
     var uiElements = this.ui.uiElements;
     for (var i = 0; i < uiElements.length; ++i) {
@@ -182,7 +179,7 @@ GJS.CanvasUICursor.prototype.press = function(pos) {
  * @param {Object|Vec2=} pos New position to set. Needs to have x and y coordinates. Relative to the canvas coordinate
  * space. May be undefined, in which case the last known position will be used to evaluate the effects.
  */
-GJS.CanvasUICursor.prototype.release = function(pos) {
+CanvasUICursor.prototype.release = function(pos) {
     if (pos !== undefined) {
         this.setPosition(pos);
     }
@@ -214,11 +211,11 @@ GJS.CanvasUICursor.prototype.release = function(pos) {
  * @param {Object} options Options for the UI element.
  * @constructor
  */
-GJS.CanvasUIElement = function(options) {
+const CanvasUIElement = function(options) {
     var defaults = {
         label: 'Button',
         labelFunc: null, // Function that returns the current text to draw on the element. Overrides label if set.
-        renderFunc: GJS.CanvasUIElement.defaultRenderFunc, // Function to draw the element. Takes CanvasRenderingContext2D, CanvasUIElement, cursorOver (boolean), pressedExtent (0 to 1), label (string)
+        renderFunc: CanvasUIElement.defaultRenderFunc, // Function to draw the element. Takes CanvasRenderingContext2D, CanvasUIElement, cursorOver (boolean), pressedExtent (0 to 1), label (string)
         centerX: 0,
         centerY: 0,
         width: 100,
@@ -230,8 +227,8 @@ GJS.CanvasUIElement = function(options) {
         active: true, // Active elements are visible and can be interacted with. Inactive elements are invisible and can't be interacted with.
         locked: false, // Locked elements can't be interacted with. Often they'd render with a lock on top.
         draggable: false,
-        pressSpeed: GJS.CanvasUIElement.defaultPressSpeed,
-        depressSpeed: GJS.CanvasUIElement.defaultDepressSpeed
+        pressSpeed: CanvasUIElement.defaultPressSpeed,
+        depressSpeed: CanvasUIElement.defaultDepressSpeed
     };
     for(var key in defaults) {
         if (!options.hasOwnProperty(key)) {
@@ -253,33 +250,33 @@ GJS.CanvasUIElement = function(options) {
 /**
  * Minimum interval between clicks on the same button in seconds.
  */
-GJS.CanvasUIElement.minimumClickInterval = 0.5;
+CanvasUIElement.minimumClickInterval = 0.5;
 
 /**
  * Visual press/depress speed that affects how fast pressedExtent changes for the element.
  */
-GJS.CanvasUIElement.defaultPressSpeed = 8.0;
-GJS.CanvasUIElement.defaultDepressSpeed = 3.0;
+CanvasUIElement.defaultPressSpeed = 8.0;
+CanvasUIElement.defaultDepressSpeed = 3.0;
 
 /**
  * The default font for UI elements used in defaultRenderFunc.
  */
-GJS.CanvasUIElement.defaultFont = 'sans-serif';
+CanvasUIElement.defaultFont = 'sans-serif';
 
 /**
  * Font size used by defaultRenderFunc in px.
  */
-GJS.CanvasUIElement.defaultFontSize = 20;
+CanvasUIElement.defaultFontSize = 20;
 
 /**
  * Default render function.
  * @param {CanvasRenderingContext2D} ctx
- * @param {GJS.CanvasUIElement} element
+ * @param {CanvasUIElement} element
  * @param {boolean} cursorOver
  * @param {number} pressedExtent Between 0 and 1. 1 means fully pressed.
  * @param {string} label
  */
-GJS.CanvasUIElement.defaultRenderFunc = function(ctx, element, cursorOver, pressedExtent, label) {
+CanvasUIElement.defaultRenderFunc = function(ctx, element, cursorOver, pressedExtent, label) {
     var isButton = element.clickCallback !== null;
 
     if (isButton) {
@@ -303,7 +300,7 @@ GJS.CanvasUIElement.defaultRenderFunc = function(ctx, element, cursorOver, press
     ctx.globalAlpha = 1.0;
     ctx.textAlign = 'center';
     ctx.fillStyle = '#fff';
-    ctx.font = GJS.CanvasUIElement.defaultFontSize + 'px ' + GJS.CanvasUIElement.defaultFont;
+    ctx.font = CanvasUIElement.defaultFontSize + 'px ' + CanvasUIElement.defaultFont;
     ctx.fillText(label, element.centerX, element.centerY + 7);
 };
 
@@ -311,16 +308,16 @@ GJS.CanvasUIElement.defaultRenderFunc = function(ctx, element, cursorOver, press
  * Update UI element state and animations.
  * @param {number} deltaTime Time passed since the last update in seconds.
  */
-GJS.CanvasUIElement.prototype.update = function(deltaTime) {
+CanvasUIElement.prototype.update = function(deltaTime) {
     this.time += deltaTime;
 };
 
 /**
  * Render the element. Will call renderFunc if it is defined.
  * @param {CanvasRenderingContext2D} ctx Context to render to.
- * @param {Array.<GJS.CanvasUICursor>} cursors A list of all active cursors.
+ * @param {Array.<CanvasUICursor>} cursors A list of all active cursors.
  */
-GJS.CanvasUIElement.prototype.render = function(ctx, cursors) {
+CanvasUIElement.prototype.render = function(ctx, cursors) {
     if (!this.active) {
         return;
     }
@@ -347,7 +344,7 @@ GJS.CanvasUIElement.prototype.render = function(ctx, cursors) {
  * @return {number} The horizontal position to draw the element at. May be different from the logical position if the
  * element is being dragged.
  */
-GJS.CanvasUIElement.prototype.visualX = function() {
+CanvasUIElement.prototype.visualX = function() {
     if (this.dragged) {
         return this.draggedX;
     } else {
@@ -359,7 +356,7 @@ GJS.CanvasUIElement.prototype.visualX = function() {
  * @return {number} The vertical position to draw the element at. May be different from the logical position if the
  * element is being dragged.
  */
-GJS.CanvasUIElement.prototype.visualY = function() {
+CanvasUIElement.prototype.visualY = function() {
     if (this.dragged) {
         return this.draggedY;
     } else {
@@ -370,7 +367,7 @@ GJS.CanvasUIElement.prototype.visualY = function() {
 /**
  * @return {boolean} True when the element is being dragged.
  */
-GJS.CanvasUIElement.prototype.isDragged = function() {
+CanvasUIElement.prototype.isDragged = function() {
     return this.dragged;
 };
 
@@ -379,7 +376,7 @@ GJS.CanvasUIElement.prototype.isDragged = function() {
  * @param {number} y Vertical coordinate to test.
  * @return {boolean} Whether the coordinate is within the area of the element.
  */
-GJS.CanvasUIElement.prototype.hitTest = function(x, y) {
+CanvasUIElement.prototype.hitTest = function(x, y) {
     if (this.clickCallback !== null || this.moveWhenDownCallback !== null) {
         return this.getRect().containsVec2(new Vec2(x, y));
     }
@@ -390,15 +387,15 @@ GJS.CanvasUIElement.prototype.hitTest = function(x, y) {
  * @return boolean True if the element can generate click events right now. False if the click cooldown hasn't
  * completed.
  */
-GJS.CanvasUIElement.prototype.canClick = function() {
+CanvasUIElement.prototype.canClick = function() {
     var sinceClicked = this.time - this.lastClick;
-    return sinceClicked >= GJS.CanvasUIElement.minimumClickInterval;
+    return sinceClicked >= CanvasUIElement.minimumClickInterval;
 };
 
 /**
  * @return {Rect} Rectangle of the element centered around its centerX, centerY.
  */
-GJS.CanvasUIElement.prototype.getRect = function() {
+CanvasUIElement.prototype.getRect = function() {
     return new Rect(
         this.centerX - this.width * 0.5,
         this.centerX + this.width * 0.5,
@@ -410,7 +407,7 @@ GJS.CanvasUIElement.prototype.getRect = function() {
 /**
  * Mark the element as down, for visual purposes only.
  */
-GJS.CanvasUIElement.prototype.down = function() {
+CanvasUIElement.prototype.down = function() {
     if (!this.isDown) {
         this.isDown = true;
         this.lastDownTime = this.time;
@@ -421,7 +418,7 @@ GJS.CanvasUIElement.prototype.down = function() {
  * Mark the element as up. Will generate a click event if clicked is true.
  * @param {boolean} clicked True when clicked, false when the cursor position has left the area of the element.
  */
-GJS.CanvasUIElement.prototype.release = function(clicked) {
+CanvasUIElement.prototype.release = function(clicked) {
     if (this.isDown) {
         this.isDown = false;
         this.lastUpTime = this.time;
@@ -434,3 +431,5 @@ GJS.CanvasUIElement.prototype.release = function(clicked) {
         this.clickCallback();
     }
 };
+
+export { CanvasUI, CanvasUIElement, CanvasUICursor }

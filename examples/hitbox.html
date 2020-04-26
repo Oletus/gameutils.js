@@ -1,37 +1,37 @@
 <html>
 <head>
-<title>Gameutils.js: Using GJS.HitBox</title>
+<title>Gameutils.js: Using HitBox</title>
 <link rel="stylesheet" type="text/css" href="assets/default.css">
-<script src="../src/gjs/util2d.js"></script>
-<script src="../src/gjs/hitbox.js"></script>
-<script>
-'use strict';
+<script type="module">
 
-var ctx;
-var tester;
+import { Vec2, Rect } from "../src/gjs/util2d.js"
+import { HitBox } from "../src/gjs/hitbox.js"
 
-var BOXES = 50;
+let ctx;
+let tester;
 
-var Tester = function() {
+const BOXES = 50;
+
+const Tester = function() {
     this.time = 0;
     this.positions = [];
     this.velocities = [];
     this.hitboxes = [];
     
-    for (var i = 0; i < BOXES; ++i) {
+    for (let i = 0; i < BOXES; ++i) {
         this.positions.push(new Vec2(Math.random() * ctx.canvas.width, Math.random() * ctx.canvas.height));
         this.velocities.push(new Vec2(Math.random(), Math.random()));
-        this.hitboxes.push(new GJS.HitBox());
+        this.hitboxes.push(new HitBox());
     }
 };
 
 Tester.prototype.update = function() {
-    var deltaTime = 1 / 60; // Assume 60 fps... bad example :P
+    const deltaTime = 1 / 60; // Assume 60 fps... bad example :P
     this.time += deltaTime;
 
     // Update:
 
-    for (var i = 0; i < this.hitboxes.length; ++i) {
+    for (let i = 0; i < this.hitboxes.length; ++i) {
         this.positions[i].translate(this.velocities[i]);
         this.positions[i].x = this.positions[i].x % ctx.canvas.width;
         this.positions[i].y = this.positions[i].y % ctx.canvas.height;
@@ -51,9 +51,9 @@ Tester.prototype.update = function() {
 
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    for (var i = 0; i < this.hitboxes.length; ++i) {
-        var intersects = false;
-        for (var j = 0; j < this.hitboxes.length; ++j) {
+    for (let i = 0; i < this.hitboxes.length; ++i) {
+        let intersects = false;
+        for (let j = 0; j < this.hitboxes.length; ++j) {
             if (j != i && this.hitboxes[i].intersects(this.hitboxes[j])) {
                 intersects = true;
             }
@@ -64,13 +64,13 @@ Tester.prototype.update = function() {
     };
 };
 
-var frame = function() {
+const frame = function() {
     tester.update();
     requestAnimationFrame(frame);
 };
 
-var start = function() {
-    var canvas = document.createElement('canvas');
+window.start = function() {
+    const canvas = document.createElement('canvas');
     canvas.width = 600;
     canvas.height = 600;
     ctx = canvas.getContext('2d');
@@ -80,8 +80,8 @@ var start = function() {
 };
 </script>
 </head>
-<body onload="start()">
-<h2>Using the GJS.HitBox</h2>
+<body onload="window.start()">
+<h2>Using the HitBox class</h2>
 <p>Compatibility: Chrome 46, Firefox 36, IE 11.</p>
 </body>
 </html>

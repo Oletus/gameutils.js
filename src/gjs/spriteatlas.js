@@ -1,21 +1,16 @@
-'use strict';
-
-if (typeof GJS === "undefined") {
-    var GJS = {};
-}
 
 /**
  * @constructor
- * @param {GJS.Sprite} img
+ * @param {Sprite} img
  * @param {string} info JSON string holding information about the sprite atlas image.
  */
-GJS.SpriteAtlas = function(img, info) {
+const SpriteAtlas = function(img, info) {
     this.img = img;
     this.info = JSON.parse(info);
     if (this.img.bakeableFilepath !== null) {
-        var index = GJS.Sprite.bakeableSpritePaths.indexOf(this.img.bakeableFilepath);
+        var index = Sprite.bakeableSpritePaths.indexOf(this.img.bakeableFilepath);
         if (index >= 0) {
-            GJS.Sprite.bakeableSpritePaths.splice(index, 1);
+            Sprite.bakeableSpritePaths.splice(index, 1);
         }
     }
 };
@@ -23,7 +18,7 @@ GJS.SpriteAtlas = function(img, info) {
 /** 
  * @param {string} filepath
  */
-GJS.SpriteAtlas.prototype.getSpriteImg = function(filepath) {
+SpriteAtlas.prototype.getSpriteImg = function(filepath) {
     if (this.hasSpriteImg(filepath)) {
         var fileinfo = this.info['imgInfo'][filepath];
         var targetImg = document.createElement('canvas');
@@ -34,22 +29,22 @@ GJS.SpriteAtlas.prototype.getSpriteImg = function(filepath) {
         ctx.drawImage(this.img.img, fileinfo['x'], fileinfo['y'], fileinfo['width'], fileinfo['height'], 0, 0, fileinfo['width'], fileinfo['height']);
         return targetImg;
     } else {
-        return GJS.Sprite.getMissingImg(filepath);
+        return Sprite.getMissingImg(filepath);
     }
 };
 
 /** 
  * @param {string} filepath
  */
-GJS.SpriteAtlas.prototype.hasSpriteImg = function(filepath) {
+SpriteAtlas.prototype.hasSpriteImg = function(filepath) {
     return this.info['imgInfo'].hasOwnProperty(filepath);
 };
 
 /**
- * Create a sprite atlas from all loaded GJS.Sprite objects and trigger a download of it.
+ * Create a sprite atlas from all loaded Sprite objects and trigger a download of it.
  */
-GJS.SpriteAtlas.bakeLoadedSpritesAndSave = function() {
-    GJS.SpriteAtlas.bakeLoadedSprites(function(atlas) {
+SpriteAtlas.bakeLoadedSpritesAndSave = function() {
+    SpriteAtlas.bakeLoadedSprites(function(atlas) {
         var infoBlob = new Blob([JSON.stringify(atlas.info)], {type: 'application/json'});
         window['saveAs'](infoBlob, 'sprite-atlas.json');
 
@@ -60,14 +55,14 @@ GJS.SpriteAtlas.bakeLoadedSpritesAndSave = function() {
 };
 
 /**
- * Create a sprite atlas from all loaded GJS.Sprite objects.
- * This loads all sprites again so that GJS.Sprite allocations are not referenced in any central structure and may be
+ * Create a sprite atlas from all loaded Sprite objects.
+ * This loads all sprites again so that Sprite allocations are not referenced in any central structure and may be
  * garbage collected.
- * @param {function} doneCallback Callback called with GJS.SpriteAtlas object as a parameter when.
+ * @param {function} doneCallback Callback called with SpriteAtlas object as a parameter when.
  */
-GJS.SpriteAtlas.bakeLoadedSprites = function(doneCallback) {
+SpriteAtlas.bakeLoadedSprites = function(doneCallback) {
     // Copy the bakeable paths so that Sprite objects created inside this function don't add to it.
-    var bakeablePaths = GJS.Sprite.bakeableSpritePaths.slice();
+    var bakeablePaths = Sprite.bakeableSpritePaths.slice();
     // Prune duplicates from bakeablePaths.
     bakeablePaths = bakeablePaths.filter(function(item, pos, that) {
         return that.indexOf(item) === pos;
@@ -79,30 +74,30 @@ GJS.SpriteAtlas.bakeLoadedSprites = function(doneCallback) {
     var spriteLoaded = function() {
         ++spritesLoadedCount;
         if (spritesLoadedCount == bakeablePaths.length) {
-            doneCallback(GJS.SpriteAtlas.bakeSprites(sprites));
+            doneCallback(SpriteAtlas.bakeSprites(sprites));
         }
     };
     
-    var restoreGfxPath = GJS.Sprite.gfxPath;
-    var restoreAtlas = GJS.Sprite.atlas;
-    GJS.Sprite.gfxPath = '';
-    GJS.Sprite.atlas = null;
+    var restoreGfxPath = Sprite.gfxPath;
+    var restoreAtlas = Sprite.atlas;
+    Sprite.gfxPath = '';
+    Sprite.atlas = null;
     for (var i = 0; i < bakeablePaths.length; ++i) {
         var path = bakeablePaths[i];
-        var sprite = new GJS.Sprite(path);
+        var sprite = new Sprite(path);
         sprites.push(sprite);
         sprite.addLoadedListener(spriteLoaded);
     }
-    GJS.Sprite.gfxPath = restoreGfxPath;
-    GJS.Sprite.atlas = restoreAtlas;
+    Sprite.gfxPath = restoreGfxPath;
+    Sprite.atlas = restoreAtlas;
 };
 
 /**
- * Creates a sprite atlas from a set of GJS.Sprite objects.
- * @param {Array.<GJS.Sprite>} sprites Sprites to bake into an atlas.
- * @return {GJS.SpriteAtlas}
+ * Creates a sprite atlas from a set of Sprite objects.
+ * @param {Array.<Sprite>} sprites Sprites to bake into an atlas.
+ * @return {SpriteAtlas}
  */
-GJS.SpriteAtlas.bakeSprites = function(sprites) {
+SpriteAtlas.bakeSprites = function(sprites) {
     var widestWidth = 0;
     var spritesByPath = {};
     for (var i = 0; i < sprites.length; ++i) {
@@ -197,5 +192,7 @@ GJS.SpriteAtlas.bakeSprites = function(sprites) {
         }
     }
 
-    return new GJS.SpriteAtlas(new GJS.Sprite(img), JSON.stringify(info));
+    return new SpriteAtlas(new Sprite(img), JSON.stringify(info));
 };
+
+export { SpriteAtlas }

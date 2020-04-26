@@ -1,22 +1,21 @@
 <html>
 <head>
-<title>Gameutils.js: Using GJS.Sprite</title>
+<title>Gameutils.js: Using Sprite</title>
 <link rel="stylesheet" type="text/css" href="assets/default.css">
-<script src="../src/gjs/sprite.js"></script>
-<script src="../src/lib/hsl.js"></script><!-- Needed for varyHue -->
-<script>
-'use strict';
+<script type="module">
+
+import { Sprite } from "../src/gjs/sprite.js";
 
 var ctx;
 var tester;
 
-GJS.Sprite.gfxPath = 'assets/gfx/';
+Sprite.gfxPath = 'assets/gfx/';
 
 var Tester = function() {
     this.time = 0;
-    this.carrotSprite = new GJS.Sprite('carrot.png');
-    this.blackCarrot = new GJS.Sprite('carrot.png', GJS.Sprite.turnSolidColored('black'));
-    this.purpleCarrot = new GJS.Sprite('carrot.png', GJS.Sprite.varyHue({hueChange: 0.7, minHue: 0.0, maxHue: 0.2}));
+    this.carrotSprite = new Sprite('carrot.png');
+    this.blackCarrot = new Sprite('carrot.png', Sprite.turnSolidColored('black'));
+    this.purpleCarrot = new Sprite('carrot.png', Sprite.varyHue({hueChange: 0.7, minHue: 0.0, maxHue: 0.2}));
 };
 
 Tester.prototype.update = function() {
@@ -49,10 +48,11 @@ var start = function() {
     document.body.appendChild(canvas);
     frame();
 };
+
+start();
 </script>
 </head>
-<body onload="start()">
+<body>
 <h2>Using GJS.Sprite</h2>
-<p>Compatibility: Chrome 41, Firefox 36, IE 11.</p>
 </body>
 </html>

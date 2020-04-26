@@ -4,67 +4,25 @@
 <head>
   <title>gameutils.js tests</title>
 
-  <link rel="shortcut icon" type="image/png" href="lib/jasmine-1.3.1/jasmine_favicon.png">
-  <link rel="stylesheet" type="text/css" href="lib/jasmine-1.3.1/jasmine.css">
-  <script type="text/javascript" src="lib/jasmine-1.3.1/jasmine.js"></script>
-  <script type="text/javascript" src="lib/jasmine-1.3.1/jasmine-html.js"></script>
+  <meta charset="UTF-8">
 
-  <script type="text/javascript" src="../src/lib/hsl.js"></script>
+  <link rel="shortcut icon" type="image/png" href="../node_modules/jasmine-core/images/jasmine_favicon.png">
+  <link rel="stylesheet" href="../node_modules/jasmine-core/lib/jasmine-core/jasmine.css">
 
-  <script type="text/javascript" src="../src/gjs/statesaver.js"></script>
-  <script type="text/javascript" src="../src/gjs/utilcolor.js"></script>
-  <script type="text/javascript" src="../src/gjs/util2d.js"></script>
-  <script type="text/javascript" src="../src/gjs/utiljs.js"></script>
-  <script type="text/javascript" src="../src/gjs/unlocker.js"></script>
-  <script type="text/javascript" src="../src/gjs/sprite.js"></script>
-  <script type="text/javascript" src="../src/gjs/tilemap.js"></script>
-  <script type="text/javascript" src="../src/gjs/hitbox.js"></script>
-  <script type="text/javascript" src="../src/gjs/platformingphysics.js"></script>
-  <script type="text/javascript" src="../src/gjs/canvasresizer.js"></script>
-  <script type="text/javascript" src="../src/gjs/canvasui.js"></script>
+  <script src="../node_modules/jasmine-core/lib/jasmine-core/jasmine.js"></script>
+  <script src="../node_modules/jasmine-core/lib/jasmine-core/jasmine-html.js"></script>
+  <script src="../node_modules/jasmine-core/lib/jasmine-core/boot.js"></script>
 
-  <script type="text/javascript" src="test_utils.js"></script>
-
-  <script type="text/javascript" src="util2d_spec.js"></script>
-  <script type="text/javascript" src="utiljs_spec.js"></script>
-  <script type="text/javascript" src="unlocker_spec.js"></script>
-  <script type="text/javascript" src="sprite_spec.js"></script>
-  <script type="text/javascript" src="tilemap_spec.js"></script>
-  <script type="text/javascript" src="hitbox_spec.js"></script>
-  <script type="text/javascript" src="platformingphysics_spec.js"></script>
-  <script type="text/javascript" src="canvasresizer_spec.js"></script>
-  <script type="text/javascript" src="canvasui_spec.js"></script>
-  <script type="text/javascript" src="statesaver_spec.js"></script>
-
-  <script type="text/javascript">
-    (function() {
-      var jasmineEnv = jasmine.getEnv();
-      jasmineEnv.updateInterval = 100;
-      jasmineEnv.waitOnUpdate = 50;
-
-      var htmlReporter = new jasmine.HtmlReporter();
-
-      jasmineEnv.addReporter(htmlReporter);
-
-      jasmineEnv.specFilter = function(spec) {
-        return htmlReporter.specFilter(spec);
-      };
-
-      var currentWindowOnload = window.onload;
-
-      window.onload = function() {
-        if (currentWindowOnload) {
-          currentWindowOnload();
-        }
-        execJasmine();
-      };
-
-      function execJasmine() {
-        jasmineEnv.execute();
-      }
-
-    })();
-  </script>
+  <script type="module" src="util2d_spec.js"></script>
+  <script type="module" src="utiljs_spec.js"></script>
+  <script type="module" src="unlocker_spec.js"></script>
+  <script type="module" src="sprite_spec.js"></script>
+  <script type="module" src="tilemap_spec.js"></script>
+  <script type="module" src="hitbox_spec.js"></script>
+  <script type="module" src="platformingphysics_spec.js"></script>
+  <script type="module" src="canvasresizer_spec.js"></script>
+  <script type="module" src="canvasui_spec.js"></script>
+  <script type="module" src="statesaver_spec.js"></script>
 
 </head>
 

@@ -1,4 +1,6 @@
-'use strict';
+
+import { objectUtil } from "../src/gjs/utiljs.js";
+import { CanvasResizer } from "../src/gjs/canvasresizer.js";
 
 var MockTouchEvent = function(options) {
     var defaults = {
@@ -37,7 +39,7 @@ describe('CanvasResizer', function() {
             clientWidth: 16,
             clientHeight: 9
         };
-        var resizer = new GJS.CanvasResizer({
+        var resizer = new CanvasResizer({
             parentElement: parentElement
         });
         resizer._getCanvasBoundingClientRect = function() {

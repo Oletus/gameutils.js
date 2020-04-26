@@ -2,14 +2,17 @@
  * Copyright Olli Etuaho 2016.
  */
 
-'use strict';
+import { testStorage } from "./test_utils.js";
+
+import { Unlocker, UnlockCondition, UnlockByDefault } from "../src/gjs/unlocker.js";
+import { StateSaver } from "../src/gjs/statesaver.js";
 
 var testUnlockCondition = function() {
     var TestCondition = function(options) {
         this.initCondition(options);
     };
     
-    TestCondition.prototype = new GJS.UnlockCondition();
+    TestCondition.prototype = new UnlockCondition();
     
     TestCondition.prototype.update = function(gameState, deltaTime) {
         if (gameState.unlocked) {
@@ -35,7 +38,7 @@ describe('UnlockCondition', function() {
     });
     
     it('initializes unlocked by default', function() {
-        var condition = new GJS.UnlockByDefault({unlockId: 'foo'});
+        var condition = new UnlockByDefault({unlockId: 'foo'});
         expect(condition.unlockId).toBe('foo');
         expect(condition.fulfilled).toBe(true);
     });
@@ -43,7 +46,7 @@ describe('UnlockCondition', function() {
 
 describe('Unlocker', function() {
     it('initializes', function() {
-        var unlocker = new GJS.Unlocker({
+        var unlocker = new Unlocker({
             needCommitUnlocks: true,
             conditions: [testUnlockCondition()]
         });
@@ -53,9 +56,9 @@ describe('Unlocker', function() {
     });
     
     it('initializes with something unlocked by default', function() {
-        var unlocker = new GJS.Unlocker({
+        var unlocker = new Unlocker({
             needCommitUnlocks: false,
-            conditions: [new GJS.UnlockByDefault({unlockId: 'foo'})]
+            conditions: [new UnlockByDefault({unlockId: 'foo'})]
         });
         expect(unlocker.needCommitUnlocks).toBe(false);
         expect(unlocker.unlocks['foo']).toBe(true);
@@ -65,7 +68,7 @@ describe('Unlocker', function() {
     
     it('updates', function() {
         var gameState = new TestGameState();
-        var unlocker = new GJS.Unlocker({
+        var unlocker = new Unlocker({
             needCommitUnlocks: false,
             conditions: [testUnlockCondition()]
         });
@@ -80,7 +83,7 @@ describe('Unlocker', function() {
     
     it('manually commits unlocks', function() {
         var gameState = new TestGameState();
-        var unlocker = new GJS.Unlocker({
+        var unlocker = new Unlocker({
             needCommitUnlocks: true,
             conditions: [testUnlockCondition()]
         });
@@ -101,12 +104,12 @@ describe('Unlocker', function() {
     });
     
     it('loads from empty storage', function() {
-        var unlocker = new GJS.Unlocker({
+        var unlocker = new Unlocker({
             needCommitUnlocks: false,
             conditions: [testUnlockCondition()]
         });
         
-        var saver = new GJS.StateSaver({
+        var saver = new StateSaver({
             savedObjects: [unlocker]
         });
         
@@ -118,13 +121,13 @@ describe('Unlocker', function() {
     });
 
     it('loads from storage with unlocks', function() {
-        var unlockerA = new GJS.Unlocker({
+        var unlockerA = new Unlocker({
             needCommitUnlocks: false,
             conditions: [testUnlockCondition()]
         });
         unlockerA.commitUnlock('test');
         
-        var saverA = new GJS.StateSaver({
+        var saverA = new StateSaver({
             savedObjects: [unlockerA]
         });
         
@@ -132,12 +135,12 @@ describe('Unlocker', function() {
         
         saverA.saveTo(storage);
         
-        var unlockerB = new GJS.Unlocker({
+        var unlockerB = new Unlocker({
             needCommitUnlocks: false,
             conditions: [testUnlockCondition()]
         });
         
-        var saverB = new GJS.StateSaver({
+        var saverB = new StateSaver({
             savedObjects: [unlockerB]
         });
         

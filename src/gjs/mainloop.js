@@ -1,4 +1,3 @@
-'use strict';
 
 /**
  * Start a main loop on the provided game with the provided options.
@@ -228,3 +227,5 @@ var startMainLoop = function(updateables, options) {
     };
     frame();
 };
+
+export { startMainLoop }

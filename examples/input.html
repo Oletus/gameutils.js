@@ -4,19 +4,19 @@
 <link rel="stylesheet" type="text/css" href="assets/default.css">
 <script src="../src/lib/mousetrap.js"></script>
 <script src="../src/lib/mousetrap-global-bind.js"></script>
-<script src="../src/gjs/gamepad.js"></script>
-<script src="../src/gjs/inputmapper.js"></script>
-<script>
-'use strict';
+<script type="module">
 
-var ctx;
-var tester;
+import { Gamepad } from "../src/gjs/gamepad.js";
+import { InputMapper } from "../src/gjs/inputmapper.js";
 
-var Tester = function() {
+let ctx;
+let tester;
+
+const Tester = function() {
     this.playerPositions = [0, 0];
     this.goingDown = [false, false];
-    this.input = new GJS.InputMapper(this, 2);
-    this.input.addListener(GJS.Gamepad.BUTTONS.A, ['down', 's'], this.downPressed, this.downReleased);
+    this.input = new InputMapper(this, 2);
+    this.input.addListener(Gamepad.BUTTONS.A, ['down', 's'], this.downPressed, this.downReleased);
     this.untilCycleDefaultController = 2;
 };
 
@@ -37,11 +37,11 @@ Tester.prototype.update = function() {
         this.untilCycleDefaultController = 2;
         this.input.cycleDefaultControllerForInstruction();
     }
-    for (var playerNumber = 0; playerNumber < this.playerPositions.length; ++playerNumber) {
+    for (let playerNumber = 0; playerNumber < this.playerPositions.length; ++playerNumber) {
         // Use getKeyInstruction to prompt for player input:
-        var instruction = 'Press ' + this.input.getKeyInstruction(this.downPressed, playerNumber);
+        const instruction = 'Press ' + this.input.getKeyInstruction(this.downPressed, playerNumber);
 
-        var x = (playerNumber + 1) / (this.playerPositions.length + 1) * ctx.canvas.width;
+        const x = (playerNumber + 1) / (this.playerPositions.length + 1) * ctx.canvas.width;
         this.playerPositions[playerNumber] += this.goingDown[playerNumber] ? 1.0 : 0.1;
         if (this.playerPositions[playerNumber] > ctx.canvas.height) {
             this.playerPositions[playerNumber] = 0;
@@ -51,23 +51,22 @@ Tester.prototype.update = function() {
     }
 };
 
-var frame = function() {
+const frame = function() {
     tester.update();
     requestAnimationFrame(frame);
 };
 
-var start = function() {
+window.start = function() {
     tester = new Tester();
-    var canvas = document.createElement('canvas');
+    const canvas = document.createElement('canvas');
     ctx = canvas.getContext('2d');
     document.body.appendChild(canvas);
     frame();
 };
 </script>
 </head>
-<body onload="start()">
-<h2>Handling key/gamepad input with GJS.InputMapper</h2>
+<body onload="window.start()">
+<h2>Handling key/gamepad input with InputMapper</h2>
 <p>Try pressing A on the gamepad, or down/S on the keyboard.</p>
-<p>Compatibility: Chrome 41 (keyboard and gamepad), Firefox 36 (keyboard and gamepad), IE 11 (keyboard only).</p>
 </body>
 </html>
