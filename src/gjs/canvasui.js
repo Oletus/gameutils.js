@@ -1,4 +1,3 @@
-'use strict';
 
 import { mathUtil, Vec2, Rect } from './util2d.js';
 

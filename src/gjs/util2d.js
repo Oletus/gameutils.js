@@ -2,8 +2,6 @@
  * Copyright Olli Etuaho 2012-2014.
  */
 
-'use strict';
-
 // This file contains following utilities:
 // TODO: Split into multiple files.
 // mathUtil: Simple math functions.

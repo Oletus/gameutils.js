@@ -1,4 +1,3 @@
-'use strict';
 
 /**
  * A class to help keeping canvas size suitable for the window or parent

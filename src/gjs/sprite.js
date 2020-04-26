@@ -1,4 +1,3 @@
-'use strict';
 
 import { hslToRgb, rgbToHsl } from '../lib/hsl.js'
 

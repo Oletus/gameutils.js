@@ -1,4 +1,3 @@
-'use strict';
 
 import { Sprite } from './sprite.js';
 

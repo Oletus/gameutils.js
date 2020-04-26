@@ -1,4 +1,3 @@
-"use strict";
 
 import { Gamepad } from "./gamepad.js";
 

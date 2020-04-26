@@ -1,4 +1,3 @@
-'use strict';
 
 import { objectUtil } from './utiljs.js';
 import { Vec2, Rect, CardinalDirection } from './util2d.js';

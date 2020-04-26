@@ -1,4 +1,3 @@
-'use strict';
 
 import { objectUtil } from "./utiljs.js";
 import { Sprite } from "./sprite.js";

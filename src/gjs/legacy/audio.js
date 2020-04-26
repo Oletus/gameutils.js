@@ -1,4 +1,3 @@
-'use strict';
 
 // Legacy code - prefer just using Howler.js directly.
 

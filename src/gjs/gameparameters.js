@@ -1,4 +1,3 @@
-'use strict';
 
 /**
  * A class for runtime developer settings and tuning game parameters.

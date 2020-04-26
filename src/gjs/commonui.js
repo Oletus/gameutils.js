@@ -1,4 +1,3 @@
-'use strict';
 
 // UI elements that are common to multiple games, like fullscreen / social media buttons.
 const commonUI = {};

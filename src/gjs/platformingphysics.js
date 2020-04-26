@@ -1,4 +1,3 @@
-'use strict';
 
 import { TileMap } from "./tilemap.js";
 import { mathUtil, Vec2, Rect } from "./util2d.js";

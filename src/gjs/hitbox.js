@@ -2,8 +2,6 @@
  * Copyright Olli Etuaho 2015.
  */
 
-'use strict';
-
 import { Rect, Polygon, Vec2, mathUtil } from './util2d.js';
 
 /**

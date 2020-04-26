@@ -1,4 +1,3 @@
-'use strict';
 
 import { arrayUtil } from './utiljs.js';
 
