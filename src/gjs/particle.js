@@ -1,4 +1,5 @@
-'use strict';
+
+import { Sprite } from "./sprite.js";
 
 /**
  * A particle engine to run particle effects.
@@ -247,7 +248,7 @@ ParticleEffect.prototype.stop = function() {
  * @constructor
  * @param {Object} options Options to use on this ParticleEmitter.
  */
-ParticleEmitter = function(options) {
+const ParticleEmitter = function(options) {
     var defaults = {
         x: 0,
         y: 0,
@@ -499,4 +500,4 @@ Particle.prototype.draw = function(ctx) {
 
 Particle.defaultAppearance = Particle.prerenderedCircleAppearance('#fff', 8, {});
 
-export { ParticleEngine, ParticleTimedEmitter, ParticleEffect, Particle }
+export { ParticleEngine, ParticleEmitter, ParticleTimedEmitter, ParticleEffect, Particle }

@@ -216,7 +216,7 @@ mathUtil.factorial = function(n) {
 };
 
 
-CardinalDirection = {
+const CardinalDirection = {
     RIGHT: 0,
     DOWN: 1,
     LEFT: 2,

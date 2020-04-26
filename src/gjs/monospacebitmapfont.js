@@ -1,5 +1,8 @@
 'use strict';
 
+import { objectUtil } from "./utiljs.js";
+import { Sprite } from "./sprite.js";
+
 /**
  * Bitmap font that uses a simple ISO-8859-1 monospace grid sprite sheet.
  * @param {Object} options Constructor options.

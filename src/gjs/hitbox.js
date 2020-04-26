@@ -4,7 +4,7 @@
 
 'use strict';
 
-import { Rect, Vec2, mathUtil } from './util2d.js';
+import { Rect, Polygon, Vec2, mathUtil } from './util2d.js';
 
 /**
  * A class to store a hit box that can be hit tested against other hit boxes.

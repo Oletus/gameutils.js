@@ -1,6 +1,6 @@
 'use strict';
 
-import { mathUtil, Vec2 } from './util2d.js';
+import { mathUtil, Vec2, Rect } from './util2d.js';
 
 /**
  * Class for rendering and interacting with UI elements on a canvas.
@@ -114,7 +114,7 @@ CanvasUI.prototype.canvasMove = function(cursor) {
  * @param {CanvasUI} ui UI this cursor belongs to.
  * @constructor
  */
-CanvasUICursor = function(ui) {
+const CanvasUICursor = function(ui) {
     this.ui = ui;
     this.active = false;
     this.x = -Infinity;
@@ -210,7 +210,7 @@ CanvasUICursor.prototype.release = function(pos) {
  * @param {Object} options Options for the UI element.
  * @constructor
  */
-CanvasUIElement = function(options) {
+const CanvasUIElement = function(options) {
     var defaults = {
         label: 'Button',
         labelFunc: null, // Function that returns the current text to draw on the element. Overrides label if set.
@@ -430,3 +430,5 @@ CanvasUIElement.prototype.release = function(clicked) {
         this.clickCallback();
     }
 };
+
+export { CanvasUI, CanvasUIElement, CanvasUICursor }

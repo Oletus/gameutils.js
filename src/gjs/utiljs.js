@@ -384,7 +384,7 @@ querystringUtil.get = function(key, querystring) {
  * @param {number} delta How much to change the value.
  * @return {number} Changed value.
  */
-towardsZero = function(value, delta) {
+const towardsZero = function(value, delta) {
     return towardsValue(value, 0, delta);
 };
 
@@ -395,7 +395,7 @@ towardsZero = function(value, delta) {
  * @param {number} delta How much to change the value.
  * @return {number} Changed value.
  */
-towardsValue = function(value, targetValue, delta) {
+const towardsValue = function(value, targetValue, delta) {
     if (value > targetValue) {
         value -= delta;
         if (value < targetValue)

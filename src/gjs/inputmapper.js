@@ -1,5 +1,7 @@
 "use strict";
 
+import { Gamepad } from "./gamepad.js";
+
 /**
  * Mapper that automatically maps keyboard / gamepad input to different player numbers.
  * This can be used to implement keyboard / gamepad controls for a single player or a local
