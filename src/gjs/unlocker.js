@@ -1,5 +1,6 @@
 
-import { Saveable } from './statesaver.js';
+import { objectUtil } from "./utiljs.js";
+import { Saveable } from "./statesaver.js";
 
 /**
  * Class to inherit to implement a condition for unlocking a single unlock.
@@ -66,7 +67,7 @@ UnlockCondition.prototype.getDescription = function() {
  * @param {Object} options Object with the following keys:
  *   unlockId: string Identifier for the unlock.
  */
-UnlockByDefault = function(options) {
+const UnlockByDefault = function(options) {
     this.initCondition(options);
     this.fulfilled = true;
 };
@@ -80,7 +81,7 @@ UnlockByDefault.prototype = new UnlockCondition();
  * @param {Object} options Object with the following keys:
  *   unlockId: string Identifier for the unlock.
  */
-NeverUnlock = function(options) {
+const NeverUnlock = function(options) {
     this.initCondition(options);
 };
 
@@ -94,7 +95,7 @@ NeverUnlock.prototype = new UnlockCondition();
  * If needCommitUnlocks is true, then all unlocks that are not unlocked by default need to be committed by calling
  * popFulfilledUnlockConditions and commitUnlock.
  */
-Unlocker = function(options) {
+const Unlocker = function(options) {
     var defaults = {
         gameName: 'game',
         needCommitUnlocks: false,

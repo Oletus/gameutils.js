@@ -2,7 +2,7 @@
  * Copyright Olli Etuaho 2012-2014.
  */
 
-'use strict';
+import { rgbToHsl, hslToRgb } from "../lib/hsl.js";
 
 // This file contains following utilities:
 // cssUtil: Utilities for working with CSS

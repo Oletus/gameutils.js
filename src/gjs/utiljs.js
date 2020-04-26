@@ -1,4 +1,5 @@
-'use strict';
+
+import { mathUtil } from "./util2d.js";
 
 var arrayUtil = {}; // Utilities for working with JS arrays
 var stringUtil = {}; // Utilities for working with JS strings

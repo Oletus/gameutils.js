@@ -47,7 +47,7 @@ Saveable.prototype.getStateVersionConversion = function(loadedStateVersion, targ
  *     are populated only on demand. May be null.
  *   gameName (string): For identifying the game in local storage.
  */
-StateSaver = function(options) {
+const StateSaver = function(options) {
     var defaults = {
         savedObjects: [],
         prepareSaveState: null,
