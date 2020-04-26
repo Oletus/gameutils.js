@@ -1,5 +1,5 @@
 
-import { Rect } from "../src/gjs/util2d.js";
+import { Rect } from "../src/gjs/math/rect.js";
 import { PlatformingObject, PlatformingLevel, PlatformingTileMap, PlatformingPhysics } from "../src/gjs/platformingphysics.js";
 import { TileMap } from "../src/gjs/tilemap.js";
 

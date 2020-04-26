@@ -1,6 +1,8 @@
 
 import { objectUtil } from './utiljs.js';
-import { Vec2, Rect, CardinalDirection } from './util2d.js';
+import { Vec2 } from './math/vec2.js';
+import { Rect } from './math/rect.js';
+import { CardinalDirection } from './util2d.js';
 
 /**
  * A 2D grid made out of tiles. Tiles can be of any type, but they are strings by default.

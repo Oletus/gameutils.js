@@ -2,7 +2,7 @@
  * Copyright Olli Etuaho 2015.
  */
 
-import { Vec2 } from "../src/gjs/util2d.js";
+import { Vec2 } from "../src/gjs/math/vec2.js";
 import { HitBox } from "../src/gjs/hitbox.js";
 
 describe('HitBox', function() {

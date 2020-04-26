@@ -1,5 +1,5 @@
 
-import { Vec2 } from "../src/gjs/util2d.js";
+import { Vec2 } from "../src/gjs/math/vec2.js";
 import { CanvasUI, CanvasUIElement } from "../src/gjs/canvasui.js";
 
 describe('CanvasUI', function() {

@@ -2,7 +2,9 @@
  * Copyright Olli Etuaho 2015.
  */
 
-import { Rect, Polygon, Vec2, mathUtil } from './util2d.js';
+import { Polygon, mathUtil } from './util2d.js';
+import { Rect } from './math/rect.js';
+import { Vec2 } from './math/vec2.js';
 
 /**
  * A class to store a hit box that can be hit tested against other hit boxes.
@@ -85,11 +87,11 @@ HitBox.prototype.setSegment = function(center, radius, angle1, angle2) {
                                     this._lineSegmentCenter.y - this._center.y);
     var dist = towardsSegCenter.length();
     towardsSegCenter.normalize();
-    towardsSegCenter.scale(this._radius - dist);
+    towardsSegCenter.multiplyScalar(this._radius - dist);
     var enclosingPoint1 = new Vec2(endPoint1.x, endPoint1.y);
-    enclosingPoint1.translate(towardsSegCenter);
+    enclosingPoint1.addScaledVector(towardsSegCenter, 1);
     var enclosingPoint2 = new Vec2(endPoint2.x, endPoint2.y);
-    enclosingPoint2.translate(towardsSegCenter);
+    enclosingPoint2.addScaledVector(towardsSegCenter, 1);
     this._boundingPolygon = new Polygon([endPoint1, endPoint2, enclosingPoint2, enclosingPoint1]);
 };
 
@@ -137,10 +139,10 @@ HitBox.prototype.intersects = function(other) {
         } else if (other._shape === HitBox.Shape.RECT) {
             return other.rect.containsVec2(that._pos);
         } else if (other._shape === HitBox.Shape.CIRCLE) {
-            return other._center.distance(that._pos) < other._radius;
+            return other._center.distanceTo(that._pos) < other._radius;
         } else if (other._shape === HitBox.Shape.SEGMENT) {
             // Test against circle
-            var dist = other._center.distance(that._pos);
+            var dist = other._center.distanceTo(that._pos);
             if (dist > other._radius) {
                 return false;
             }
@@ -150,9 +152,9 @@ HitBox.prototype.intersects = function(other) {
             var pointAngle = Math.atan2(that._pos.y - other._center.y, that._pos.x - other._center.x);
             pointAngle = mathUtil.angleDifference(pointAngle, segmentCenterAngle);
             var distAlongSegmentNormal = Math.cos(pointAngle) * dist;
-            return distAlongSegmentNormal > other._lineSegmentCenter.distance(other._center);
+            return distAlongSegmentNormal > other._lineSegmentCenter.distanceTo(other._center);
         } /*else if (other._shape === HitBox.Shape.SECTOR) { // TODO
-            var dist = other._center.distance(that._pos);
+            var dist = other._center.distanceTo(that._pos);
             if (dist > other._radius) {
                 return false;
             }
@@ -175,16 +177,16 @@ HitBox.prototype.intersects = function(other) {
         }
     } else if (that._shape === HitBox.Shape.CIRCLE) {
         if (other._shape === HitBox.Shape.CIRCLE) {
-            return other._center.distance(that._center) < other._radius + that._radius;
+            return other._center.distanceTo(that._center) < other._radius + that._radius;
         } else if (other._shape === HitBox.Shape.SEGMENT) {
-            if (other._center.distance(that._center) >= other._radius + that._radius) {
+            if (other._center.distanceTo(that._center) >= other._radius + that._radius) {
                 return false;
             }
             return other._boundingPolygon.intersectsCircle(that._center, that._radius);
         }
     } else if (that._shape === HitBox.Shape.SEGMENT) {
         if (other._shape === HitBox.Shape.SEGMENT) {
-            if (other._center.distance(that._center) >= other._radius + that._radius) {
+            if (other._center.distanceTo(that._center) >= other._radius + that._radius) {
                 return false;
             }
             if (!other._boundingPolygon.intersectsCircle(that._center, that._radius)) {
@@ -213,7 +215,7 @@ HitBox.prototype.getCenter = function() {
             var subCenter = this.hitBoxes[i].getCenter();
             center.translate(subCenter);
         }
-        center.scale(1 / this.hitBoxes.length);
+        center.multiplyScalar(1 / this.hitBoxes.length);
         return center;
     }
 };

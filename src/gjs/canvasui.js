@@ -1,5 +1,7 @@
 
-import { mathUtil, Vec2, Rect } from './util2d.js';
+import { mathUtil } from './util2d.js';
+import { Rect } from './math/rect.js';
+import { Vec2 } from './math/vec2.js';
 
 /**
  * Class for rendering and interacting with UI elements on a canvas.

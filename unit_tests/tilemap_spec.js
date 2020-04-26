@@ -1,6 +1,6 @@
 
 import { TileMap } from "../src/gjs/tilemap.js";
-import { Rect } from "../src/gjs/util2d.js";
+import { Rect } from "../src/gjs/math/rect.js";
 
 describe('TileMap', function() {
     it('is created', function() {

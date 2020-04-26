@@ -1,6 +1,8 @@
 
 import { TileMap } from "./tilemap.js";
-import { mathUtil, Vec2, Rect } from "./util2d.js";
+import { mathUtil } from "./util2d.js";
+import { Rect } from "./math/rect.js";
+import { Vec2 } from "./math/vec2.js";
 
 /**
  * Helpers for doing platforming physics, including tile classes and a function to evaluate movement with collisions.
