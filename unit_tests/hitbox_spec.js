@@ -2,14 +2,15 @@
  * Copyright Olli Etuaho 2015.
  */
 
-'use strict';
+import { Vec2 } from "../src/gjs/util2d.js";
+import { HitBox } from "../src/gjs/hitbox.js";
 
 describe('HitBox', function() {
     describe('circle', function() {
         it('tests intersection with a segment', function() {
-            var hb1 = new GJS.HitBox();
+            var hb1 = new HitBox();
             hb1.setCircle(new Vec2(0, 0), 10);
-            var hb2 = new GJS.HitBox();
+            var hb2 = new HitBox();
             hb2.setSegment(new Vec2(0, -19), 10, 3.5, 6.1);
             expect(hb2.intersects(hb1)).toBe(false);
             expect(hb1.intersects(hb2)).toBe(false);

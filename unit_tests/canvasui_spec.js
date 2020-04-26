@@ -1,4 +1,6 @@
-'use strict';
+
+import { Vec2 } from "../src/gjs/util2d.js";
+import { CanvasUI, CanvasUIElement } from "../src/gjs/canvasui.js";
 
 describe('CanvasUI', function() {
     var createCursor = function(currentPosition, index) {
@@ -12,12 +14,12 @@ describe('CanvasUI', function() {
     };
     
     it('Tracks multiple cursors', function() {
-        var ui = new GJS.CanvasUI({});
+        var ui = new CanvasUI({});
         
         var element1Clicks = [];
         var element2Clicks = [];
         
-        var element1 = new GJS.CanvasUIElement({
+        var element1 = new CanvasUIElement({
             centerX: 100,
             centerY: 100,
             width: 10,
@@ -26,7 +28,7 @@ describe('CanvasUI', function() {
                 element1Clicks.push({});
             }
         });
-        var element2 = new GJS.CanvasUIElement({
+        var element2 = new CanvasUIElement({
             centerX: 100,
             centerY: 200,
             width: 10,

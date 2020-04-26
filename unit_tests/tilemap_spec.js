@@ -1,8 +1,10 @@
-'use strict';
 
-describe('GJS.TileMap', function() {
+import { TileMap } from "../src/gjs/tilemap.js";
+import { Rect } from "../src/gjs/util2d.js";
+
+describe('TileMap', function() {
     it('is created', function() {
-        var tilemap = new GJS.TileMap({width: 2, height: 3});
+        var tilemap = new TileMap({width: 2, height: 3});
         expect(tilemap.width).toBe(2);
         expect(tilemap.height).toBe(3);
         expect(tilemap.tiles.length).toBe(tilemap.height);
@@ -17,33 +19,33 @@ describe('GJS.TileMap', function() {
         };
 
         it('groups a single tile into a rectangle', function() {
-            var tileMap = new GJS.TileMap({ width: 10, height: 10 });
+            var tileMap = new TileMap({ width: 10, height: 10 });
             tileMap.tiles[0][0] = 1;
             expect(tileMap.groupTilesToRectangles(matchFunc)).toEqual([new Rect(0, 1, 0, 1)]);
         });
 
         it('groups a single tile at end of row into a rectangle', function() {
-            var tileMap = new GJS.TileMap({ width: 10, height: 10 });
+            var tileMap = new TileMap({ width: 10, height: 10 });
             tileMap.tiles[0][9] = 1;
             expect(tileMap.groupTilesToRectangles(matchFunc)).toEqual([new Rect(9, 10, 0, 1)]);
         });
 
         it('groups two tiles horizontal adjacently into a rectangle', function() {
-            var tileMap = new GJS.TileMap({ width: 10, height: 10 });
+            var tileMap = new TileMap({ width: 10, height: 10 });
             tileMap.tiles[1][0] = 1;
             tileMap.tiles[1][1] = 1;
             expect(tileMap.groupTilesToRectangles(matchFunc)).toEqual([new Rect(0, 2, 1, 2)]);
         });
 
         it('groups two tiles horizontal adjacently at end of row into a rectangle', function() {
-            var tileMap = new GJS.TileMap({ width: 10, height: 10 });
+            var tileMap = new TileMap({ width: 10, height: 10 });
             tileMap.tiles[1][8] = 1;
             tileMap.tiles[1][9] = 1;
             expect(tileMap.groupTilesToRectangles(matchFunc)).toEqual([new Rect(8, 10, 1, 2)]);
         });
 
         it('groups a square of tiles spanning multiple rows into a rectangle', function() {
-            var tileMap = new GJS.TileMap({ width: 10, height: 10 });
+            var tileMap = new TileMap({ width: 10, height: 10 });
             tileMap.tiles[2][3] = 1;
             tileMap.tiles[2][4] = 1;
             tileMap.tiles[3][3] = 1;
@@ -52,7 +54,7 @@ describe('GJS.TileMap', function() {
         });
 
         it('groups a square of tiles spanning multiple rows at end of row into a rectangle', function() {
-            var tileMap = new GJS.TileMap({ width: 10, height: 10 });
+            var tileMap = new TileMap({ width: 10, height: 10 });
             tileMap.tiles[8][8] = 1;
             tileMap.tiles[8][9] = 1;
             tileMap.tiles[9][8] = 1;
@@ -62,17 +64,17 @@ describe('GJS.TileMap', function() {
 
         it('covers the entire map if required', function() {
             var initTile = function(x, y) { return 1; };
-            var tileMap = new GJS.TileMap({ width: 10, height: 10, initTile: initTile });
+            var tileMap = new TileMap({ width: 10, height: 10, initTile: initTile });
             expect(tileMap.groupTilesToRectangles(matchFunc)).toEqual([new Rect(0, 10, 0, 10)]);
         });
 
         it('creates no groups if there are no matching tiles', function() {
-            var tileMap = new GJS.TileMap({ width: 10, height: 10 });
+            var tileMap = new TileMap({ width: 10, height: 10 });
             expect(tileMap.groupTilesToRectangles(matchFunc)).toEqual([]);
         });
 
         it('creates two groups for tiles that cannot be grouped perfectly vertically (v1)', function() {
-            var tileMap = new GJS.TileMap({ width: 10, height: 10 });
+            var tileMap = new TileMap({ width: 10, height: 10 });
             tileMap.tiles[5][2] = 1;
             tileMap.tiles[5][3] = 1;
             tileMap.tiles[6][2] = 1;
@@ -83,7 +85,7 @@ describe('GJS.TileMap', function() {
         });
 
         it('creates two groups for tiles that cannot be grouped perfectly vertically (v2)', function() {
-            var tileMap = new GJS.TileMap({ width: 10, height: 10 });
+            var tileMap = new TileMap({ width: 10, height: 10 });
             tileMap.tiles[5][3] = 1;
             tileMap.tiles[6][2] = 1;
             tileMap.tiles[6][3] = 1;

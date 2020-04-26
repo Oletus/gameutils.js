@@ -2,7 +2,8 @@
  * Copyright Olli Etuaho 2017.
  */
 
-'use strict';
+import { testStorage } from "./test_utils.js";
+import { Saveable, StateSaver } from "../src/gjs/statesaver.js";
 
 var testSaveable = function() {
     var TestSaveable = function() {
@@ -11,7 +12,7 @@ var testSaveable = function() {
         this.saveStateDefaults = {'testProp': 2, 'testObj': {'foo': 4}};
     };
 
-    TestSaveable.prototype = new GJS.Saveable();
+    TestSaveable.prototype = new Saveable();
     
     TestSaveable.prototype.setStateToOtherValues = function() {
         this.saveState['testProp'] = 545365;
@@ -25,7 +26,7 @@ describe('StateSaver', function() {
     it('initializes', function() {
         var saveable = testSaveable();
         
-        var saver = new GJS.StateSaver({
+        var saver = new StateSaver({
             gameName: 'testGame',
             savedObjects: [saveable]
         });
@@ -38,7 +39,7 @@ describe('StateSaver', function() {
     it('saves to storage', function() {
         var saveable = testSaveable();
         
-        var saver = new GJS.StateSaver({
+        var saver = new StateSaver({
             gameName: 'testGame',
             savedObjects: [saveable]
         });
@@ -51,7 +52,7 @@ describe('StateSaver', function() {
     it('loads defaults from empty storage', function() {
         var saveable = testSaveable();
         
-        var saver = new GJS.StateSaver({
+        var saver = new StateSaver({
             gameName: 'testGame',
             savedObjects: [saveable]
         });
@@ -67,7 +68,7 @@ describe('StateSaver', function() {
     it('saves and loads state', function() {
         var saveable = testSaveable();
         
-        var saver = new GJS.StateSaver({
+        var saver = new StateSaver({
             gameName: 'testGame',
             savedObjects: [saveable]
         });
@@ -78,7 +79,7 @@ describe('StateSaver', function() {
         
         saveable.setStateToOtherValues();
         
-        var saverB = new GJS.StateSaver({
+        var saverB = new StateSaver({
             gameName: 'testGame',
             savedObjects: [saveable]
         });
@@ -94,7 +95,7 @@ describe('StateSaver', function() {
         saveable.saveState = {'testObj': {'foo': 3}};
         saveable.saveStateDefaults = {'testObj': {'foo': 4}};
 
-        var saver = new GJS.StateSaver({
+        var saver = new StateSaver({
             gameName: 'testGame',
             savedObjects: [saveable]
         });
@@ -104,7 +105,7 @@ describe('StateSaver', function() {
         saver.saveTo(storage);
         
         saveable = testSaveable();
-        saver = new GJS.StateSaver({
+        saver = new StateSaver({
             gameName: 'testGame',
             savedObjects: [saveable]
         });
@@ -118,7 +119,7 @@ describe('StateSaver', function() {
     it('recursively fills in missing properties from defaults', function() {
         var saveable = testSaveable();
 
-        var saver = new GJS.StateSaver({
+        var saver = new StateSaver({
             gameName: 'testGame',
             savedObjects: [saveable]
         });
@@ -143,12 +144,12 @@ describe('StateSaver', function() {
         saveableB.saveState['testProp'] = 5;
         saveableB.saveState['testObj']['foo'] = 7;
 
-        var saverA = new GJS.StateSaver({
+        var saverA = new StateSaver({
             gameName: 'testGame',
             savedObjects: [saveableA]
         });
 
-        var saverB = new GJS.StateSaver({
+        var saverB = new StateSaver({
             gameName: 'testGameB',
             savedObjects: [saveableB]
         });
@@ -175,7 +176,7 @@ describe('StateSaver', function() {
         var saveable = testSaveable();
         saveable.saveStateVersion = 1;
 
-        var saver = new GJS.StateSaver({
+        var saver = new StateSaver({
             gameName: 'testGame',
             savedObjects: [saveable]
         });

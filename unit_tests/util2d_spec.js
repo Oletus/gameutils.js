@@ -2,12 +2,21 @@
  * Copyright Olli Etuaho 2013.
  */
 
-'use strict';
+import { mathUtil, Vec2, Rect, Polygon, AffineTransform } from "../src/gjs/util2d.js";
+import { cssUtil, colorUtil } from "../src/gjs/utilcolor.js";
 
 beforeEach(function() {
-  this.addMatchers({
-    toBeNear: function(expected, tolerance) {
-      return Math.abs(this.actual - expected) <= tolerance;
+  jasmine.addMatchers({
+    toBeNear: function(util, customEqualityTesters) {
+      return {
+          compare: function(actual, expected, tolerance) {
+            let passed = Math.abs(actual - expected) <= tolerance;
+            return {
+                pass: passed,
+                message: 'Expected ' + actual + ' to be near ' + expected + ' within tolerance of ' + tolerance
+            };
+          }
+      }
     }
   });
 });
