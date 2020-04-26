@@ -55,14 +55,14 @@ var loadFileInput = function(fileInput, urlCallback) {
     reader.readAsDataURL(file);
 };
 
-var loadSpriteFromFileInput = function() {
+window.loadSpriteFromFileInput = function() {
     var fileInput = document.getElementById('imageFile');
     loadFileInput(fileInput, function(fileSrc) {
         editor.parameters.set('spriteURL', fileSrc);
     });
 };
 
-var loadBGFromFileInput = function() {
+window.loadBGFromFileInput = function() {
     var fileInput = document.getElementById('bgFile');
     loadFileInput(fileInput, function(fileSrc) {
         editor.bg = new Sprite(fileSrc);
@@ -606,7 +606,7 @@ var particleParameters = {
     'spriteURL': {initial: ''}
 };
 
-var setPositionMode = function() {
+window.setPositionMode = function() {
     if (document.getElementById('posMode').checked) {
         editor.positionMode = Editor.PositionMode.FOLLOW;
     } else {
@@ -646,6 +646,7 @@ window.start = function() {
     document.getElementById('ui').appendChild(div);
     
     editor = new Editor();
+    window.editor = editor;
     document.getElementById('ui').appendChild(editor.codeDiv);
     var instructions = document.createElement('div');
     instructions.id = 'instructions';
