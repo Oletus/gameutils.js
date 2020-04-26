@@ -3,34 +3,33 @@
 <title>Gameutils.js: Using the Audio class</title>
 <link rel="stylesheet" type="text/css" href="assets/default.css">
 <script src="../node_modules/howler/howler.min.js"></script>
-<script src="../src/gjs/audio.js"></script>
-<script>
-'use strict';
+<script type="module">
 
-GJS.Audio.audioPath = 'assets/audio/';
+import { Audio } from '../src/gjs/legacy/audio.js';
 
-var bgm = new GJS.Audio('whichwayisup');
-var sample = new GJS.Audio('get');
+Audio.audioPath = 'assets/audio/';
 
-var playSample = function() {
+var bgm = new Audio('whichwayisup');
+var sample = new Audio('get');
+
+window.playSample = function() {
     sample.play();
 };
 
-var stopMusic = function() {
+window.stopMusic = function() {
     bgm.stop();
 };
 
-var startMusic = function() {
+window.startMusic = function() {
     bgm.playSingular(true);
 };
 
 </script>
 </head>
-<body onload="startMusic()">
+<body onload="window.startMusic()">
 <h2>Using the Audio class</h2>
-<p>Compatibility: Chrome, Firefox, IE</p>
-<input type="button" onclick="playSample()" value="Play sample once" />
-<input type="button" onclick="stopMusic()" value="Stop music" />
-<input type="button" onclick="startMusic()" value="Restart music" />
+<input type="button" onclick="window.playSample()" value="Play sample once" />
+<input type="button" onclick="window.stopMusic()" value="Stop music" />
+<input type="button" onclick="window.startMusic()" value="Restart music" />
 </body>
 </html>

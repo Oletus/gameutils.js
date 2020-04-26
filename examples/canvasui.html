@@ -1,20 +1,21 @@
 <html>
 <head>
-<title>Gameutils.js: Using GJS.CanvasUI and GJS.CanvasUIElement</title>
+<title>Gameutils.js: Using CanvasUI and CanvasUIElement</title>
 <link rel="stylesheet" type="text/css" href="assets/default.css">
-<script src="../src/gjs/util2d.js"></script>
-<script src="../src/gjs/canvasui.js"></script>
-<script>
+<script type="module">
 'use strict';
 
-var ctx;
-var tester;
+import { CardinalDirection } from "../src/gjs/util2d.js";
+import { CanvasUI, CanvasUIElement } from "../src/gjs/canvasui.js";
 
-GJS.CanvasUIElement.defaultFont = 'monospace';
+let ctx;
+let tester;
 
-var Tester = function(canvas) {
+CanvasUIElement.defaultFont = 'monospace';
+
+const Tester = function(canvas) {
     this.time = 0;
-    this.ui = new GJS.CanvasUI();
+    this.ui = new CanvasUI();
     
     var getCanvasPositionFromEvent = function(event) {
         return {x: event.clientX - canvas.getBoundingClientRect().left,
@@ -44,7 +45,7 @@ var Tester = function(canvas) {
         event.preventDefault();
     });
 
-    var button = new GJS.CanvasUIElement({
+    const button = new CanvasUIElement({
         centerX: 100,
         centerY: 100,
         width: 120,
@@ -57,14 +58,14 @@ var Tester = function(canvas) {
     });
     this.ui.addElement(button);
 
-    var label = new GJS.CanvasUIElement({
+    const label = new CanvasUIElement({
         centerX: 200,
         centerY: 200,
         label: 'Label'
     });
     this.ui.addElement(label);
     
-    var customButton = new GJS.CanvasUIElement({
+    const customButton = new CanvasUIElement({
         centerX: 300,
         centerY: 100,
         width: 120,
@@ -91,7 +92,7 @@ var Tester = function(canvas) {
 };
 
 Tester.prototype.update = function() {
-    var deltaTime = 1 / 60; // Assume 60 fps... bad example :P
+    const deltaTime = 1 / 60; // Assume 60 fps... bad example :P
     this.time += deltaTime;
     this.ui.update(deltaTime);
 
@@ -101,13 +102,13 @@ Tester.prototype.update = function() {
     this.ui.render(ctx);
 };
 
-var frame = function() {
+const frame = function() {
     tester.update();
     requestAnimationFrame(frame);
 };
 
-var start = function() {
-    var canvas = document.createElement('canvas');
+window.start = function() {
+    const canvas = document.createElement('canvas');
     canvas.width = 400;
     canvas.height = 300;
     tester = new Tester(canvas);
@@ -117,8 +118,7 @@ var start = function() {
 };
 </script>
 </head>
-<body onload="start()">
-<h2>Using GJS.CanvasUI and GJS.CanvasUIElement</h2>
-<p>Compatibility: Chrome 41, Firefox 36, IE 11.</p>
+<body onload="window.start()">
+<h2>Using CanvasUI and CanvasUIElement</h2>
 </body>
 </html>

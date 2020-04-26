@@ -1,20 +1,19 @@
 <html>
 <head>
-<title>Gameutils.js: Using GJS.AnimatedSprite and GJS.AnimatedSpriteInstance</title>
+<title>Gameutils.js: Using AnimatedSprite and AnimatedSpriteInstance</title>
 <link rel="stylesheet" type="text/css" href="assets/default.css">
 <script type="module">
-'use strict';
 
 import { AnimatedSprite, AnimatedSpriteInstance } from '../src/gjs/animatedsprite.js';
 import { Sprite } from '../src/gjs/sprite.js';
 
-var ctx;
-var tester;
+let ctx;
+let tester;
 
 Sprite.gfxPath = 'assets/gfx/';
 AnimatedSprite.frameConstructor = Sprite;
 
-var Tester = function() {
+const Tester = function() {
     this.time = 0;
     this.carrotSprite = new AnimatedSprite({
         'idle': [{src: 'carrot.png', duration: 0}],
@@ -57,18 +56,18 @@ Tester.prototype.toggleAnimation = function() {
     }
 };
 
-var frame = function() {
+const frame = function() {
     tester.update();
     requestAnimationFrame(frame);
 };
 
-var start = function() {
+const start = function() {
     tester = new Tester();
 
     // Quick-n-dirty way of exposing the class to event listeners in HTML.
     window.tester = tester;
 
-    var canvas = document.createElement('canvas');
+    const canvas = document.createElement('canvas');
     canvas.width = 400;
     canvas.height = 300;
     ctx = canvas.getContext('2d');
@@ -76,7 +75,7 @@ var start = function() {
     frame();
 };
 
-start();
+window.start();
 </script>
 </head>
 <body>

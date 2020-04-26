@@ -1,21 +1,20 @@
 <html>
 <head>
-<title>Gameutils.js: Using GJS.MonospaceBitmapFont</title>
+<title>Gameutils.js: Using MonospaceBitmapFont</title>
 <meta charset="UTF-8">
 <link rel="stylesheet" type="text/css" href="assets/default.css">
-<script src="../src/gjs/sprite.js"></script>
-<script src="../src/gjs/utiljs.js"></script>
-<script src="../src/gjs/monospacebitmapfont.js"></script>
-<script>
-'use strict';
+<script type="module">
 
-var ctx;
-var tester;
+import { Sprite } from "../src/gjs/sprite.js";
+import { MonospaceBitmapFont } from "../src/gjs/monospacebitmapfont.js";
 
-GJS.Sprite.gfxPath = 'assets/gfx/';
+let ctx;
+let tester;
 
-var Tester = function() {
-    this.font = new GJS.MonospaceBitmapFont({
+Sprite.gfxPath = 'assets/gfx/';
+
+const Tester = function() {
+    this.font = new MonospaceBitmapFont({
         spriteSrc: 'bitmapfont-medium.png',
         characterWidth: 8,
         characterHeight: 13,
@@ -58,14 +57,14 @@ Tester.prototype.update = function() {
     this.testBaseline('bottom', 270);
 };
 
-var frame = function() {
+const frame = function() {
     tester.update();
     requestAnimationFrame(frame);
 };
 
-var start = function() {
+window.start = function() {
     tester = new Tester();
-    var canvas = document.createElement('canvas');
+    const canvas = document.createElement('canvas');
     canvas.width = 600;
     canvas.height = 300;
     ctx = canvas.getContext('2d');
@@ -74,8 +73,7 @@ var start = function() {
 };
 </script>
 </head>
-<body onload="start()">
-<h2>Using GJS.MonospaceBitmapFont</h2>
-<p>Compatibility: Chrome 47, Firefox 43, IE 11.</p>
+<body onload="window.start()">
+<h2>Using MonospaceBitmapFont</h2>
 </body>
 </html>
