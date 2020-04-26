@@ -1,4 +1,6 @@
 
+import { Sprite } from "./sprite.js";
+
 // UI elements that are common to multiple games, like fullscreen / social media buttons.
 const commonUI = {};
 
@@ -78,7 +80,7 @@ commonUI.createFullscreenButton = function(options) {
     button.addEventListener('click', function() {
         requestFullscreen(options.fullscreenElement);
     });
-    addFullscreenChangeListener(function() {
+    document.addEventListener('fullscreenchange', function() {
         button.style.display = isFullscreen() ? 'none' : 'block';
     });
     return button;

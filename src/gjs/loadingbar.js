@@ -1,4 +1,7 @@
 
+import { Audio } from './legacy/audio.js';
+import { Sprite } from './sprite.js';
+
 /**
  * Loading bar.
  * @param {Array.<Object>=} objectsToPoll Objects that contain loadedFraction()
