@@ -1,5 +1,5 @@
 
-import { objectUtil } from "./src/gjs/utiljs.js";
+import { objectUtil } from "../src/gjs/utiljs.js";
 import { CanvasResizer } from "../src/gjs/canvasresizer.js";
 
 var MockTouchEvent = function(options) {

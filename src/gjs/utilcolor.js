@@ -2,6 +2,7 @@
  * Copyright Olli Etuaho 2012-2014.
  */
 
+import * as mathUtil from './math/math_util.js';
 import { rgbToHsl, hslToRgb } from "../lib/hsl.js";
 
 // This file contains following utilities:

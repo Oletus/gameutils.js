@@ -1,5 +1,5 @@
 
-import { mathUtil } from "./util2d.js";
+import * as mathUtil from './math/math_util.js';
 
 var arrayUtil = {}; // Utilities for working with JS arrays
 var stringUtil = {}; // Utilities for working with JS strings

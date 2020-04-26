@@ -3,9 +3,10 @@
  */
 
 import { AffineTransform } from "../src/gjs/math/affine_transform.js";
+import * as mathUtil from '../src/gjs/math/math_util.js';
 import { Vec2 } from "../src/gjs/math/vec2.js";
 import { Rect } from "../src/gjs/math/rect.js";
-import { mathUtil, Polygon } from "../src/gjs/util2d.js";
+import { Polygon } from "../src/gjs/util2d.js";
 import { cssUtil, colorUtil } from "../src/gjs/utilcolor.js";
 
 beforeEach(function() {

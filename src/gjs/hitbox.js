@@ -2,7 +2,8 @@
  * Copyright Olli Etuaho 2015.
  */
 
-import { Polygon, mathUtil } from './util2d.js';
+import * as mathUtil from './math/math_util.js';
+import { Polygon } from './util2d.js';
 import { Rect } from './math/rect.js';
 import { Vec2 } from './math/vec2.js';
 

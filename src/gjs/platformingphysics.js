@@ -1,6 +1,6 @@
 
+import * as mathUtil from './math/math_util.js';
 import { TileMap } from "./tilemap.js";
-import { mathUtil } from "./util2d.js";
 import { Rect } from "./math/rect.js";
 import { Vec2 } from "./math/vec2.js";
 
