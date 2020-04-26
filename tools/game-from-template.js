@@ -10,7 +10,7 @@ const rootDir = path.join(__dirname, '..');
 const packageJson = require(path.join(rootDir, 'package.json'));
 const templateNpmScripts = require(path.join(rootDir, 'tools/template-files/npm-scripts.json'));
 
-var checkValidGameName = function(name) {
+const checkValidGameName = function(name) {
     var gameDir = path.join(rootDir, name);
     if (name === undefined) {
         console.error('possible arguments: --name <game name> [--template threejs]');
@@ -25,7 +25,7 @@ var checkValidGameName = function(name) {
     return true;
 };
 
-var createTemplateDirs = function(gameDir) {
+const createTemplateDirs = function(gameDir) {
     fse.ensureDirSync(gameDir);
     fse.ensureDirSync(path.join(gameDir, 'assets'));
     fse.ensureDirSync(path.join(gameDir, 'assets/audio'));
@@ -34,7 +34,7 @@ var createTemplateDirs = function(gameDir) {
     fse.ensureDirSync(path.join(gameDir, 'assets/models'));
 };
 
-var copyPackageJSON = function(gameDir, gameName) {
+const copyPackageJSON = function(gameDir, gameName) {
     packageJsonCopy = JSON.parse(JSON.stringify(packageJson));
     packageJsonCopy.scripts = JSON.parse(JSON.stringify(templateNpmScripts));
     packageJsonCopy.name = gameName;
@@ -45,7 +45,7 @@ var copyPackageJSON = function(gameDir, gameName) {
     fs.writeFileSync(path.join(gameDir, 'package.json'), JSON.stringify(packageJsonCopy, null, 2));
 };
 
-var copyUsefulExampleAssets = function(gameDir) {
+const copyUsefulExampleAssets = function(gameDir) {
     fse.copy(path.join(rootDir, 'examples/assets/gfx/bitmapfont-medium.png'), path.join(gameDir, 'assets/gfx/bitmapfont-medium.png'), function(err) {
         if (err) {
             return console.error(err);
@@ -58,7 +58,7 @@ var copyUsefulExampleAssets = function(gameDir) {
     });
 };
 
-var copyTemplateFiles = function(gameDir) {
+const copyTemplateFiles = function(gameDir) {
     fse.copy(path.join(rootDir, 'tools/template-files/tools'), path.join(gameDir, 'tools'), function(err) {
         if (err) {
             return console.error(err);
@@ -71,24 +71,24 @@ var copyTemplateFiles = function(gameDir) {
     });
 };
 
-var putInlineJSToFile = function(htmlContents, targetHTMLPath, targetJSPath) {
-    var addedScriptRef = false;
-    var htmlOutput = [''];
-    var scriptOutput = [''];
-    var inScript = false;
-    var parser = new htmlparser.Parser({
+const putInlineJSToFile = function(htmlContents, targetHTMLPath, targetJSPath) {
+    let addedScriptRef = false;
+    let htmlOutput = [''];
+    let scriptOutput = [''];
+    let inScript = false;
+    const parser = new htmlparser.Parser({
         onopentag: function(name, attribs) {
             if (name == 'script' && attribs['src'] === undefined) {
                 if (addedScriptRef) {
                     throw new Error('Multiple inline scripts not supported.');
                 }
-                var relativeJSPath = path.relative(path.dirname(targetHTMLPath), targetJSPath);
+                let relativeJSPath = path.relative(path.dirname(targetHTMLPath), targetJSPath);
                 relativeJSPath = relativeJSPath.replace(/\\/g, "/");
                 htmlOutput.push('<script src="' + relativeJSPath + '">');
                 addedScriptRef = true;
                 inScript = true;
             } else {
-                var tagOutput = '<' + name;
+                let tagOutput = '<' + name;
                 for (attr in attribs) {
                     tagOutput += ' ' + attr + '="' + attribs[attr] + '"';
                 }
@@ -102,6 +102,7 @@ var putInlineJSToFile = function(htmlContents, targetHTMLPath, targetJSPath) {
         },
         ontext: function(text) {
             if (inScript) {
+                // TODO: Replace import paths in script
                 scriptOutput.push(text);
             } else {
                 htmlOutput.push(text)
@@ -117,13 +118,13 @@ var putInlineJSToFile = function(htmlContents, targetHTMLPath, targetJSPath) {
     fs.writeFileSync(targetHTMLPath, htmlOutput.join(''));
 };
 
-var copyTemplateIndex = function(gameDir, templateName) {
+const copyTemplateIndex = function(gameDir, templateName) {
     fse.ensureDirSync(path.join(gameDir, 'src'));
-    var htmlContents = fs.readFileSync(path.join(rootDir, templateName));
+    let htmlContents = fs.readFileSync(path.join(rootDir, templateName));
     htmlContents = putInlineJSToFile(htmlContents, path.join(gameDir, 'index.html'), path.join(gameDir, 'src/game.js'));
 };
 
-var copySrcToGame = function() {
+const copySrcToGame = function() {
     fse.copy(path.join(rootDir, 'src'), path.join(gameDir, 'src'), function(err) {
         if (err) {
             return console.error(err);
@@ -132,14 +133,14 @@ var copySrcToGame = function() {
 };
 
 if (checkValidGameName(argv.name)) {
-    var gameDir = path.join(rootDir, argv.name);
+    const gameDir = path.join(rootDir, argv.name);
     createTemplateDirs(gameDir);
     copySrcToGame(gameDir);
     copyPackageJSON(gameDir, argv.name);
     copyUsefulExampleAssets(gameDir);
     copyTemplateFiles(gameDir);
     
-    var useThreeJS = (argv.template !== undefined && argv.template === 'threejs');
+    const useThreeJS = (argv.template !== undefined && argv.template === 'threejs');
     if (useThreeJS) {
         copyTemplateIndex(gameDir, 'game-threejs-template.html');
     } else {
