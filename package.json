@@ -6,7 +6,7 @@
   "license": "MIT",
   "devDependencies": {
     "archiver": "^4.0.1",
-    "async": "^2.6.3",
+    "async": "^2.6.4",
     "fs-extra": "^3.0.1",
     "google-closure-compiler": "^20151015.0.0",
     "htmlparser2": "^3.10.1",
